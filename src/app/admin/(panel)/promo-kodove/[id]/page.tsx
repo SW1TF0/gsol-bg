@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -7,12 +8,22 @@ import { formatPrice } from "@/lib/format";
 import { PromoForm } from "../PromoForm";
 import { categoryOptions } from "../categories";
 import { describeDiscount } from "../describe";
+import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Промо код" };
 
-export default async function PromoPage(props: PageProps<"/admin/promo-kodove/[id]">) {
+// Номерът в адреса е известен чак при заявка — рамката на страницата излиза веднага, данните след това
+export default function PromoPage(props: PageProps<"/admin/promo-kodove/[id]">) {
+  return (
+    <Suspense fallback={<AdminLoading />}>
+      <PromoPageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PromoPageContent({ params }: Pick<PageProps<"/admin/promo-kodove/[id]">, "params">) {
   const { db } = await requireStaff(["admin", "manager"]);
-  const id = Number((await props.params).id);
+  const id = Number((await params).id);
   if (!id) notFound();
 
   const [{ data: promo }, { data: uses }, categories] = await Promise.all([

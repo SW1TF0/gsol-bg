@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
           </nav>
         </div>
         <main className="mx-auto max-w-[1280px] px-4 py-8 lg:px-8">
-          <Suspense fallback={<AdminSkeleton />}>{children}</Suspense>
+          {children}
         </main>
       </div>
     </div>
@@ -67,15 +67,6 @@ async function CurrentUser() {
           <LogOut className="h-4 w-4" />
         </button>
       </form>
-    </div>
-  );
-}
-
-function AdminSkeleton() {
-  return (
-    <div className="space-y-4" aria-busy="true">
-      <div className="h-9 w-64 animate-pulse bg-surface-2" />
-      <div className="h-96 animate-pulse bg-surface-2" />
     </div>
   );
 }

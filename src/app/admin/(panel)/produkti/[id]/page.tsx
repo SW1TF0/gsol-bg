@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -5,12 +6,22 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { AdminHeader, Panel, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { ProductForm } from "./ProductForm";
+import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Продукт" };
 
-export default async function ProductEditPage(props: PageProps<"/admin/produkti/[id]">) {
+// Номерът в адреса е известен чак при заявка — рамката на страницата излиза веднага, данните след това
+export default function ProductEditPage(props: PageProps<"/admin/produkti/[id]">) {
+  return (
+    <Suspense fallback={<AdminLoading />}>
+      <ProductEditPageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function ProductEditPageContent({ params }: Pick<PageProps<"/admin/produkti/[id]">, "params">) {
   const { db } = await requireStaff();
-  const id = Number((await props.params).id);
+  const id = Number((await params).id);
   if (!id) notFound();
 
   const [{ data: product }, { data: categories }] = await Promise.all([

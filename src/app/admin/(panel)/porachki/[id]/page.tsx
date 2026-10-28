@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
@@ -6,14 +7,24 @@ import { requireStaff } from "@/lib/admin/auth";
 import { formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import { NoteForm, StatusForm } from "./forms";
+import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Поръчка" };
 
 type Invoice = { company?: string; eik?: string; vat?: string; mol?: string; address?: string };
 
-export default async function OrderPage(props: PageProps<"/admin/porachki/[id]">) {
+// Номерът в адреса е известен чак при заявка — рамката на страницата излиза веднага, данните след това
+export default function OrderPage(props: PageProps<"/admin/porachki/[id]">) {
+  return (
+    <Suspense fallback={<AdminLoading />}>
+      <OrderPageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]">, "params">) {
   const { db } = await requireStaff();
-  const id = Number((await props.params).id);
+  const id = Number((await params).id);
   if (!id) notFound();
 
   const [{ data: order }, { data: items }, { data: events }] = await Promise.all([
@@ -93,7 +104,7 @@ export default async function OrderPage(props: PageProps<"/admin/porachki/[id]">
 
         <div className="space-y-6">
           <Panel title="Статус">
-            <StatusForm orderId={order.id} status={order.status} />
+            <StatusForm key={order.status} orderId={order.id} status={order.status} />
           </Panel>
 
           <Panel title="Клиент">

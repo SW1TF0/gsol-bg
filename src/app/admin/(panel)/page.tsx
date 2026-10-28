@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { AdminHeader, Empty, Panel, Stat, StatusBadge, Table, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { formatPrice } from "@/lib/format";
@@ -7,7 +6,6 @@ import { formatPrice } from "@/lib/format";
 export const metadata = { title: "Табло" };
 
 export default async function DashboardPage() {
-  await connection();
   const { db } = await requireStaff();
 
   const since = new Date();
