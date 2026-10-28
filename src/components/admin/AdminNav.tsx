@@ -9,12 +9,12 @@ const items = [
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
   { href: "/admin/promo-kodove", label: "Промо кодове", icon: TicketPercent },
+  { href: "/admin/tomboli", label: "Томболи", icon: Ticket },
   { href: "/admin/zapitvaniya", label: "Запитвания", icon: Inbox },
   { href: "/admin/stranitsi", label: "Страници", icon: FileText },
 ];
 
 const soon = [
-  { label: "Томболи", icon: Ticket },
   { label: "Клиенти", icon: Users },
   { label: "Настройки", icon: Settings },
 ];

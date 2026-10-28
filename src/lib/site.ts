@@ -35,6 +35,7 @@ export const footerColumns = [
       { label: "Компоненти", href: "/katalog/komponenti" },
       { label: "Периферия", href: "/katalog/periferiya" },
       { label: "Промоции", href: "/promocii" },
+      { label: "Томболи", href: "/tomboli" },
     ],
   },
   {

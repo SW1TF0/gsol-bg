@@ -11,6 +11,7 @@ export type TrackedOrder = {
   shipping_method: string;
   payment_method: string;
   items: { name: string; qty: number; line_total_cents: number }[];
+  raffles: { slug: string; title: string; status: string; entries: number }[];
 };
 
 export type TrackState = { order?: TrackedOrder; error?: string } | null;

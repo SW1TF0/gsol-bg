@@ -2,7 +2,7 @@
 
 import { publicClient } from "@/lib/supabase/clients";
 import { promoMessage } from "@/lib/promo";
-import type { CheckoutInput, PlaceOrderResult, Quote, ShippingMethod } from "@/lib/orders";
+import type { CheckoutInput, PlaceOrderResult, Quote, RafflePreview, ShippingMethod } from "@/lib/orders";
 
 type CartItem = { productId: number; qty: number };
 
@@ -22,9 +22,17 @@ export async function quoteCart(items: CartItem[], code: string | null, shipping
   });
   if (error) throw new Error("Офертата не можа да се изчисли. Опитайте отново.");
   const quote = data as unknown as Quote;
+
+  // Колко участия би донесла поръчката в активните томболи (сумата на продуктите след отстъпка)
+  const { data: raffles } = await publicClient().rpc("raffle_preview", {
+    p_amount_cents: quote.subtotal_cents - quote.discount_cents,
+    p_items: toItems(items),
+  });
+
   return {
     ...quote,
     promoError: quote.promo && !quote.promo.ok ? promoMessage(quote.promo.reason) : null,
+    raffles: (raffles as RafflePreview[] | null) ?? [],
   };
 }
 

@@ -33,6 +33,8 @@ export type Quote = {
   } | null;
 };
 
+export type RafflePreview = { slug: string; title: string; entries: number; min_order_cents: number };
+
 export type CheckoutInput = {
   email: string;
   phone: string;

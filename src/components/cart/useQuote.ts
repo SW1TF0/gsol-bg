@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { quoteCart } from "@/app/(shop)/actions";
-import type { Quote, ShippingMethod } from "@/lib/orders";
+import type { Quote, RafflePreview, ShippingMethod } from "@/lib/orders";
 import { useCart } from "./CartProvider";
 
-type QuoteState = (Quote & { promoError: string | null }) | null;
+type QuoteState = (Quote & { promoError: string | null; raffles: RafflePreview[] }) | null;
 
 /** Взима оферта от сървъра при всяка промяна на количката, кода или доставката. */
 export function useQuote(shipping: ShippingMethod = "econt_office") {

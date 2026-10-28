@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2, Tag, X } from "lucide-react";
+import Link from "next/link";
+import { Check, Loader2, Tag, Ticket, X } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { normalizeCode } from "@/lib/promo";
-import type { Quote } from "@/lib/orders";
+import type { Quote, RafflePreview } from "@/lib/orders";
 import { useCart } from "./CartProvider";
 
 type Props = {
-  quote: (Quote & { promoError: string | null }) | null;
+  quote: (Quote & { promoError: string | null; raffles?: RafflePreview[] }) | null;
   pending: boolean;
   error: string | null;
   shippingKnown?: boolean;
@@ -119,6 +120,29 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
           </div>
           <p className="text-right text-[12px] text-dim">включва {formatPrice(vat)} ДДС</p>
         </dl>
+
+        {quote?.raffles?.map((r) => {
+          const amount = quote.subtotal_cents - quote.discount_cents;
+          return (
+            <Link
+              key={r.slug}
+              href={`/tomboli/${r.slug}`}
+              className="flex items-start gap-3 bg-accent/10 p-3 text-[13px] ring-1 ring-accent/30 hover:ring-accent"
+            >
+              <Ticket className="mt-0.5 h-4 w-4 flex-none text-accent" />
+              {r.entries > 0 ? (
+                <span className="text-text">
+                  С тази поръчка печелите <b className="font-medium text-white">{r.entries}</b>{" "}
+                  {r.entries === 1 ? "участие" : "участия"} в „{r.title}“
+                </span>
+              ) : (
+                <span className="text-text">
+                  Добавете още {formatPrice(Math.max(0, r.min_order_cents - amount))}, за да участвате в „{r.title}“
+                </span>
+              )}
+            </Link>
+          );
+        })}
 
         {error && (
           <p role="alert" className="text-[13px] text-accent">

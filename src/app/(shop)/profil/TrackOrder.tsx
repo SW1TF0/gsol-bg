@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { Check, PackageSearch, X } from "lucide-react";
+import Link from "next/link";
+import { Check, PackageSearch, Ticket, X } from "lucide-react";
 import { formatDate, formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import { trackOrder, type TrackState } from "./actions";
@@ -86,6 +87,24 @@ export function TrackOrder() {
               </li>
             ))}
           </ul>
+          {order.raffles.length > 0 && (
+            <ul className="mt-6 space-y-2">
+              {order.raffles.map((r) => (
+                <li key={r.slug}>
+                  <Link
+                    href={`/tomboli/${r.slug}`}
+                    className="flex items-center gap-3 bg-accent/10 p-3 text-[14px] ring-1 ring-accent/30 hover:ring-accent"
+                  >
+                    <Ticket className="h-4 w-4 flex-none text-accent" />
+                    <span>
+                      <b className="font-medium text-white">{r.entries}</b> {r.entries === 1 ? "участие" : "участия"} в „{r.title}“
+                      {r.status === "drawn" && " — тегленето е проведено"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="mt-4 text-[13px] text-muted">
             {shippingLabels[order.shipping_method as ShippingMethod]} · {paymentLabels[order.payment_method as PaymentMethod]} ·
             последна промяна {formatDate(order.updated_at)}

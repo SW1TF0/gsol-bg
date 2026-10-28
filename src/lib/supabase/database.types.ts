@@ -527,6 +527,185 @@ export type Database = {
         };
         Relationships: [];
       };
+      raffles: {
+        Row: {
+          id: number;
+          slug: string;
+          title: string;
+          intro: string | null;
+          rules: string;
+          image_url: string | null;
+          starts_at: string;
+          ends_at: string;
+          status: Database["public"]["Enums"]["raffle_status"];
+          min_order_cents: number;
+          base_entries: number;
+          per_amount_cents: number | null;
+          bonus_entries: number;
+          bonus_category_ids: number[];
+          bonus_product_ids: number[];
+          max_entries_per_order: number | null;
+          count_statuses: Database["public"]["Enums"]["order_status"][];
+          reserves_count: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: never;
+          slug: string;
+          title: string;
+          intro?: string | null;
+          rules?: string;
+          image_url?: string | null;
+          starts_at: string;
+          ends_at: string;
+          status?: Database["public"]["Enums"]["raffle_status"];
+          min_order_cents?: number;
+          base_entries?: number;
+          per_amount_cents?: number | null;
+          bonus_entries?: number;
+          bonus_category_ids?: number[];
+          bonus_product_ids?: number[];
+          max_entries_per_order?: number | null;
+          count_statuses?: Database["public"]["Enums"]["order_status"][];
+          reserves_count?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: never;
+          slug?: string;
+          title?: string;
+          intro?: string | null;
+          rules?: string;
+          image_url?: string | null;
+          starts_at?: string;
+          ends_at?: string;
+          status?: Database["public"]["Enums"]["raffle_status"];
+          min_order_cents?: number;
+          base_entries?: number;
+          per_amount_cents?: number | null;
+          bonus_entries?: number;
+          bonus_category_ids?: number[];
+          bonus_product_ids?: number[];
+          max_entries_per_order?: number | null;
+          count_statuses?: Database["public"]["Enums"]["order_status"][];
+          reserves_count?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      raffle_prizes: {
+        Row: {
+          id: number;
+          raffle_id: number;
+          position: number;
+          title: string;
+          description: string | null;
+          image_url: string | null;
+          quantity: number;
+        };
+        Insert: {
+          id?: never;
+          raffle_id: number;
+          position?: number;
+          title: string;
+          description?: string | null;
+          image_url?: string | null;
+          quantity?: number;
+        };
+        Update: {
+          id?: never;
+          raffle_id?: number;
+          position?: number;
+          title?: string;
+          description?: string | null;
+          image_url?: string | null;
+          quantity?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "raffle_prizes_raffle_id_fkey";
+            columns: ["raffle_id"];
+            isOneToOne: false;
+            referencedRelation: "raffles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      raffle_winners: {
+        Row: {
+          id: number;
+          raffle_id: number;
+          order_id: number | null;
+          email: string;
+          display_name: string;
+          position: number;
+          is_reserve: boolean;
+          prize_id: number | null;
+          notified_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: never;
+          raffle_id: number;
+          order_id?: number | null;
+          email: string;
+          display_name: string;
+          position: number;
+          is_reserve?: boolean;
+          prize_id?: number | null;
+          notified_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: never;
+          raffle_id?: number;
+          order_id?: number | null;
+          email?: string;
+          display_name?: string;
+          position?: number;
+          is_reserve?: boolean;
+          prize_id?: number | null;
+          notified_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      raffle_draws: {
+        Row: {
+          raffle_id: number;
+          seed: string;
+          participants: number;
+          total_entries: number;
+          snapshot: Json;
+          drawn_by: string | null;
+          drawn_at: string;
+        };
+        Insert: {
+          raffle_id: number;
+          seed: string;
+          participants: number;
+          total_entries: number;
+          snapshot: Json;
+          drawn_by?: string | null;
+          drawn_at?: string;
+        };
+        Update: {
+          raffle_id?: number;
+          seed?: string;
+          participants?: number;
+          total_entries?: number;
+          snapshot?: Json;
+          drawn_by?: string | null;
+          drawn_at?: string;
+        };
+        Relationships: [];
+      };
       settings: {
         Row: { key: string; updated_at: string; value: Json };
         Insert: { key: string; updated_at?: string; value: Json };
@@ -559,6 +738,21 @@ export type Database = {
     Functions: {
       place_order: { Args: { p_items: Json; p_order: Json }; Returns: Json };
       track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
+      get_raffle: { Args: { p_slug: string }; Returns: Json };
+      raffle_preview: { Args: { p_amount_cents: number; p_items: Json }; Returns: Json };
+      draw_raffle: { Args: { p_raffle_id: number }; Returns: Json };
+      raffle_participants: {
+        Args: { p_raffle_id: number };
+        Returns: {
+          order_id: number;
+          order_number: string;
+          email: string;
+          first_name: string;
+          last_name: string;
+          amount_cents: number;
+          entries: number;
+        }[];
+      };
       quote_order: {
         Args: { p_code?: string; p_items: Json; p_shipping_method?: string };
         Returns: Json;
@@ -567,6 +761,7 @@ export type Database = {
     Enums: {
       discount_type: "percent" | "fixed" | "free_shipping";
       inquiry_status: "new" | "in_progress" | "done" | "spam";
+      raffle_status: "draft" | "active" | "drawn" | "cancelled";
       order_status: "new" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
       staff_role: "admin" | "manager" | "sales" | "technician" | "editor";
     };
@@ -585,6 +780,7 @@ export const Constants = {
     Enums: {
       discount_type: ["percent", "fixed", "free_shipping"],
       inquiry_status: ["new", "in_progress", "done", "spam"],
+      raffle_status: ["draft", "active", "drawn", "cancelled"],
       order_status: ["new", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"],
       staff_role: ["admin", "manager", "sales", "technician", "editor"],
     },

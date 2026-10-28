@@ -14,6 +14,7 @@ import {
   Phone,
   Recycle,
   ShieldCheck,
+  Ticket,
   Wrench,
 } from "lucide-react";
 import { ButtonLink, Container, Eyebrow, SectionHeading } from "@/components/ui";
@@ -27,16 +28,19 @@ import {
   tierInfo,
   type Tier,
 } from "@/lib/catalog";
+import { listRaffles } from "@/lib/raffle-data";
 import { company } from "@/lib/site";
 
 export default async function HomePage() {
-  const [promos, configs, gaming, budget, counts] = await Promise.all([
+  const [promos, configs, gaming, budget, counts, raffles] = await Promise.all([
     getPromoProducts(10),
     getConfigsByTier(),
     getCollection("gaming-laptops", 4),
     getCollection("budget-laptops", 4),
     countByCategory(),
+    listRaffles(),
   ]);
+  const activeRaffle = raffles.find((r) => r.status === "active");
 
   const tierData = Object.fromEntries(
     (Object.keys(tierInfo) as Tier[]).map((t) => [
@@ -54,6 +58,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <PromoStrip products={promos} />
+      {activeRaffle && <RaffleBanner raffle={activeRaffle} />}
 
       {/* Категории */}
       <section className="bg-gradient-to-b from-bg-alt to-bg-deep py-24 [--section-bg:var(--color-bg-alt)]">
@@ -242,6 +247,30 @@ function PromoStrip({ products }: { products: Awaited<ReturnType<typeof getPromo
             </div>
           ))}
         </div>
+      </Container>
+    </section>
+  );
+}
+
+function RaffleBanner({ raffle }: { raffle: Awaited<ReturnType<typeof listRaffles>>[number] }) {
+  const prizes = raffle.raffle_prizes;
+  return (
+    <section className="bg-bg-deep pb-20 [--section-bg:var(--color-bg-deep)]">
+      <Container>
+        <Link href={`/tomboli/${raffle.slug}`} className="cut-frame cut-lg group block hover:[--frame:var(--color-accent)]">
+          <div className="cut-inner relative grid items-center gap-6 overflow-hidden bg-gradient-to-r from-accent/25 via-surface-2 to-surface-2 p-8 md:grid-cols-[auto_1fr_auto] md:p-10">
+            <Ticket className="h-14 w-14 text-accent" strokeWidth={1.25} />
+            <div>
+              <Eyebrow>Томбола</Eyebrow>
+              <h2 className="h-display mt-2 text-[26px] group-hover:text-accent">{raffle.title}</h2>
+              <p className="mt-2 text-muted">
+                {raffle.intro ?? "Всяка потвърдена поръчка ви носи участия."}
+                {prizes.length > 0 && <> Награди: {prizes.map((p) => p.title).join(", ")}.</>}
+              </p>
+            </div>
+            <span className="btn btn-primary">Виж томболата</span>
+          </div>
+        </Link>
       </Container>
     </section>
   );
