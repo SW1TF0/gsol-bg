@@ -41,6 +41,84 @@ export type Database = {
         };
         Relationships: [];
       };
+      pages: {
+        Row: {
+          body: string;
+          intro: string | null;
+          is_published: boolean;
+          slug: string;
+          sort_order: number;
+          title: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          body?: string;
+          intro?: string | null;
+          is_published?: boolean;
+          slug: string;
+          sort_order?: number;
+          title: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          body?: string;
+          intro?: string | null;
+          is_published?: boolean;
+          slug?: string;
+          sort_order?: number;
+          title?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      inquiries: {
+        Row: {
+          contact: string;
+          created_at: string;
+          details: Json;
+          handled_by: string | null;
+          id: number;
+          message: string;
+          name: string;
+          notes: string | null;
+          source_url: string | null;
+          status: Database["public"]["Enums"]["inquiry_status"];
+          topic: string;
+          updated_at: string;
+        };
+        Insert: {
+          contact: string;
+          created_at?: string;
+          details?: Json;
+          handled_by?: string | null;
+          id?: never;
+          message: string;
+          name: string;
+          notes?: string | null;
+          source_url?: string | null;
+          status?: Database["public"]["Enums"]["inquiry_status"];
+          topic: string;
+          updated_at?: string;
+        };
+        Update: {
+          contact?: string;
+          created_at?: string;
+          details?: Json;
+          handled_by?: string | null;
+          id?: never;
+          message?: string;
+          name?: string;
+          notes?: string | null;
+          source_url?: string | null;
+          status?: Database["public"]["Enums"]["inquiry_status"];
+          topic?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       customers: {
         Row: {
           company: Json | null;
@@ -480,6 +558,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       place_order: { Args: { p_items: Json; p_order: Json }; Returns: Json };
+      track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
       quote_order: {
         Args: { p_code?: string; p_items: Json; p_shipping_method?: string };
         Returns: Json;
@@ -487,6 +566,7 @@ export type Database = {
     };
     Enums: {
       discount_type: "percent" | "fixed" | "free_shipping";
+      inquiry_status: "new" | "in_progress" | "done" | "spam";
       order_status: "new" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
       staff_role: "admin" | "manager" | "sales" | "technician" | "editor";
     };
@@ -504,6 +584,7 @@ export const Constants = {
   public: {
     Enums: {
       discount_type: ["percent", "fixed", "free_shipping"],
+      inquiry_status: ["new", "in_progress", "done", "spam"],
       order_status: ["new", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"],
       staff_role: ["admin", "manager", "sales", "technician", "editor"],
     },

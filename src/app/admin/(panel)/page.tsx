@@ -11,7 +11,7 @@ export default async function DashboardPage() {
   const since = new Date();
   since.setDate(since.getDate() - 30);
 
-  const [newOrders, recent, month, promos, topCodes] = await Promise.all([
+  const [newOrders, recent, month, promos, topCodes, newInquiries] = await Promise.all([
     db.from("orders").select("id", { count: "exact", head: true }).eq("status", "new"),
     db
       .from("orders")
@@ -30,6 +30,7 @@ export default async function DashboardPage() {
       .gt("times_used", 0)
       .order("times_used", { ascending: false })
       .limit(5),
+    db.from("inquiries").select("id", { count: "exact", head: true }).eq("status", "new"),
   ]);
 
   const monthRows = month.data ?? [];
@@ -40,11 +41,12 @@ export default async function DashboardPage() {
     <>
       <AdminHeader title="Табло" subtitle="Последните 30 дни" />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat label="Нови поръчки" value={String(newOrders.count ?? 0)} hint="чакат потвърждение" href="/admin/porachki?status=new" />
         <Stat label="Оборот" value={formatPrice(revenue)} hint={`${monthRows.length} поръчки`} />
         <Stat label="Дадени отстъпки" value={formatPrice(discounts)} hint="от промо кодове" />
         <Stat label="Активни промо кодове" value={String(promos.count ?? 0)} href="/admin/promo-kodove" />
+        <Stat label="Нови запитвания" value={String(newInquiries.count ?? 0)} hint="чакат отговор" href="/admin/zapitvaniya?status=new" />
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[2fr_1fr]">

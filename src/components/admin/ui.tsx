@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { orderStatusLabels } from "@/lib/orders";
 
+export { formatDate } from "@/lib/format";
+
 export function AdminHeader({
   title,
   subtitle,
@@ -120,15 +122,3 @@ export function Pager({ page, pages, href }: { page: number; pages: number; href
   );
 }
 
-const dateFmt = new Intl.DateTimeFormat("bg-BG", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Sofia",
-});
-
-export function formatDate(iso: string | null | undefined) {
-  return iso ? dateFmt.format(new Date(iso)) : "—";
-}

@@ -12,3 +12,16 @@ export function formatPrice(cents: number) {
 export function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
 }
+
+const dateFmt = new Intl.DateTimeFormat("bg-BG", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Sofia",
+});
+
+export function formatDate(iso: string | null | undefined) {
+  return iso ? dateFmt.format(new Date(iso)) : "—";
+}

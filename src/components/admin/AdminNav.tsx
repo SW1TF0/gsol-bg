@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gauge, Package, Receipt, Settings, Ticket, TicketPercent, Users } from "lucide-react";
+import { FileText, Gauge, Inbox, Package, Receipt, Settings, Ticket, TicketPercent, Users } from "lucide-react";
 
 const items = [
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
   { href: "/admin/promo-kodove", label: "Промо кодове", icon: TicketPercent },
+  { href: "/admin/zapitvaniya", label: "Запитвания", icon: Inbox },
+  { href: "/admin/stranitsi", label: "Страници", icon: FileText },
 ];
 
 const soon = [
