@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="bg" className={`${tektur.variable} ${onest.variable} antialiased`}>
+    <html lang="bg" data-scroll-behavior="smooth" className={`${tektur.variable} ${onest.variable} antialiased`}>
       <body className="min-h-dvh flex flex-col">{children}</body>
     </html>
   );

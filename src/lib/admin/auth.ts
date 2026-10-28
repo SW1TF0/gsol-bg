@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { sessionClient } from "@/lib/supabase/clients";
 import type { Enums } from "@/lib/supabase/database.types";
 
@@ -18,6 +19,8 @@ export const roleLabels: Record<StaffRole, string> = {
  * Подайте roles, за да ограничите страницата до определени роли.
  */
 export async function requireStaff(roles?: StaffRole[]) {
+  // Админът винаги се рендерира при заявка: Supabase чете текущото време при проверка на сесията
+  await connection();
   const db = await sessionClient();
   const {
     data: { user },
