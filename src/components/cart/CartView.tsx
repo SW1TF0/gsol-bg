@@ -6,9 +6,12 @@ import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { company } from "@/lib/site";
 import { useCart } from "./CartProvider";
+import { OrderSummary } from "./OrderSummary";
+import { useQuote } from "./useQuote";
 
 export function CartView() {
-  const { lines, subtotal, ready, setQty, remove } = useCart();
+  const { lines, ready, setQty, remove } = useCart();
+  const { quote, pending, error } = useQuote();
 
   if (!ready) return <div className="h-64 animate-pulse bg-surface-2" aria-busy="true" />;
 
@@ -31,8 +34,6 @@ export function CartView() {
       </div>
     );
   }
-
-  const vat = Math.round(subtotal - subtotal / 1.2);
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
@@ -77,54 +78,37 @@ export function CartView() {
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
-              <div className="w-28 text-right font-display text-[18px] text-white">{formatPrice(line.price * line.qty)}</div>
+              <LineTotal
+                total={line.price * line.qty}
+                discount={quote?.lines.find((q) => q.product_id === line.id)?.discount_cents ?? 0}
+              />
             </div>
           </li>
         ))}
       </ul>
 
-      <aside className="h-fit">
-        <div className="cut-frame">
-          <div className="cut-inner space-y-5 bg-surface-2 p-6">
-            <h2 className="h-display text-[18px]">Обобщение</h2>
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <label htmlFor="promo-code" className="sr-only">
-                Промо код
-              </label>
-              <input id="promo-code" name="code" placeholder="Промо код" className="input !h-10 uppercase" disabled />
-              <button type="submit" className="btn btn-sm btn-ghost !h-10" disabled>
-                Приложи
-              </button>
-            </form>
-            <p className="-mt-3 text-[12px] text-dim">Промо кодовете се включват с админ панела.</p>
-            <dl className="space-y-2 text-[14px]">
-              <div className="flex justify-between">
-                <dt className="text-muted">Продукти</dt>
-                <dd className="text-white">{formatPrice(subtotal)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">Доставка</dt>
-                <dd className="text-muted">при поръчка</dd>
-              </div>
-              <div className="flex items-baseline justify-between border-t border-line pt-3">
-                <dt className="text-white">Общо с ДДС</dt>
-                <dd className="font-display text-[24px] text-white">{formatPrice(subtotal)}</dd>
-              </div>
-              <p className="text-right text-[12px] text-dim">включва {formatPrice(vat)} ДДС</p>
-            </dl>
-            <button type="button" className="btn btn-primary w-full" disabled>
-              Продължи към поръчка
-            </button>
-            <p className="text-[12px] text-dim">
-              Поръчката се добавя в следващата стъпка. Дотогава поръчайте на{" "}
-              <a href={company.phoneHref} className="text-muted hover:text-white">
-                {company.phone}
-              </a>
-              .
-            </p>
-          </div>
-        </div>
+      <aside className="h-fit lg:sticky lg:top-[94px]">
+        <OrderSummary quote={quote} pending={pending} error={error}>
+          <Link href="/porachka" className="btn btn-primary w-full">
+            Продължи към поръчка
+          </Link>
+          <p className="text-[12px] text-dim">
+            Без регистрация · Не дължите нищо преди потвърждение · Въпроси на{" "}
+            <a href={company.phoneHref} className="text-muted hover:text-white">
+              {company.phone}
+            </a>
+          </p>
+        </OrderSummary>
       </aside>
+    </div>
+  );
+}
+
+function LineTotal({ total, discount }: { total: number; discount: number }) {
+  return (
+    <div className="w-28 text-right">
+      {discount > 0 && <s className="block text-[12px] text-dim">{formatPrice(total)}</s>}
+      <span className="font-display text-[18px] text-white">{formatPrice(total - discount)}</span>
     </div>
   );
 }

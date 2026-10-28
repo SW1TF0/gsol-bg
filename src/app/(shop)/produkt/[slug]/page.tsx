@@ -50,7 +50,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
   const product = await getProduct((await params).slug);
   if (!product) notFound();
 
-  const category = getCategory(product.category);
+  const category = await getCategory(product.category);
   const sub = category?.subcategories.find((s) => s.slug === product.subcategory);
   const related = await getRelated(product, 4);
 

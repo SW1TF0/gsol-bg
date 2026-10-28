@@ -55,7 +55,7 @@ export async function CatalogView({
   showSearchSummary?: boolean;
 }) {
   const query = parseQuery(params, fixed);
-  const category = query.category ? getCategory(query.category) : undefined;
+  const category = query.category ? await getCategory(query.category) : undefined;
   const result = await queryProducts(query);
   const activeBrands = query.brands ?? [];
 

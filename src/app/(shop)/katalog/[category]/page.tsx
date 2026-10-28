@@ -3,15 +3,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CatalogSkeleton, CatalogView } from "@/components/catalog/CatalogView";
 import { PageHeader } from "@/components/catalog/PageHeader";
-import { categories, getCategory } from "@/lib/catalog";
+import { getCategories, getCategory } from "@/lib/catalog";
 
-export function generateStaticParams() {
-  return categories.map((c) => ({ category: c.slug }));
+export async function generateStaticParams() {
+  return (await getCategories()).map((c) => ({ category: c.slug }));
 }
 
 export async function generateMetadata(props: PageProps<"/katalog/[category]">): Promise<Metadata> {
   const { category } = await props.params;
-  const cat = getCategory(category);
+  const cat = await getCategory(category);
   return cat ? { title: cat.name, description: `${cat.name} — ${cat.tagline}. Реални цени с ДДС и наличност.` } : {};
 }
 
@@ -36,7 +36,7 @@ function CategorySkeleton() {
 
 async function CategoryContent({ params, searchParams }: PageProps<"/katalog/[category]">) {
   const [{ category }, query] = await Promise.all([params, searchParams]);
-  const cat = getCategory(category);
+  const cat = await getCategory(category);
   if (!cat) notFound();
 
   return (
