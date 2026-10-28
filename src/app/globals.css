@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+/* Дизайн токени — виж style-guide.md */
+@theme {
+  --color-accent: #ff002b;
+  --color-accent-dark: #c80022;
+  --color-bg: #121212;
+  --color-bg-alt: #161619;
+  --color-bg-deep: #0f0f11;
+  --color-surface: #252529;
+  --color-surface-2: #1c1c20;
+  --color-line: #2a2a30;
+  --color-line-soft: #1a1a1d;
+  --color-text: #ededed;
+  --color-strong: #ffffff;
+  --color-muted: #b1b1b1;
+  --color-dim: #7c7c84;
+  --color-plate: #ececef;
+  --color-ok: #2fd47a;
+
+  --font-display: var(--font-tektur), sans-serif;
+  --font-sans: var(--font-onest), sans-serif;
+
+  --tracking-wide-1: 0.5px;
+  --tracking-eyebrow: 1.5px;
+}
+
+:root {
+  /* Цветът зад бутоните с рамка; всяка секция го задава според фона си */
+  --section-bg: var(--color-bg);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: var(--tracking-wide-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+@layer components {
+  /* ---------- Типография ---------- */
+  .h-display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide-1);
+    color: var(--color-strong);
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .tagline {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+
+  /* ---------- Скосени ъгли ---------- */
+  .cut {
+    --c: 28px;
+    clip-path: polygon(0 100%, 0 var(--c), var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%);
+  }
+  .cut-sm { --c: 12px; }
+  .cut-lg { --c: 48px; }
+
+  /* Рамка със скосени ъгли: външният слой е цветът на рамката, вътрешният — фонът */
+  .cut-frame {
+    --c: 28px;
+    --frame: var(--color-line);
+    background: var(--frame);
+    padding: 1px;
+    clip-path: polygon(0 100%, 0 var(--c), var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%);
+  }
+  .cut-frame > .cut-inner {
+    height: 100%;
+    clip-path: polygon(0 100%, 0 calc(var(--c) - 0.5px), calc(var(--c) - 0.5px) 0, 100% 0, 100% calc(100% - var(--c) + 0.5px), calc(100% - var(--c) + 0.5px) 100%);
+  }
+
+  /* ---------- Бутони ---------- */
+  .btn {
+    --h: 40px;
+    --cx: 10px;
+    --cy: 14px;
+    --cw: 26px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: var(--h);
+    padding: 0 30px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide-1);
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.25s, color 0.25s, transform 0.15s;
+    clip-path: polygon(0 100%, var(--cx) var(--cy), var(--cw) 0, 100% 0, calc(100% - var(--cx)) calc(100% - var(--cy)), calc(100% - var(--cw)) 100%);
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sm {
+    --h: 30px;
+    --cx: 7px;
+    --cy: 10px;
+    --cw: 19px;
+    padding: 0 22px;
+    font-size: 12px;
+  }
+  .btn-lg {
+    --h: 50px;
+    --cx: 12px;
+    --cy: 18px;
+    --cw: 32px;
+    padding: 0 40px;
+    font-size: 15px;
+  }
+
+  .btn-primary { background: var(--color-accent); }
+  .btn-primary:hover { background: var(--color-accent-dark); }
+
+  /* Рамка: червеният фон се вижда като 2px контур, вътрешността се „отлива“ при hover */
+  .btn-outline { background: var(--color-accent); }
+  .btn-outline::before {
+    content: "";
+    position: absolute;
+    inset: 2px 3px;
+    z-index: 0;
+    background: linear-gradient(to right, transparent 50%, var(--section-bg) 50%);
+    background-size: 210% 100%;
+    background-position: 100% 0;
+    transition: background-position 0.3s ease-out;
+    clip-path: polygon(0 100%, calc(var(--cx) - 1px) calc(var(--cy) - 2px), calc(var(--cw) - 2px) 0, 100% 0, calc(100% - var(--cx) + 1px) calc(100% - var(--cy) + 2px), calc(100% - var(--cw) + 2px) 100%);
+  }
+  .btn-outline:hover::before { background-position: 0 0; }
+  .btn-outline > * { position: relative; z-index: 1; }
+
+  .btn-ghost {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .btn-ghost:hover { background: #303036; }
+
+  /* ---------- Маркер преди eyebrow и заглавия на колони ---------- */
+  .marker {
+    display: inline-block;
+    width: 14px;
+    height: 9px;
+    background: var(--color-accent);
+    clip-path: polygon(30% 0, 100% 0, 88% 75%, 70% 100%, 0 100%, 12% 25%);
+    flex: none;
+  }
+
+  /* ---------- Чипове за филтри ---------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 400;
+    background: var(--color-surface);
+    color: var(--color-text);
+    clip-path: polygon(0 100%, 0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%);
+    transition: background-color 0.2s;
+  }
+  .chip:hover { background: #303036; }
+  .chip[data-active="true"] {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .input {
+    height: 42px;
+    width: 100%;
+    padding: 0 14px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-line);
+    color: var(--color-text);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input:focus { border-color: var(--color-accent); }
+}
+
+/* Бягащата лента с промоции */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.animate-bob {
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-bob {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
