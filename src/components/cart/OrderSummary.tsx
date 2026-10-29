@@ -13,13 +13,27 @@ type Props = {
   pending: boolean;
   error: string | null;
   shippingKnown?: boolean;
+  /** Какво пише при доставката, докато не е избран офис/място */
+  shippingPendingLabel?: string;
   children?: React.ReactNode;
 };
 
 /** Обобщение с промо код и суми — общо за количката и за поръчката. */
-export function OrderSummary({ quote, pending, error, shippingKnown = false, children }: Props) {
+export function OrderSummary({
+  quote,
+  pending,
+  error,
+  shippingKnown = false,
+  shippingPendingLabel = "при поръчка",
+  children,
+}: Props) {
   const { promoCode, setPromoCode, subtotal } = useCart();
   const [input, setInput] = useState("");
+  const apply = () => {
+    const code = normalizeCode(input);
+    if (code) setPromoCode(code);
+    setInput("");
+  };
 
   const applied = quote?.promo?.ok ? quote.promo : null;
   const promoError = quote?.promoError ?? null;
@@ -54,16 +68,8 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
             </button>
           </div>
         ) : (
-          <form
-            method="post"
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const code = normalizeCode(input);
-              if (code) setPromoCode(code);
-              setInput("");
-            }}
-          >
+          // Не <form>: в поръчката обобщението е вътре в голямата форма, а вложени форми не са позволени
+          <div className="flex gap-2" role="group" aria-label="Промо код">
             <label htmlFor="promo-code" className="sr-only">
               Промо код
             </label>
@@ -73,15 +79,21 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
                 id="promo-code"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    apply();
+                  }
+                }}
                 placeholder="Промо код"
                 autoComplete="off"
                 className="input !h-10 pl-9 uppercase placeholder:normal-case"
               />
             </div>
-            <button type="submit" className="btn btn-sm btn-ghost !h-10" disabled={!input.trim()}>
+            <button type="button" onClick={apply} className="btn btn-sm btn-ghost !h-10" disabled={!input.trim()}>
               Приложи
             </button>
-          </form>
+          </div>
         )}
         {promoError && (
           <p role="alert" className="-mt-2 text-[13px] text-danger">
@@ -107,7 +119,7 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
             <dt className="text-muted">Доставка</dt>
             <dd className="text-white">
               {!shippingKnown || !quote ? (
-                <span className="text-muted">при поръчка</span>
+                <span className="text-muted">{shippingPendingLabel}</span>
               ) : shipping === 0 ? (
                 <span className="text-ok">безплатна</span>
               ) : (

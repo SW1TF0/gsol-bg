@@ -129,11 +129,11 @@ export function ShippingForm({ shipping }: { shipping: SiteSettings["shipping"] 
 
   return (
     <SettingsForm
-      title="Доставка с Еконт"
+      title="Резервни цени за доставка"
       action={saveShipping}
       footer={
         <div className="mt-5 bg-bg-deep p-4 text-[14px]">
-          <div className="mb-2 text-[12px] uppercase tracking-wide text-dim">Така се вижда при поръчка</div>
+          <div className="mb-2 text-[12px] uppercase tracking-wide text-dim">Ако Еконт не отговори</div>
           <ul className="space-y-1 text-muted">
             {preview.map(([label, price]) => (
               <li key={label}>
@@ -176,7 +176,8 @@ export function ShippingForm({ shipping }: { shipping: SiteSettings["shipping"] 
             invalid={f === "free_from"}
           />
           <p className="text-[13px] text-muted">
-            Новите цени важат за поръчките от момента на записа. Вече направените поръчки пазят своята цена.
+            Обикновено цената идва на живо от Еконт по теглото. Тези цени се ползват само ако Еконт не отговори или
+            реалната среда още не е настроена. Прагът за безплатна доставка важи винаги.
           </p>
         </>
       )}

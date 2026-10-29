@@ -18,6 +18,7 @@ export type Database = {
           slug: string;
           sort_order: number;
           tagline: string | null;
+          weight_kg: number | null;
         };
         Insert: {
           id?: never;
@@ -28,6 +29,7 @@ export type Database = {
           slug: string;
           sort_order?: number;
           tagline?: string | null;
+          weight_kg?: number | null;
         };
         Update: {
           id?: never;
@@ -38,8 +40,53 @@ export type Database = {
           slug?: string;
           sort_order?: number;
           tagline?: string | null;
+          weight_kg?: number | null;
         };
         Relationships: [];
+      };
+      econt_cities: {
+        Row: { id: number; name: string; offices: number; post_code: string; region: string; updated_at: string };
+        Insert: { id: number; name: string; offices?: number; post_code?: string; region?: string; updated_at?: string };
+        Update: { id?: number; name?: string; offices?: number; post_code?: string; region?: string; updated_at?: string };
+        Relationships: [];
+      };
+      econt_offices: {
+        Row: { address: string; city_id: number; city_name: string; code: string; name: string; post_code: string; updated_at: string };
+        Insert: { address?: string; city_id: number; city_name: string; code: string; name: string; post_code?: string; updated_at?: string };
+        Update: { address?: string; city_id?: number; city_name?: string; code?: string; name?: string; post_code?: string; updated_at?: string };
+        Relationships: [];
+      };
+      shipments: {
+        Row: {
+          attempts: number;
+          claimed_at: string | null;
+          created_at: string;
+          delivered_at: string | null;
+          env: string;
+          error: string | null;
+          events: Json;
+          expected_at: string | null;
+          id: number;
+          number: string | null;
+          order_id: number;
+          pdf_url: string | null;
+          price_cents: number | null;
+          state: string;
+          status: string | null;
+          status_checked_at: string | null;
+          updated_at: string;
+        };
+        Insert: { env: string; order_id: number; state?: string };
+        Update: { state?: string };
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       pages: {
         Row: {
@@ -251,7 +298,9 @@ export type Database = {
           created_at: string;
           customer_id: string | null;
           discount_cents: number;
+          econt_city_id: number | null;
           econt_office: string | null;
+          econt_office_code: string | null;
           email: string;
           first_name: string;
           id: number;
@@ -268,6 +317,8 @@ export type Database = {
           shipping_cents: number;
           shipping_city: string;
           shipping_method: string;
+          shipping_source: string | null;
+          shipping_weight_kg: number | null;
           status: Database["public"]["Enums"]["order_status"];
           subtotal_cents: number;
           total_cents: number;
@@ -278,7 +329,9 @@ export type Database = {
           created_at?: string;
           customer_id?: string | null;
           discount_cents?: number;
+          econt_city_id?: number | null;
           econt_office?: string | null;
+          econt_office_code?: string | null;
           email: string;
           first_name: string;
           id?: never;
@@ -295,6 +348,8 @@ export type Database = {
           shipping_cents?: number;
           shipping_city: string;
           shipping_method: string;
+          shipping_source?: string | null;
+          shipping_weight_kg?: number | null;
           status?: Database["public"]["Enums"]["order_status"];
           subtotal_cents: number;
           total_cents: number;
@@ -305,7 +360,9 @@ export type Database = {
           created_at?: string;
           customer_id?: string | null;
           discount_cents?: number;
+          econt_city_id?: number | null;
           econt_office?: string | null;
+          econt_office_code?: string | null;
           email?: string;
           first_name?: string;
           id?: never;
@@ -322,6 +379,8 @@ export type Database = {
           shipping_cents?: number;
           shipping_city?: string;
           shipping_method?: string;
+          shipping_source?: string | null;
+          shipping_weight_kg?: number | null;
           status?: Database["public"]["Enums"]["order_status"];
           subtotal_cents?: number;
           total_cents?: number;
@@ -370,6 +429,7 @@ export type Database = {
           summary: string | null;
           tier: string | null;
           updated_at: string;
+          weight_kg: number | null;
         };
         Insert: {
           brand?: string | null;
@@ -395,6 +455,7 @@ export type Database = {
           summary?: string | null;
           tier?: string | null;
           updated_at?: string;
+          weight_kg?: number | null;
         };
         Update: {
           brand?: string | null;
@@ -420,6 +481,7 @@ export type Database = {
           summary?: string | null;
           tier?: string | null;
           updated_at?: string;
+          weight_kg?: number | null;
         };
         Relationships: [
           {
@@ -887,6 +949,13 @@ export type Database = {
       };
     };
     Functions: {
+      econt_cancel: { Args: { p_order_id: number }; Returns: undefined };
+      econt_overview: { Args: never; Returns: Json };
+      econt_refresh: { Args: { p_order_id: number }; Returns: undefined };
+      econt_request: { Args: { p_what: string }; Returns: undefined };
+      econt_set_access: { Args: { p_password: string; p_username: string }; Returns: undefined };
+      econt_ship: { Args: { p_order_id: number }; Returns: undefined };
+      quote_checkout: { Args: { p_code?: string; p_items: Json; p_shipping?: Json }; Returns: Json };
       place_order: { Args: { p_items: Json; p_order: Json }; Returns: Json };
       track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
       order_receipt: { Args: { p_email: string; p_number: string }; Returns: Json };

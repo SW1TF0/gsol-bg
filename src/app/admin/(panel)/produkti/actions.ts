@@ -21,6 +21,8 @@ export async function updateProduct(_prev: ProductFormState, form: FormData): Pr
   const regular = toCents(form.get("regular_price"));
   const stock = String(form.get("stock_status"));
   const categoryId = Number(form.get("category_id")) || null;
+  const weightText = String(form.get("weight_kg") ?? "").replace(/\s/g, "").replace(",", ".");
+  const weight = weightText ? Number(weightText) : null;
 
   if (!id) return { error: "Липсва продукт." };
   if (name.length < 3) return { error: "Името е твърде кратко." };
@@ -28,6 +30,7 @@ export async function updateProduct(_prev: ProductFormState, form: FormData): Pr
   if (Number.isNaN(regular)) return { error: "Невалидна стара цена." };
   if (regular !== null && regular < price) return { error: "Старата цена трябва да е по-висока от текущата." };
   if (!["in_stock", "on_request", "out_of_stock"].includes(stock)) return { error: "Невалидна наличност." };
+  if (weight !== null && !(weight > 0 && weight <= 500)) return { error: "Теглото е в килограми — между 0,01 и 500." };
 
   const { error } = await db
     .from("products")
@@ -39,6 +42,7 @@ export async function updateProduct(_prev: ProductFormState, form: FormData): Pr
       delivery_days: String(form.get("delivery_days") ?? "1–7").trim().slice(0, 20) || "1–7",
       summary: String(form.get("summary") ?? "").trim().slice(0, 500) || null,
       category_id: categoryId,
+      weight_kg: weight === null ? null : Math.round(weight * 100) / 100,
       is_active: form.get("is_active") === "on",
       is_promo: form.get("is_promo") === "on",
       free_windows: form.get("free_windows") === "on",

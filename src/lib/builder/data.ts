@@ -7,6 +7,7 @@ import { lineById, lines, type LineId } from "./policy";
 import { runBuilder, type ExistingMachine, type Machine, type RunResult } from "./generator";
 import { validatePricing } from "./pricing";
 import { builderPolicy } from "./policy";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 // Връзката на билдъра с базата: чете частите и вчерашния рафт, пуска билдъра, сверява цените с базата
 // и (при „Публикувай“) записва машините в каталога. Работи със сесията на мениджър/администратор (RLS).
@@ -60,16 +61,6 @@ export type BuilderInput = Awaited<ReturnType<typeof loadInput>>;
  * Всички редове на заявка, страница по страница. Базата връща най-много 1000 реда наведнъж —
  * без това машините идват „без части“ и билдърът ги сваля като непълни.
  */
-async function fetchAll<T>(page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
-  const out: T[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await page(from, from + 999);
-    if (error) throw new Error(`Четенето от базата не успя: ${error.message}`);
-    out.push(...(data ?? []));
-    if (!data || data.length < 1000) return out;
-  }
-}
-
 export async function loadInput(db: Db) {
   const [rows, { data: pricingRow }, products] = await Promise.all([
     fetchAll((a, b) => db.from("components").select("*").eq("is_active", true).eq("in_stock", true).order("id").range(a, b)),

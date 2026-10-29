@@ -6,6 +6,7 @@ import { Constants, type Enums } from "@/lib/supabase/database.types";
 import { getSettings } from "@/lib/settings-data";
 import { sendEmail, type SendResult } from "@/lib/email/send";
 import { siteUrl } from "@/lib/email/notify";
+import { econtWorker } from "@/lib/econt";
 import { notifiableStatuses, orderStatusEmail } from "@/lib/email/templates";
 
 export type ActionState = { error?: string; ok?: boolean; email?: SendResult } | null;
@@ -60,6 +61,27 @@ export async function addOrderNote(_prev: ActionState, form: FormData): Promise<
   if (!orderId || !note) return { error: "Напишете бележка." };
   const { error } = await db.from("order_events").insert({ order_id: orderId, actor: user.id, type: "note", data: { text: note } });
   if (error) return { error: "Бележката не можа да се запише." };
+  refresh();
+  return { ok: true };
+}
+
+const shipmentErrors: Record<string, string> = {
+  SHIPMENT_EXISTS: "Поръчката вече има товарителница.",
+  NO_SHIPMENT: "Няма създадена товарителница за анулиране.",
+  FORBIDDEN: "Нямате права за пратките.",
+};
+
+/** Товарителница: създаване, обновяване на статуса, анулиране. Работникът го изпълнява веднага. */
+export async function shipmentAction(op: "create" | "refresh" | "cancel", orderId: number): Promise<ActionState> {
+  const { db } = await requireStaff(["admin", "manager", "sales"]);
+  const { error } =
+    op === "create"
+      ? await db.rpc("econt_ship", { p_order_id: orderId })
+      : op === "cancel"
+        ? await db.rpc("econt_cancel", { p_order_id: orderId })
+        : await db.rpc("econt_refresh", { p_order_id: orderId });
+  if (error) return { error: shipmentErrors[error.message.trim()] ?? "Действието не мина. Опитайте отново." };
+  await econtWorker({ action: "tick" }, 30000);
   refresh();
   return { ok: true };
 }

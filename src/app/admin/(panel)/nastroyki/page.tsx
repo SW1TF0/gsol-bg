@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Truck } from "lucide-react";
 import { AdminHeader, Panel, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { parseSettings, settingKeys } from "@/lib/settings";
@@ -28,6 +28,14 @@ export default async function SettingsPage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <CompanyForm company={settings.company} />
         <div className="space-y-6">
+          <Panel title="Еконт">
+            <p className="text-[14px] text-muted">
+              Жива цена по теглото, товарителници след поръчка, статус на пратките, достъп и тегла по категории.
+            </p>
+            <Link href="/admin/nastroyki/ekont" className="btn btn-sm btn-ghost mt-4">
+              <Truck className="h-4 w-4" /> Настройки на Еконт
+            </Link>
+          </Panel>
           <ShippingForm shipping={settings.shipping} />
           <BankForm bank={settings.bank} />
           <Panel title="Имейли">

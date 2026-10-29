@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Mail, Phone } from "lucide-react";
+import { ArrowLeft, FileText, Mail, Phone } from "lucide-react";
 import { AdminHeader, Panel, StatusBadge, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
-import { formatPrice } from "@/lib/format";
+import { formatDay, formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import { emailConfig } from "@/lib/email/send";
-import { NoteForm, StatusForm } from "./forms";
+import { shipmentStateLabels } from "@/lib/econt-shared";
+import { NoteForm, ShipmentButtons, StatusForm } from "./forms";
 import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Поръчка" };
@@ -36,16 +37,19 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
   const id = Number((await params).id);
   if (!id) notFound();
 
-  const [{ data: order }, { data: items }, { data: events }] = await Promise.all([
+  const [{ data: order }, { data: items }, { data: events }, { data: shipments }] = await Promise.all([
     db.from("orders").select("*").eq("id", id).maybeSingle(),
     db.from("order_items").select("*").eq("order_id", id).order("id"),
     db.from("order_events").select("*").eq("order_id", id).order("created_at", { ascending: false }),
+    db.from("shipments").select("*").eq("order_id", id).order("id", { ascending: false }),
   ]);
   if (!order) notFound();
 
   const invoice = order.invoice as Invoice | null;
   const legal = order.legal as Legal;
   const shipping = order.shipping_method as ShippingMethod;
+  const shipment = shipments?.[0] ?? null;
+  const shipmentEvents = (shipment?.events as { time: string; text: string; place: string | null }[] | undefined) ?? [];
 
   return (
     <>
@@ -100,6 +104,9 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                   status?: string;
                   result?: string;
                   message?: string;
+                  number?: string;
+                  error?: string;
+                  env?: string;
                 };
                 return (
                   <li key={e.id} className="border-l-2 border-line pl-4">
@@ -113,6 +120,23 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                         </>
                       )}
                       {e.type === "note" && <span className="whitespace-pre-line">{data.text}</span>}
+                      {e.type === "shipment_created" && (
+                        <>
+                          Товарителница <b className="font-medium text-white">{data.number}</b>
+                          {data.env === "demo" ? " (пробна, тестова среда)" : ""}
+                        </>
+                      )}
+                      {e.type === "shipment_failed" && (
+                        <>
+                          Товарителницата не се създаде: <span className="text-danger">{data.error}</span>
+                        </>
+                      )}
+                      {e.type === "shipment_cancelled" && <>Товарителница {data.number} е анулирана.</>}
+                      {e.type === "shipment_cancel_failed" && (
+                        <>
+                          Анулирането на {data.number} не мина: <span className="text-danger">{data.error}</span>
+                        </>
+                      )}
                       {e.type === "email" && (
                         <>
                           {data.kind === "confirmation" && "Имейл до клиента: потвърждение на поръчката"}
@@ -166,6 +190,73 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
               <Row label="Плащане" value={paymentLabels[order.payment_method as PaymentMethod]} />
             </dl>
             {order.note && <p className="mt-4 whitespace-pre-line bg-bg-deep p-3 text-[14px] text-muted">{order.note}</p>}
+          </Panel>
+
+          <Panel title="Еконт">
+            <dl className="space-y-2 text-[14px]">
+              {order.shipping_weight_kg !== null && (
+                <Row label="Тегло" value={`${String(order.shipping_weight_kg).replace(".", ",")} кг`} />
+              )}
+              {order.shipping_source && (
+                <Row
+                  label="Цена за клиента"
+                  value={
+                    order.shipping_source === "econt"
+                      ? "по тарифата на Еконт"
+                      : order.shipping_source === "free"
+                        ? "безплатна"
+                        : "резервна цена (Еконт не отговори)"
+                  }
+                />
+              )}
+              {shipment && (
+                <>
+                  <Row
+                    label="Товарителница"
+                    value={[
+                      shipment.number,
+                      shipment.state !== "created" && (shipmentStateLabels[shipment.state] ?? shipment.state).toLowerCase(),
+                      shipment.env === "demo" && "проба",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  />
+                  {shipment.state === "created" && (
+                    <>
+                      {shipment.status && <Row label="Статус" value={shipment.status} />}
+                      {shipment.expected_at && !shipment.delivered_at && (
+                        <Row label="Очаквана доставка" value={formatDay(shipment.expected_at)} />
+                      )}
+                      {shipment.delivered_at && <Row label="Доставена" value={formatDate(shipment.delivered_at)} />}
+                      {shipment.price_cents !== null && <Row label="Цена в Еконт" value={formatPrice(shipment.price_cents)} />}
+                    </>
+                  )}
+                </>
+              )}
+            </dl>
+            {shipment?.error && <p className="mt-3 text-[13px] text-danger">{shipment.error}</p>}
+            {shipment?.pdf_url && shipment.state === "created" && (
+              <a
+                href={shipment.pdf_url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-2 text-[13px] text-accent-ink hover:underline"
+              >
+                <FileText className="h-4 w-4" /> Товарителница (PDF)
+              </a>
+            )}
+            {shipment?.state === "created" && shipmentEvents.length > 0 && (
+              <ol className="mt-4 space-y-2 border-t border-line pt-3 text-[13px]">
+                {shipmentEvents.slice(0, 6).map((ev, i) => (
+                  <li key={i}>
+                    <span className="text-dim">{formatDate(ev.time)}</span> · <span className="text-text">{ev.text}</span>
+                    {ev.place && <span className="text-muted"> — {ev.place}</span>}
+                  </li>
+                ))}
+              </ol>
+            )}
+            {!shipment && <p className="text-[13px] text-muted">Още няма товарителница.</p>}
+            <ShipmentButtons orderId={order.id} state={shipment?.state ?? null} delivered={Boolean(shipment?.delivered_at)} />
           </Panel>
 
           {invoice && (

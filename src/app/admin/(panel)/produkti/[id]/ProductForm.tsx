@@ -14,6 +14,7 @@ type Props = {
     regular_price_cents: number | null;
     stock_status: string;
     delivery_days: string;
+    weight_kg: number | null;
     summary: string | null;
     category_id: number | null;
     is_active: boolean;
@@ -76,6 +77,16 @@ export function ProductForm({ product, categories }: Props) {
           </Field>
           <Field label="Срок за доставка (работни дни)" htmlFor="delivery_days">
             <input id="delivery_days" name="delivery_days" defaultValue={product.delivery_days} className="input" />
+          </Field>
+          <Field label="Тегло за Еконт (кг)" htmlFor="weight_kg">
+            <input
+              id="weight_kg"
+              name="weight_kg"
+              inputMode="decimal"
+              defaultValue={product.weight_kg === null ? "" : String(product.weight_kg).replace(".", ",")}
+              placeholder="празно = теглото на категорията"
+              className="input"
+            />
           </Field>
         </div>
         <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-[14px]">

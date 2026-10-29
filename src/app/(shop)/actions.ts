@@ -3,8 +3,16 @@
 import { after } from "next/server";
 import { publicClient } from "@/lib/supabase/clients";
 import { sendOrderEmails, siteUrl } from "@/lib/email/notify";
+import { econtWorker } from "@/lib/econt";
 import { promoMessage } from "@/lib/promo";
-import type { CheckoutInput, PlaceOrderResult, Quote, RafflePreview, ShippingMethod } from "@/lib/orders";
+import type {
+  CheckoutInput,
+  CheckoutShipping,
+  PlaceOrderResult,
+  Quote,
+  RafflePreview,
+  ShippingMethod,
+} from "@/lib/orders";
 
 type CartItem = { productId: number; qty: number };
 
@@ -23,8 +31,33 @@ export async function quoteCart(items: CartItem[], code: string | null, shipping
     p_shipping_method: shipping,
   });
   if (error) throw new Error("Офертата не можа да се изчисли. Опитайте отново.");
-  const quote = data as unknown as Quote;
+  return withExtras(data as unknown as Quote, items);
+}
 
+/**
+ * Оферта за страницата на поръчката: доставката е цената от Еконт за избрания офис/град, тегло и плащане.
+ * Ако базата още няма тази цена, будим работника да я вземе от Еконт и питаме отново.
+ */
+export async function quoteCheckout(items: CartItem[], code: string | null, shipping: CheckoutShipping) {
+  const p_items = toItems(items);
+  const p_shipping = {
+    method: shipping.method,
+    city_id: shipping.cityId,
+    office_code: shipping.officeCode,
+    payment: shipping.payment,
+  };
+  const ask = () => publicClient().rpc("quote_checkout", { p_items, p_code: code ?? undefined, p_shipping });
+
+  let { data, error } = await ask();
+  if (!error && (data as Quote).shipping_source === "flat" && !(data as Quote).shipping_pending) {
+    const priced = await econtWorker<{ cents: number | null }>({ action: "price", items: p_items, code, shipping: p_shipping });
+    if (priced?.cents != null) ({ data, error } = await ask());
+  }
+  if (error) throw new Error("Офертата не можа да се изчисли. Опитайте отново.");
+  return withExtras(data as unknown as Quote, items);
+}
+
+async function withExtras(quote: Quote, items: CartItem[]) {
   // Колко участия би донесла поръчката в активните томболи (сумата на продуктите след отстъпка)
   const { data: raffles } = await publicClient().rpc("raffle_preview", {
     p_amount_cents: quote.subtotal_cents - quote.discount_cents,
@@ -45,9 +78,9 @@ const errorMap: Record<string, { error: string; field?: Exclude<PlaceOrderResult
   INVALID_LAST_NAME: { error: "Въведете фамилия.", field: "last_name" },
   INVALID_PHONE: { error: "Въведете валиден телефон, напр. 0888 123 456.", field: "phone" },
   INVALID_SHIPPING: { error: "Изберете начин на доставка.", field: "shipping_method" },
-  INVALID_CITY: { error: "Въведете населено място.", field: "shipping_city" },
+  INVALID_CITY: { error: "Изберете населено място от списъка.", field: "shipping_city" },
   INVALID_ADDRESS: { error: "Въведете адрес за доставка.", field: "shipping_address" },
-  INVALID_OFFICE: { error: "Въведете офис на Еконт.", field: "econt_office" },
+  INVALID_OFFICE: { error: "Изберете офис на Еконт от списъка.", field: "econt_office" },
   INVALID_PAYMENT: { error: "Изберете начин на плащане.", field: "payment_method" },
   COD_LIMIT: {
     error: "Над 5 112,92 € наложеният платеж не е разрешен по закон. Изберете банков превод.",
@@ -76,6 +109,8 @@ export async function placeOrder(items: CartItem[], input: CheckoutInput): Promi
     last_name: input.last_name,
     shipping_method: input.shipping_method,
     shipping_city: input.shipping_city,
+    econt_city_id: input.econt_city_id ?? null,
+    econt_office_code: input.shipping_method === "econt_office" ? (input.econt_office_code ?? null) : null,
     shipping_address: input.shipping_method === "econt_address" ? input.shipping_address : null,
     econt_office: input.shipping_method === "econt_office" ? input.econt_office : null,
     payment_method: input.payment_method,
@@ -102,5 +137,7 @@ export async function placeOrder(items: CartItem[], input: CheckoutInput): Promi
   // Писмата тръгват след отговора — клиентът не чака пощата
   const url = await siteUrl();
   after(() => sendOrderEmails({ id: result.order_id, number: result.number }, order, url));
+  // Товарителницата: будим работника веднага (иначе будилникът в базата го прави до 5 минути)
+  after(() => econtWorker({ action: "tick" }, 30000));
   return { ok: true, number: result.number, total_cents: result.total_cents };
 }

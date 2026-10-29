@@ -61,6 +61,7 @@ async function ProductEditPageContent({ params }: Pick<PageProps<"/admin/produkt
             regular_price_cents: product.regular_price_cents,
             stock_status: product.stock_status,
             delivery_days: product.delivery_days,
+            weight_kg: product.weight_kg,
             summary: product.summary,
             category_id: product.category_id,
             is_active: product.is_active,

@@ -23,6 +23,11 @@ export type Quote = {
   shipping_cents: number;
   shipping_discount_cents: number;
   total_cents: number;
+  /** econt — цена от Еконт; flat — цената от настройките (Еконт не е отговорил); free — безплатна */
+  shipping_source?: "econt" | "flat" | "free";
+  /** Още не е избран офис/град — доставката не може да се сметне */
+  shipping_pending?: boolean;
+  weight_kg?: number;
   promo: {
     code: string;
     id: number | null;
@@ -50,6 +55,14 @@ export function invoiceLine(i: InvoiceInput) {
     : `${i.company}, ЕИК ${i.eik}${i.vat ? `, ДДС № ${i.vat}` : ""}, МОЛ ${i.mol}, ${i.address}`;
 }
 
+/** Изборът за доставка в чекаута — по него базата смята цената с Еконт */
+export type CheckoutShipping = {
+  method: ShippingMethod;
+  cityId: number | null;
+  officeCode: string | null;
+  payment: PaymentMethod;
+};
+
 export type CheckoutInput = {
   email: string;
   phone: string;
@@ -57,6 +70,8 @@ export type CheckoutInput = {
   last_name: string;
   shipping_method: ShippingMethod;
   shipping_city: string;
+  econt_city_id?: number | null;
+  econt_office_code?: string | null;
   shipping_address?: string;
   econt_office?: string;
   payment_method: PaymentMethod;

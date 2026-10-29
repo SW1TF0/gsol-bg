@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { quoteCart } from "@/app/(shop)/actions";
-import type { Quote, RafflePreview, ShippingMethod } from "@/lib/orders";
+import { quoteCart, quoteCheckout } from "@/app/(shop)/actions";
+import type { CheckoutShipping, Quote, RafflePreview } from "@/lib/orders";
 import { useCart } from "./CartProvider";
 
 type QuoteState = (Quote & { promoError: string | null; raffles: RafflePreview[] }) | null;
 
-/** Взима оферта от сървъра при всяка промяна на количката, кода или доставката. */
-export function useQuote(shipping: ShippingMethod = "econt_office") {
+/**
+ * Взима оферта от сървъра при всяка промяна на количката, кода или доставката.
+ * Без shipping — за количката (доставката още не е избрана); с shipping — за поръчката, с цена от Еконт.
+ */
+export function useQuote(shipping?: CheckoutShipping) {
   const { lines, promoCode, ready, syncWithQuote } = useCart();
   const [quote, setQuote] = useState<QuoteState>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +25,8 @@ export function useQuote(shipping: ShippingMethod = "econt_office") {
     const timer = setTimeout(() => {
       startTransition(async () => {
         try {
-          const q = await quoteCart(
-            lines.map((l) => ({ productId: l.id, qty: l.qty })),
-            promoCode,
-            shipping,
-          );
+          const items = lines.map((l) => ({ productId: l.id, qty: l.qty }));
+          const q = shipping ? await quoteCheckout(items, promoCode, shipping) : await quoteCart(items, promoCode);
           if (cancelled) return;
           setQuote(q);
           setError(null);

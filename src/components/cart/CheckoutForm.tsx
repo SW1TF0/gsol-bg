@@ -7,27 +7,50 @@ import { useRouter } from "next/navigation";
 import { Building2, Landmark, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
 import { placeOrder } from "@/app/(shop)/actions";
 import { formatPrice } from "@/lib/format";
+import type { EcontDirectory } from "@/lib/econt-shared";
 import { COD_LIMIT_CENTS, type CheckoutInput, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import type { Shipping } from "@/lib/settings";
 import { useCart } from "./CartProvider";
+import { CityPicker, OfficePicker } from "./EcontPicker";
 import { OrderSummary } from "./OrderSummary";
 import { useQuote } from "./useQuote";
 
 type Errors = Partial<Record<string, string>>;
 
-export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPrices: Shipping; phone: string; phoneHref: string }) {
+export function CheckoutForm({
+  shippingPrices,
+  econt,
+  phone,
+  phoneHref,
+}: {
+  shippingPrices: Shipping;
+  econt: EcontDirectory;
+  phone: string;
+  phoneHref: string;
+}) {
   const router = useRouter();
   const { lines, ready, promoCode, clear, setPromoCode } = useCart();
   const [shipping, setShipping] = useState<ShippingMethod>("econt_office");
+  const [cityId, setCityId] = useState<number | null>(null);
+  const [officeCode, setOfficeCode] = useState<string | null>(null);
   const [chosenPayment, setPayment] = useState<PaymentMethod>("cod");
   const [invoiceType, setInvoiceType] = useState<"none" | "person" | "company">("none");
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
-  const { quote, pending, error } = useQuote(shipping);
-  // Над законовия лимит за плащане в брой остава само банковият превод
-  const codAllowed = !quote || quote.total_cents <= COD_LIMIT_CENTS;
+
+  // Над законовия лимит за плащане в брой остава само банковият превод. Таксата за наложен платеж влиза
+  // в доставката, затова веднъж отказан, наложеният платеж остава отказан до промяна в количката —
+  // иначе изборът би скачал напред-назад около лимита.
+  const cartKey = JSON.stringify([lines.map((l) => [l.id, l.qty]), promoCode]);
+  const [codRefusedFor, setCodRefusedFor] = useState<string | null>(null);
+  const codAllowed = codRefusedFor !== cartKey;
   const payment: PaymentMethod = codAllowed ? chosenPayment : "bank";
+  const listed = econt.offices.length > 0;
+  const { quote, pending, error } = useQuote({ method: shipping, cityId, officeCode, payment });
+  if (codAllowed && payment === "cod" && quote && !pending && quote.total_cents > COD_LIMIT_CENTS) {
+    setCodRefusedFor(cartKey);
+  }
   // Същото правило като в базата: прагът е за продуктите след отстъпка; кодът „безплатна доставка“ важи за двата начина
   const itemsCents = quote ? quote.subtotal_cents - quote.discount_cents : 0;
   const freeShipping =
@@ -52,15 +75,29 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const text = (name: string) => String(f.get(name) ?? "").trim();
+    const city = econt.cities.find((c) => c.id === cityId);
+    const office = econt.offices.find((o) => o.code === officeCode);
+    if (listed && !city) {
+      setErrors({ shipping_city: "Изберете населено място от списъка." });
+      document.getElementById("f-shipping_city")?.focus();
+      return;
+    }
+    if (listed && shipping === "econt_office" && !office) {
+      setErrors({ econt_office: "Изберете офис на Еконт от списъка." });
+      document.getElementById("f-econt_office")?.focus();
+      return;
+    }
     const input: CheckoutInput = {
       first_name: text("first_name"),
       last_name: text("last_name"),
       phone: text("phone"),
       email: text("email"),
       shipping_method: shipping,
-      shipping_city: text("shipping_city"),
+      shipping_city: city?.name ?? text("shipping_city"),
+      econt_city_id: city?.id ?? null,
+      econt_office_code: office?.code ?? null,
       shipping_address: text("shipping_address"),
-      econt_office: text("econt_office"),
+      econt_office: office ? `${office.name} — ${office.address}` : text("econt_office"),
       payment_method: payment,
       invoice:
         invoiceType === "company"
@@ -126,11 +163,14 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
             <Choice
               name="shipping_method"
               checked={shipping === "econt_office"}
-              onChange={() => setShipping("econt_office")}
+              onChange={() => {
+                setShipping("econt_office");
+                // Място без офис не става за „До офис“
+                if (econt.cities.find((c) => c.id === cityId)?.offices === 0) setCityId(null);
+              }}
               icon={Building2}
               title="До офис на Еконт"
               hint="Взимате пратката от удобен офис"
-              price={freeShipping ? 0 : shippingPrices.econtOfficeCents}
             />
             <Choice
               name="shipping_method"
@@ -139,7 +179,6 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
               icon={MapPin}
               title="До адрес"
               hint="Куриерът идва до вас"
-              price={freeShipping ? 0 : shippingPrices.econtAddressCents}
             />
           </div>
           {freeShipping ? (
@@ -154,8 +193,33 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
             )
           )}
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field name="shipping_city" label="Населено място" autoComplete="address-level2" errors={errors} required />
-            {shipping === "econt_office" ? (
+            {listed ? (
+              <CityPicker
+                cities={econt.cities}
+                value={cityId}
+                onChange={(id) => {
+                  setCityId(id);
+                  setOfficeCode(null);
+                  setErrors({});
+                }}
+                withOfficesOnly={shipping === "econt_office"}
+                error={errors.shipping_city}
+              />
+            ) : (
+              <Field name="shipping_city" label="Населено място" autoComplete="address-level2" errors={errors} required />
+            )}
+            {shipping === "econt_office" && listed ? (
+              <OfficePicker
+                offices={econt.offices}
+                cityId={cityId}
+                value={officeCode}
+                onChange={(code) => {
+                  setOfficeCode(code);
+                  setErrors({});
+                }}
+                error={errors.econt_office}
+              />
+            ) : shipping === "econt_office" ? (
               <Field
                 name="econt_office"
                 label="Офис на Еконт"
@@ -174,6 +238,10 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
               />
             )}
           </div>
+          {shipping === "econt_office" && (
+            <p className="mt-3 text-[13px] text-muted">Доставка до офис на Еконт — не е нужен адрес.</p>
+          )}
+          <ShippingNote quote={quote} pending={pending} />
         </Fieldset>
 
         <Fieldset title="Плащане" icon={Wallet}>
@@ -283,7 +351,13 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
           ))}
         </ul>
 
-        <OrderSummary quote={quote} pending={pending} error={error ?? formError} shippingKnown>
+        <OrderSummary
+          quote={quote}
+          pending={pending}
+          error={error ?? formError}
+          shippingKnown={Boolean(quote && !quote.shipping_pending)}
+          shippingPendingLabel={shipping === "econt_office" ? "изберете офис" : "изберете място"}
+        >
           {errors.promo_code && (
             <p role="alert" className="text-[13px] text-danger">
               {errors.promo_code}
@@ -309,7 +383,7 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
             </p>
           )}
           <button type="submit" className="btn btn-lg btn-primary w-full" disabled={submitting || pending || !quote}>
-            {submitting ? "Изпращане…" : `Поръчай${quote ? ` · ${formatPrice(quote.total_cents)}` : ""}`}
+            {submitting ? "Изпращане…" : `Поръчай${quote && !quote.shipping_pending ? ` · ${formatPrice(quote.total_cents)}` : ""}`}
           </button>
           <p className="flex items-start gap-2 text-[12px] text-dim">
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-dim" />
@@ -318,6 +392,22 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
         </OrderSummary>
       </aside>
     </form>
+  );
+}
+
+/** Откъде е цената на доставката — от Еконт по теглото или ориентировъчна */
+function ShippingNote({ quote, pending }: { quote: ReturnType<typeof useQuote>["quote"]; pending: boolean }) {
+  if (!quote || quote.shipping_pending || quote.shipping_source === "free") return null;
+  const kg = quote.weight_kg ? `${String(quote.weight_kg).replace(".", ",")} кг` : null;
+  return (
+    <p className="mt-3 flex items-center gap-2 text-[13px] text-muted">
+      <Truck className="h-4 w-4 flex-none text-dim" />
+      {pending
+        ? "Смятаме доставката с Еконт…"
+        : quote.shipping_source === "econt"
+          ? `Доставка ${formatPrice(quote.shipping_cents)} — по тарифата на Еконт${kg ? ` за ${kg}` : ""}.`
+          : `Доставка ${formatPrice(quote.shipping_cents)} — ориентировъчно; точната цена потвърждаваме с поръчката.`}
+    </p>
   );
 }
 
