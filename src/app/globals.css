@@ -2,6 +2,7 @@
 
 /* light:… — стилове само за светлата тема (data-theme="light" на <html>) */
 @custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+@custom-variant business (&:where([data-mode="business"], [data-mode="business"] *));
 
 /* Дизайн токени — виж style-guide.md */
 @theme {
@@ -100,6 +101,76 @@
 .theme-fade *::before,
 .theme-fade *::after {
   transition: background-color 0.45s ease, color 0.45s ease, border-color 0.45s ease, fill 0.45s ease !important;
+}
+
+/*
+ * Смяна „за дома“ ↔ „за бизнеса“: колони като сгради закриват страницата, режимът се сменя под тях.
+ * Към бизнеса — нощни фасади със светещи прозорци; към дома — в цвета на магазина.
+ */
+.mode-shutter {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: flex;
+  pointer-events: none;
+}
+.mode-shutter-col {
+  flex: 1;
+  height: 100%;
+  margin-right: -1px;
+  transform: translateY(101%);
+  will-change: transform;
+}
+.mode-shutter.is-business .mode-shutter-col {
+  border-top: 3px solid var(--color-accent);
+  background-color: #0b1a2e;
+  background-image:
+    linear-gradient(to bottom, transparent 58%, #0b1a2e 58%),
+    linear-gradient(to right, transparent 26%, rgb(255 214 140 / 0.2) 26% 74%, transparent 74%),
+    linear-gradient(to right, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 22px 30px, 22px 30px, 100% 100%;
+  background-position: 6px 40px, 6px 40px, 0 0;
+}
+.mode-shutter.is-business .mode-shutter-col:nth-child(3n + 2) {
+  filter: brightness(0.75);
+}
+.mode-shutter.is-business .mode-shutter-col:nth-child(4n + 1) {
+  background-color: #0e2038;
+}
+.mode-shutter.is-home .mode-shutter-col {
+  transform: translateY(-101%);
+  background-color: var(--color-accent);
+  background-image: repeating-linear-gradient(115deg, rgb(255 255 255 / 0.07) 0 2px, transparent 2px 22px);
+  box-shadow: inset -1px 0 rgb(0 0 0 / 0.12);
+}
+.mode-shutter-label {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 24px;
+  text-align: center;
+  color: #fff;
+  opacity: 0;
+}
+.mode-shutter-label svg {
+  width: 64px;
+  height: 64px;
+  color: #fff;
+  filter: drop-shadow(0 0 24px var(--color-accent));
+}
+.mode-shutter-label span {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 46px);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.mode-shutter-label small {
+  font-size: 15px;
+  color: rgb(255 255 255 / 0.75);
 }
 
 html {

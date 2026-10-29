@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Clock, MapPin, Menu, MessageSquare, Phone, Truck, User, Wrench } from "lucide-react";
+import { Briefcase, Clock, FileText, MapPin, Menu, MessageSquare, Phone, Truck, User, Wrench } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { CartButton } from "@/components/cart/CartButton";
+import { BusinessToggle } from "@/components/BusinessToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getMenu } from "@/lib/catalog";
 import { getCompany } from "@/lib/settings-data";
@@ -29,12 +30,21 @@ export async function Header() {
           <span className="hidden items-center gap-1.5 sm:flex">
             <MapPin className="h-3.5 w-3.5" /> {company.address}
           </span>
-          <span className="ml-auto hidden items-center gap-5 min-[1020px]:flex">
+          {/* Горната лента следва режима: за дома — доставка и сервиз; за бизнеса — фактура и оферта */}
+          <span className="ml-auto hidden items-center gap-5 min-[1020px]:flex business:!hidden">
             <span className="flex items-center gap-1.5">
               <Truck className="h-3.5 w-3.5" /> Доставка в цялата страна
             </span>
             <span className="flex items-center gap-1.5">
               <Wrench className="h-3.5 w-3.5" /> Директен сервиз от GSOL
+            </span>
+          </span>
+          <span className="ml-auto hidden items-center gap-5 text-white business:min-[1020px]:flex">
+            <span className="flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5 text-accent-ink" /> Фактура на фирма
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5 text-accent-ink" /> Фирмена оферта по заявка
             </span>
           </span>
         </div>
@@ -61,9 +71,13 @@ export async function Header() {
           <SearchBox className="mx-auto hidden w-full max-w-[520px] flex-1 md:block" />
 
           <div className="ml-auto flex items-center gap-1 md:ml-0">
-            <Link href="/zapitvane" className="btn btn-sm btn-ghost mr-1 hidden lg:inline-flex">
+            <Link href="/zapitvane" className="btn btn-sm btn-ghost mr-1 hidden lg:inline-flex business:!hidden">
               <MessageSquare className="h-4 w-4" /> Бързо запитване
             </Link>
+            <Link href="/zapitvane?tema=nov-kompyutar" className="btn btn-sm btn-ghost mr-1 hidden business:lg:inline-flex">
+              <Briefcase className="h-4 w-4" /> Фирмена оферта
+            </Link>
+            <BusinessToggle className="mx-1" />
             <ThemeToggle />
             <Link
               href="/profil"

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, LayoutGrid, SlidersHorizontal } from "lucide-react";
+import { Building2, ChevronDown, LayoutGrid, SlidersHorizontal } from "lucide-react";
 import type { MenuDepartment, MenuLink } from "@/lib/catalog";
 
 export const services: MenuLink[] = [
@@ -47,14 +47,14 @@ export function DepartmentsNav({ departments, brands }: { departments: MenuDepar
 
   return (
     <nav aria-label="Отдели" className="relative" onMouseLeave={() => hover(null)}>
-      <ul className="mx-auto flex h-11 max-w-[1400px] items-stretch gap-1 px-4 lg:px-6">
+      <ul className="mx-auto flex h-11 max-w-[1400px] items-stretch gap-0 px-4 lg:px-6 xl:gap-1">
         <li>
           <button
             type="button"
             aria-expanded={open === "catalog"}
             onClick={() => toggle("catalog")}
             onMouseEnter={() => hover("catalog")}
-            className={`flex h-full items-center gap-2 px-3 font-display text-[13px] uppercase tracking-wide transition-colors ${
+            className={`flex h-full items-center gap-2 px-2 xl:px-3 font-display text-[13px] uppercase tracking-wide transition-colors ${
               open === "catalog" ? "bg-accent text-on-accent" : "text-white hover:text-accent-ink"
             }`}
           >
@@ -68,7 +68,7 @@ export function DepartmentsNav({ departments, brands }: { departments: MenuDepar
               aria-expanded={open === d.slug}
               onClick={() => toggle(d.slug)}
               onMouseEnter={() => hover(d.slug)}
-              className={`flex h-full items-center gap-1 px-3 text-[13px] uppercase tracking-wide transition-colors ${
+              className={`flex h-full items-center gap-1 px-2 xl:px-3 text-[13px] uppercase tracking-wide transition-colors ${
                 open === d.slug || pathname.startsWith(d.href) ? "text-accent-ink" : "text-white hover:text-accent-ink"
               }`}
             >
@@ -78,17 +78,24 @@ export function DepartmentsNav({ departments, brands }: { departments: MenuDepar
           </li>
         ))}
         <li>
-          <Link href="/promocii" onMouseEnter={() => hover(null)} className="flex h-full items-center px-3 text-[13px] font-medium uppercase tracking-wide text-accent-ink hover:text-white">
+          <Link href="/promocii" onMouseEnter={() => hover(null)} className="flex h-full items-center px-2 xl:px-3 text-[13px] font-medium uppercase tracking-wide text-accent-ink hover:text-white">
             Промоции
           </Link>
         </li>
+        {/* Само в режим „за бизнеса“ и на широк екран; там заема мястото на „Контакти“, иначе редът не се събира */}
+        <li className="hidden business:xl:block">
+          <Link href="/it-pregled" onMouseEnter={() => hover(null)} className="flex h-full items-center gap-1.5 px-2 xl:px-3 text-[13px] font-medium uppercase tracking-wide text-accent-ink hover:text-white">
+            <Building2 className="h-3.5 w-3.5" /> IT преглед за фирми
+          </Link>
+        </li>
         <li className="ml-auto">
-          <Link href="/konfigurator" onMouseEnter={() => hover(null)} className="flex h-full items-center gap-1.5 px-3 text-[13px] uppercase tracking-wide text-white hover:text-accent-ink">
+          <Link href="/konfigurator" onMouseEnter={() => hover(null)} className="flex h-full items-center gap-1.5 px-2 xl:px-3 text-[13px] uppercase tracking-wide text-white hover:text-accent-ink">
             <SlidersHorizontal className="h-3.5 w-3.5" /> Конфигуратор
           </Link>
         </li>
-        <li>
-          <Link href="/kontakti" onMouseEnter={() => hover(null)} className="flex h-full items-center px-3 text-[13px] uppercase tracking-wide text-white hover:text-accent-ink">
+        {/* Под 1280px редът е тесен — контактите остават в горната лента и във футъра */}
+        <li className="hidden xl:block business:!hidden">
+          <Link href="/kontakti" onMouseEnter={() => hover(null)} className="flex h-full items-center px-2 xl:px-3 text-[13px] uppercase tracking-wide text-white hover:text-accent-ink">
             Контакти
           </Link>
         </li>

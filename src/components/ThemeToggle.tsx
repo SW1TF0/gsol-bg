@@ -1,19 +1,19 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { THEME_KEY } from "@/lib/theme";
 
 // Тема: по подразбиране тъмна; изборът се пази в браузъра (gsol-theme) и се прилага преди рисуването
-// от скрипта в основния layout. Иконата се сменя само с CSS (вариант light:), без състояние —
+// от скрипта в основния layout (src/lib/theme.ts). Иконата се сменя само с CSS (вариант light:), без състояние —
 // така сървърът и браузърът рисуват едно и също.
 
-const KEY = "gsol-theme";
 const DURATION = 950;
 const EASE = "cubic-bezier(0.76, 0, 0.24, 1)";
 
 function apply(theme: "light" | "dark") {
   document.documentElement.dataset.theme = theme;
   try {
-    localStorage.setItem(KEY, theme);
+    localStorage.setItem(THEME_KEY, theme);
   } catch {
     // поверителен режим — темата важи до презареждане
   }
@@ -117,6 +117,3 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     </button>
   );
 }
-
-/** Изпълнява се преди рисуването: прилага запазената тема, за да няма проблясване */
-export const themeScript = `try{if(localStorage.getItem("${KEY}")==="light")document.documentElement.dataset.theme="light"}catch(e){}`;

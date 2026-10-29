@@ -6,6 +6,7 @@ import {
   Cctv,
   ChevronsDown,
   Cpu,
+  FileText,
   Gauge,
   Headphones,
   Laptop,
@@ -57,6 +58,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <BusinessPaths />
       <PromoStrip products={promos} />
       {activeRaffle && <RaffleBanner raffle={activeRaffle} />}
 
@@ -195,27 +197,107 @@ function Hero() {
           strokeWidth=".15"
         />
       </svg>
+      {/* За бизнеса: по-едра решетка като чертеж */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 hidden opacity-40 business:block"
+        style={{
+          backgroundImage:
+            "linear-gradient(color-mix(in srgb, var(--color-accent) 22%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 22%, transparent) 1px, transparent 1px)",
+          backgroundSize: "112px 112px",
+        }}
+      />
       <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-bg-deep from-15% to-transparent to-60%" />
 
       <Container className="relative z-10 pb-14 text-center">
-        <h1 className="h-display mx-auto max-w-4xl text-[34px] sm:text-[48px]">
-          <span className="text-accent-ink">Сигурният избор</span> за техника и IT
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-[18px]">
-          Лаптопи, гейминг компютри и компоненти — подбрани, сглобени и тествани от GSOL. Собствен сервиз и IT
-          поддръжка за дома и бизнеса.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <ButtonLink href="/katalog/kompyutri" size="lg">
-            Разгледай магазина
-          </ButtonLink>
-          <ButtonLink href="/zapitvane" variant="outline" size="lg" className="[--section-bg:var(--color-bg-deep)]">
-            Бързо запитване
-          </ButtonLink>
+        <div className="business:hidden">
+          <h1 className="h-display mx-auto max-w-4xl text-[34px] sm:text-[48px]">
+            <span className="text-accent-ink">Сигурният избор</span> за техника и IT
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-[18px]">
+            Лаптопи, гейминг компютри и компоненти — подбрани, сглобени и тествани от GSOL. Собствен сервиз и IT
+            поддръжка за дома и бизнеса.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <ButtonLink href="/katalog/kompyutri" size="lg">
+              Разгледай магазина
+            </ButtonLink>
+            <ButtonLink href="/zapitvane" variant="outline" size="lg" className="[--section-bg:var(--color-bg-deep)]">
+              Бързо запитване
+            </ButtonLink>
+          </div>
+        </div>
+        <div className="hidden business:block">
+          <p className="tagline">За фирми, училища и детски градини</p>
+          <h1 className="h-display mx-auto mt-3 max-w-4xl text-[34px] sm:text-[48px]">
+            <span className="text-accent-ink">IT партньор</span> за вашия бизнес
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-[18px]">
+            Компютри и техника с фактура на фирма, IT поддръжка, мрежи, сървъри и видеонаблюдение — от офертата до
+            сервиза при един доставчик.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <ButtonLink href="/it-pregled" size="lg">
+              Безплатен IT преглед
+            </ButtonLink>
+            <ButtonLink href="/zapitvane?tema=nov-kompyutar" variant="outline" size="lg" className="[--section-bg:var(--color-bg-deep)]">
+              Фирмена оферта
+            </ButtonLink>
+          </div>
         </div>
         <a href="#promo" aria-label="Надолу към промоциите" className="mt-12 inline-block text-accent-ink">
           <ChevronsDown className="animate-bob h-8 w-8" strokeWidth={1.5} />
         </a>
+      </Container>
+    </section>
+  );
+}
+
+/** Само в режим „за бизнеса“: четирите пътя за фирмите веднага под началото */
+function BusinessPaths() {
+  const items = [
+    {
+      icon: Headphones,
+      title: "IT поддръжка",
+      text: "Помощ за служителите, работни станции, мрежа и сървъри — по заявка или по абонамент.",
+      href: "/zapitvane?tema=it",
+    },
+    {
+      icon: Building2,
+      title: "Безплатен IT преглед",
+      text: "Разбираме какво имате и от какво имате нужда, преди да предложим нещо.",
+      href: "/it-pregled",
+    },
+    {
+      icon: FileText,
+      title: "Фирмена оферта",
+      text: "Кажете какво ви трябва — пращаме оферта с цени и срок. Фактура на фирма за всяка поръчка.",
+      href: "/zapitvane?tema=nov-kompyutar",
+    },
+    {
+      icon: Cctv,
+      title: "Видеонаблюдение",
+      text: "Оглед, проект, монтаж и отдалечен достъп — като една система.",
+      href: "/zapitvane?tema=video",
+    },
+  ];
+  return (
+    <section className="hidden bg-bg-deep pb-20 pt-6 business:block [--section-bg:var(--color-bg-deep)]">
+      <Container>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map(({ icon: Icon, title, text, href }) => (
+            <Link key={title} href={href} className="cut-frame cut-sm group hover:[--frame:var(--color-accent)]">
+              <div className="cut-inner flex h-full flex-col gap-4 bg-gradient-to-br from-surface-2 from-40% to-accent/10 p-6">
+                <Icon className="h-8 w-8 text-accent-ink" strokeWidth={1.5} />
+                <div className="h-display text-[17px] group-hover:text-accent-ink">{title}</div>
+                <p className="text-[14px] text-muted">{text}</p>
+                <span className="mt-auto flex items-center gap-2 font-display text-[12px] uppercase tracking-wide text-accent-ink">
+                  Напред <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </Container>
     </section>
   );

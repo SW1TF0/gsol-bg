@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Onest, Tektur } from "next/font/google";
 import Script from "next/script";
-import { themeScript } from "@/components/ThemeToggle";
+import { themeScript } from "@/lib/theme";
+import { modeScript } from "@/lib/mode";
 import "./globals.css";
 
 const tektur = Tektur({
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: скриптът за тема слага data-theme на <html> преди React
+    // suppressHydrationWarning: скриптът слага data-theme и data-mode на <html> преди React
     <html
       lang="bg"
       data-scroll-behavior="smooth"
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh flex flex-col">
         <Script id="theme" strategy="beforeInteractive">
-          {themeScript}
+          {themeScript + modeScript}
         </Script>
         {children}
       </body>
