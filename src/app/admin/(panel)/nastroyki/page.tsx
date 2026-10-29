@@ -1,6 +1,9 @@
-import { AdminHeader, formatDate } from "@/components/admin/ui";
+import Link from "next/link";
+import { Mail } from "lucide-react";
+import { AdminHeader, Panel, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { parseSettings, settingKeys } from "@/lib/settings";
+import { emailConfig } from "@/lib/email/send";
 import { BankForm, CompanyForm, ShippingForm } from "./forms";
 
 export const metadata = { title: "Настройки" };
@@ -27,6 +30,16 @@ export default async function SettingsPage() {
         <div className="space-y-6">
           <ShippingForm shipping={settings.shipping} />
           <BankForm bank={settings.bank} />
+          <Panel title="Имейли">
+            <p className="text-[14px] text-muted">
+              {emailConfig().enabled
+                ? "Изпращането е включено: потвърждения до клиентите и известия до магазина."
+                : "Изпращането още не е настроено — писмата не тръгват."}
+            </p>
+            <Link href="/admin/nastroyki/imeyli" className="btn btn-sm btn-ghost mt-4">
+              <Mail className="h-4 w-4" /> Преглед и настройка
+            </Link>
+          </Panel>
         </div>
       </div>
     </>

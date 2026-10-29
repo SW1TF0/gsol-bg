@@ -1,7 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { publicClient } from "@/lib/supabase/clients";
+import { sendInquiryAlert, siteUrl } from "@/lib/email/notify";
 import { inquiryTopics, type InquiryState, type InquiryTopic } from "@/lib/inquiries";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -32,6 +34,7 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
   }
 
   const referer = (await headers()).get("referer") ?? "";
+  const sourceUrl = referer ? new URL(referer).pathname.slice(0, 300) : null;
   const { error } = await publicClient()
     .from("inquiries")
     .insert({
@@ -40,12 +43,17 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
       contact: contact.slice(0, 120),
       message,
       details: details as Json,
-      source_url: referer ? new URL(referer).pathname.slice(0, 300) : null,
+      source_url: sourceUrl,
     });
 
   if (error) {
     console.error("inquiry", error);
     return { error: "Запитването не се изпрати. Опитайте отново или ни се обадете." };
   }
+
+  const url = await siteUrl();
+  after(() =>
+    sendInquiryAlert({ topicLabel: inquiryTopics[topic].label, name, contact, message, details, sourceUrl }, url),
+  );
   return { ok: true };
 }

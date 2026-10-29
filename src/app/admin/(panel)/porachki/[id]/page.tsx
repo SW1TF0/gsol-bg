@@ -6,10 +6,17 @@ import { AdminHeader, Panel, StatusBadge, formatDate } from "@/components/admin/
 import { requireStaff } from "@/lib/admin/auth";
 import { formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
+import { emailConfig } from "@/lib/email/send";
 import { NoteForm, StatusForm } from "./forms";
 import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Поръчка" };
+
+const emailResultLabels: Record<string, string> = {
+  sent: "изпратен",
+  failed: "грешка при изпращане",
+  disabled: "не е изпратен (изпращането не е настроено)",
+};
 
 type Invoice = { company?: string; eik?: string; vat?: string; mol?: string; address?: string };
 
@@ -81,7 +88,16 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
             <NoteForm orderId={order.id} />
             <ol className="mt-5 space-y-3 text-[14px]">
               {events?.map((e) => {
-                const data = e.data as { from?: string; to?: string; text?: string; promo_code?: string };
+                const data = e.data as {
+                  from?: string;
+                  to?: string;
+                  text?: string;
+                  promo_code?: string;
+                  kind?: string;
+                  status?: string;
+                  result?: string;
+                  message?: string;
+                };
                 return (
                   <li key={e.id} className="border-l-2 border-line pl-4">
                     <div className="text-[12px] text-dim">{formatDate(e.created_at)}</div>
@@ -94,6 +110,18 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                         </>
                       )}
                       {e.type === "note" && <span className="whitespace-pre-line">{data.text}</span>}
+                      {e.type === "email" && (
+                        <>
+                          {data.kind === "confirmation" && "Имейл до клиента: потвърждение на поръчката"}
+                          {data.kind === "shop_alert" && "Известие до магазина за новата поръчка"}
+                          {data.kind === "status" && <>Имейл до клиента: „{orderStatusLabels[data.status ?? ""] ?? data.status}“</>}
+                          {" — "}
+                          <span className={data.result === "sent" ? "text-ok" : data.result === "failed" ? "text-accent" : "text-dim"}>
+                            {emailResultLabels[data.result ?? ""] ?? data.result}
+                          </span>
+                          {data.message && <span className="mt-1 block whitespace-pre-line text-muted">{data.message}</span>}
+                        </>
+                      )}
                     </div>
                   </li>
                 );
@@ -104,7 +132,7 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
 
         <div className="space-y-6">
           <Panel title="Статус">
-            <StatusForm key={order.status} orderId={order.id} status={order.status} />
+            <StatusForm orderId={order.id} status={order.status} emailEnabled={emailConfig().enabled} />
           </Panel>
 
           <Panel title="Клиент">

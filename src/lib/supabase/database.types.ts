@@ -738,6 +738,8 @@ export type Database = {
     Functions: {
       place_order: { Args: { p_items: Json; p_order: Json }; Returns: Json };
       track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
+      order_receipt: { Args: { p_email: string; p_number: string }; Returns: Json };
+      log_order_email: { Args: { p_email: string; p_kind: string; p_number: string; p_result: string }; Returns: undefined };
       get_raffle: { Args: { p_slug: string }; Returns: Json };
       raffle_preview: { Args: { p_amount_cents: number; p_items: Json }; Returns: Json };
       draw_raffle: { Args: { p_raffle_id: number }; Returns: Json };

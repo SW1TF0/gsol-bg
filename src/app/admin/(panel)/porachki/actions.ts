@@ -3,8 +3,12 @@
 import { refresh } from "next/cache";
 import { requireStaff } from "@/lib/admin/auth";
 import { Constants, type Enums } from "@/lib/supabase/database.types";
+import { getSettings } from "@/lib/settings-data";
+import { sendEmail, type SendResult } from "@/lib/email/send";
+import { siteUrl } from "@/lib/email/notify";
+import { notifiableStatuses, orderStatusEmail } from "@/lib/email/templates";
 
-export type ActionState = { error?: string; ok?: boolean } | null;
+export type ActionState = { error?: string; ok?: boolean; email?: SendResult } | null;
 
 export async function updateOrderStatus(_prev: ActionState, form: FormData): Promise<ActionState> {
   const { db, user } = await requireStaff(["admin", "manager", "sales"]);
@@ -12,7 +16,14 @@ export async function updateOrderStatus(_prev: ActionState, form: FormData): Pro
   const status = String(form.get("status")) as Enums<"order_status">;
   if (!orderId || !Constants.public.Enums.order_status.includes(status)) return { error: "Невалиден статус." };
 
-  const { data: before } = await db.from("orders").select("status").eq("id", orderId).single();
+  const notify = form.get("notify") === "on" && notifiableStatuses.includes(status);
+  const message = String(form.get("message") ?? "").trim().slice(0, 1000);
+
+  const { data: before } = await db
+    .from("orders")
+    .select("status, number, email, first_name, total_cents")
+    .eq("id", orderId)
+    .single();
   if (!before) return { error: "Поръчката не е намерена." };
   if (before.status === status) return { ok: true };
 
@@ -24,8 +35,22 @@ export async function updateOrderStatus(_prev: ActionState, form: FormData): Pro
     type: "status",
     data: { from: before.status, to: status },
   });
+
+  let email: SendResult | undefined;
+  if (notify) {
+    const { company } = await getSettings();
+    email = await sendEmail(before.email, orderStatusEmail({ company, siteUrl: await siteUrl() }, { ...before, status }, message), {
+      replyTo: company.email,
+    });
+    await db.from("order_events").insert({
+      order_id: orderId,
+      actor: user.id,
+      type: "email",
+      data: { kind: "status", status, result: email, ...(message ? { message } : {}) },
+    });
+  }
   refresh();
-  return { ok: true };
+  return { ok: true, email };
 }
 
 export async function addOrderNote(_prev: ActionState, form: FormData): Promise<ActionState> {

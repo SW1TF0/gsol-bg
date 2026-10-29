@@ -4,6 +4,10 @@ import { refresh, updateTag } from "next/cache";
 import { requireStaff } from "@/lib/admin/auth";
 import { isValidIban, normalizeIban, socialNetworks, type SettingKey } from "@/lib/settings";
 import type { Json } from "@/lib/supabase/database.types";
+import { getSettings } from "@/lib/settings-data";
+import { sendEmail, type SendResult } from "@/lib/email/send";
+import { siteUrl } from "@/lib/email/notify";
+import { emailSamples, renderSample } from "./imeyli/samples";
 
 export type SettingsFormState = { ok?: boolean; error?: string; field?: string } | null;
 
@@ -82,4 +86,17 @@ export async function saveBank(_prev: SettingsFormState, form: FormData): Promis
   if (v.iban && v.holder.length < 3) return { error: "Въведете титуляря на сметката.", field: "holder" };
 
   return save("bank", v);
+}
+
+export type TestEmailState = { result?: SendResult; to?: string } | null;
+
+/** Изпраща избрания пример до имейла на влезлия администратор */
+export async function sendTestEmail(_prev: TestEmailState, form: FormData): Promise<TestEmailState> {
+  const { user } = await requireStaff(["admin"]);
+  const id = String(form.get("vid") ?? "");
+  const sample = emailSamples.find((s) => s.id === id) ?? emailSamples[0];
+  if (!user.email) return { result: "failed" };
+  const email = renderSample(sample.id, await getSettings(), await siteUrl());
+  const result = await sendEmail(user.email, { ...email, subject: `[Тест] ${email.subject}` });
+  return { result, to: user.email };
 }

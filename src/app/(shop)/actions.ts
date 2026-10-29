@@ -1,6 +1,8 @@
 "use server";
 
+import { after } from "next/server";
 import { publicClient } from "@/lib/supabase/clients";
+import { sendOrderEmails, siteUrl } from "@/lib/email/notify";
 import { promoMessage } from "@/lib/promo";
 import type { CheckoutInput, PlaceOrderResult, Quote, RafflePreview, ShippingMethod } from "@/lib/orders";
 
@@ -89,6 +91,9 @@ export async function placeOrder(items: CartItem[], input: CheckoutInput): Promi
     return { ok: false, error: "Възникна грешка при изпращането. Опитайте отново или ни се обадете." };
   }
 
-  const result = data as { number: string; total_cents: number };
+  const result = data as { order_id: number; number: string; total_cents: number };
+  // Писмата тръгват след отговора — клиентът не чака пощата
+  const url = await siteUrl();
+  after(() => sendOrderEmails({ id: result.order_id, number: result.number }, order, url));
   return { ok: true, number: result.number, total_cents: result.total_cents };
 }
