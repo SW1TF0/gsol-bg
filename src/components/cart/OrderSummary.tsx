@@ -55,6 +55,7 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
           </div>
         ) : (
           <form
+            method="post"
             className="flex gap-2"
             onSubmit={(e) => {
               e.preventDefault();

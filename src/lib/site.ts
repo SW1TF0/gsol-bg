@@ -15,6 +15,7 @@ export const footerColumns = [
     links: [
       { label: "Лаптопи", href: "/katalog/laptopi" },
       { label: "Гейминг компютри", href: "/katalog/kompyutri" },
+      { label: "Конфигуратор", href: "/konfigurator" },
       { label: "Компоненти", href: "/katalog/komponenti" },
       { label: "Периферия", href: "/katalog/periferiya" },
       { label: "Промоции", href: "/promocii" },

@@ -19,7 +19,7 @@ export function StatusForm({ orderId, status, emailEnabled }: { orderId: number;
     return result;
   }, null);
   return (
-    <form onSubmit={keepValues(action)} className="space-y-3">
+    <form method="post" onSubmit={keepValues(action)} className="space-y-3">
       <input type="hidden" name="order_id" value={orderId} />
       <label htmlFor="status" className="sr-only">
         Статус
@@ -69,7 +69,7 @@ export function NoteForm({ orderId }: { orderId: number }) {
     return result;
   }, null);
   return (
-    <form ref={ref} onSubmit={keepValues(action)} className="flex flex-col gap-2 sm:flex-row">
+    <form ref={ref} method="post" onSubmit={keepValues(action)} className="flex flex-col gap-2 sm:flex-row">
       <input type="hidden" name="order_id" value={orderId} />
       <label htmlFor="note" className="sr-only">
         Бележка

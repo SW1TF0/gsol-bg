@@ -24,7 +24,7 @@ function SettingsForm({
 }) {
   const [state, action, pending] = useActionState<SettingsFormState, FormData>(save, null);
   return (
-    <form onSubmit={keepValues(action)}>
+    <form method="post" onSubmit={keepValues(action)}>
       <Panel title={title}>
         <div className="space-y-4">{children(state?.field)}</div>
         {footer}

@@ -1,8 +1,8 @@
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, Gauge, Phone, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { BadgeCheck, Gauge, Phone, ShieldCheck, SlidersHorizontal, Truck, Wallet } from "lucide-react";
 import { BuyBox } from "@/components/cart/AddToCart";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { Gallery } from "@/components/product/Gallery";
@@ -10,6 +10,7 @@ import { PriceBlock, ProductBadge, ProductGrid } from "@/components/product/Prod
 import { Container, Eyebrow } from "@/components/ui";
 import { getAllSlugs, getCategory, getProduct, getRelated, tierInfo } from "@/lib/catalog";
 import { getCompany } from "@/lib/settings-data";
+import { partKinds, partLabels } from "@/lib/builder/parts";
 
 export async function generateStaticParams() {
   return (await getAllSlugs()).map((slug) => ({ slug }));
@@ -83,14 +84,38 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
             )}
 
             {product.components && (
-              <dl className="mt-6 grid grid-cols-[56px_1fr] gap-x-3 gap-y-2 bg-surface-2 p-5 text-[14px]">
-                <dt className="font-display text-accent-ink">CPU</dt>
-                <dd className="text-white">{product.components.cpu}</dd>
-                <dt className="font-display text-accent-ink">GPU</dt>
-                <dd className="text-white">{product.components.gpu}</dd>
-                <dt className="font-display text-accent-ink">Кутия</dt>
-                <dd className="text-white">{product.components.case}</dd>
-              </dl>
+              <div className="mt-6 bg-surface-2 p-5 text-[14px]">
+                {product.components.motherboard ? (
+                  // Машина от билдъра: всички части + промяна в конфигуратора
+                  <>
+                    <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2">
+                      {partKinds.map((k) =>
+                        product.components?.[k] ? (
+                          <Fragment key={k}>
+                            <dt className="text-dim">{partLabels[k]}</dt>
+                            <dd className="text-white">{product.components[k]}</dd>
+                          </Fragment>
+                        ) : null,
+                      )}
+                    </dl>
+                    <Link
+                      href={`/konfigurator?ot=${encodeURIComponent(product.slug)}`}
+                      className="mt-4 inline-flex items-center gap-2 text-[13px] text-accent-ink hover:underline"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" /> Променете конфигурацията
+                    </Link>
+                  </>
+                ) : (
+                  <dl className="grid grid-cols-[56px_1fr] gap-x-3 gap-y-2">
+                    <dt className="font-display text-accent-ink">CPU</dt>
+                    <dd className="text-white">{product.components.cpu}</dd>
+                    <dt className="font-display text-accent-ink">GPU</dt>
+                    <dd className="text-white">{product.components.gpu}</dd>
+                    <dt className="font-display text-accent-ink">Кутия</dt>
+                    <dd className="text-white">{product.components.case}</dd>
+                  </dl>
+                )}
+              </div>
             )}
 
             <div className="mt-8 border-y border-line-soft py-6">

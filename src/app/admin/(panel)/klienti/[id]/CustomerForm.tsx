@@ -14,7 +14,7 @@ export function CustomerForm({ id, note, tags }: { id: string; note: string; tag
     return result;
   }, null);
   return (
-    <form onSubmit={keepValues(action)} className="space-y-4">
+    <form method="post" onSubmit={keepValues(action)} className="space-y-4">
       <input type="hidden" name="id" value={id} />
       <div>
         <label htmlFor="note" className="mb-2 block text-[12px] uppercase tracking-wide text-muted">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Cpu,
   FileText,
   Gauge,
   Inbox,
@@ -24,6 +25,7 @@ const items: { href: string; label: string; icon: typeof Gauge; exact?: boolean;
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
+  { href: "/admin/bildar", label: "Билдър", icon: Cpu, roles: ["admin", "manager"] },
   { href: "/admin/klienti", label: "Клиенти", icon: Users, roles: ["admin", "manager", "sales"] },
   { href: "/admin/promo-kodove", label: "Промо кодове", icon: TicketPercent },
   { href: "/admin/tomboli", label: "Томболи", icon: Ticket, roles: ["admin", "manager"] },

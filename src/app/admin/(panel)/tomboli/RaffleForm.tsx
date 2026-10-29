@@ -105,7 +105,7 @@ export function RaffleForm({
   const statuses = defaults.count_statuses ?? ["confirmed", "processing", "shipped", "delivered"];
 
   return (
-    <form onSubmit={keepValues(action)} className="space-y-6">
+    <form method="post" onSubmit={keepValues(action)} className="space-y-6">
       {editing && <input type="hidden" name="id" value={defaults.id} />}
 
       <Panel title="Кампания">

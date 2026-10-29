@@ -54,7 +54,7 @@ export function InviteForm() {
   }, null);
 
   return (
-    <form id="invite-form" onSubmit={keepValues(action)} className="space-y-4">
+    <form id="invite-form" method="post" onSubmit={keepValues(action)} className="space-y-4">
       <div>
         <label htmlFor="invite-email" className="mb-2 block text-[12px] uppercase tracking-wide text-muted">
           Имейл
@@ -104,7 +104,7 @@ export function InviteForm() {
 export function StaffEditForm({ userId, name, role, isSelf }: { userId: string; name: string; role: StaffRole; isSelf: boolean }) {
   const [state, action, pending] = useActionState<StaffFormState, FormData>(updateStaff, null);
   return (
-    <form onSubmit={keepValues(action)} className="flex flex-wrap items-end gap-2">
+    <form method="post" onSubmit={keepValues(action)} className="flex flex-wrap items-end gap-2">
       <input type="hidden" name="user_id" value={userId} />
       <div className="min-w-[160px] flex-1">
         <label htmlFor={`name-${userId}`} className="sr-only">
@@ -136,6 +136,7 @@ export function AccessButton({ userId, disabled, label }: { userId: string; disa
   const [state, action, pending] = useActionState<StaffFormState, FormData>(setStaffAccess, null);
   return (
     <form
+      method="post"
       onSubmit={(e) => {
         if (!disabled && !window.confirm(`Да спра ли достъпа на ${label}? Ще бъде изведен при следващото действие.`)) {
           e.preventDefault();
@@ -166,7 +167,7 @@ export function AccessButton({ userId, disabled, label }: { userId: string; disa
 export function ApproveForm({ email }: { email: string }) {
   const [state, action, pending] = useActionState<InviteState, FormData>(inviteStaff, null);
   return (
-    <form onSubmit={keepValues(action)} className="flex flex-wrap items-center gap-2">
+    <form method="post" onSubmit={keepValues(action)} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="email" value={email} />
       <label htmlFor={`approve-${email}`} className="sr-only">
         Роля

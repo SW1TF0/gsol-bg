@@ -14,7 +14,7 @@ const messages = {
 export function TestEmailForm({ vid, enabled }: { vid: string; enabled: boolean }) {
   const [state, action, pending] = useActionState<TestEmailState, FormData>(sendTestEmail, null);
   return (
-    <form onSubmit={keepValues(action)} className="flex flex-wrap items-center gap-3">
+    <form method="post" onSubmit={keepValues(action)} className="flex flex-wrap items-center gap-3">
       <input type="hidden" name="vid" value={vid} />
       <button type="submit" className="btn btn-sm btn-ghost" disabled={pending || !enabled}>
         <Send className="h-4 w-4" /> {pending ? "Изпращане…" : "Изпрати тест до мен"}

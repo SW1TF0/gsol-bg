@@ -27,7 +27,8 @@ export type Product = {
   summary: string;
   isPromo: boolean;
   tier?: Tier;
-  components?: { cpu: string; gpu: string; case: string } | null;
+  /** Части на машината GSOL; машините от билдъра имат всички осем (motherboard, ram, …) */
+  components?: { cpu: string; gpu: string; case: string; [kind: string]: string } | null;
 };
 
 export type Category = {

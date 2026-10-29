@@ -32,7 +32,7 @@ export function LoginForm({ invitedEmail }: { invitedEmail?: string }) {
           ))}
         </div>
 
-        <form onSubmit={keepValues(mode === "in" ? inAction : upAction)} className="space-y-4">
+        <form method="post" onSubmit={keepValues(mode === "in" ? inAction : upAction)} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
               Имейл

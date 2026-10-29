@@ -754,6 +754,70 @@ export type Database = {
         };
         Relationships: [];
       };
+      components: {
+        Row: {
+          id: number;
+          kind: Database["public"]["Enums"]["part_kind"];
+          name: string;
+          brand: string | null;
+          part_number: string | null;
+          ean: string | null;
+          specs: Json;
+          cost_cents: number;
+          supplier: string | null;
+          lead_days: number;
+          in_stock: boolean;
+          image_url: string | null;
+          is_sample: boolean;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: never;
+          kind: Database["public"]["Enums"]["part_kind"];
+          name: string;
+          brand?: string | null;
+          part_number?: string | null;
+          ean?: string | null;
+          specs?: Json;
+          cost_cents: number;
+          supplier?: string | null;
+          lead_days?: number;
+          in_stock?: boolean;
+          image_url?: string | null;
+          is_sample?: boolean;
+          is_active?: boolean;
+        };
+        Update: {
+          kind?: Database["public"]["Enums"]["part_kind"];
+          name?: string;
+          brand?: string | null;
+          part_number?: string | null;
+          ean?: string | null;
+          specs?: Json;
+          cost_cents?: number;
+          supplier?: string | null;
+          lead_days?: number;
+          in_stock?: boolean;
+          image_url?: string | null;
+          is_sample?: boolean;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
+      machine_parts: {
+        Row: { product_id: number; kind: Database["public"]["Enums"]["part_kind"]; component_id: number };
+        Insert: { product_id: number; kind: Database["public"]["Enums"]["part_kind"]; component_id: number };
+        Update: { product_id?: number; kind?: Database["public"]["Enums"]["part_kind"]; component_id?: number };
+        Relationships: [];
+      };
+      builder_runs: {
+        Row: { id: number; run_by: string | null; mode: string; ok: boolean; summary: Json; created_at: string };
+        Insert: { id?: never; run_by?: string | null; mode: string; ok: boolean; summary?: Json; created_at?: string };
+        Update: { run_by?: string | null; mode?: string; ok?: boolean; summary?: Json };
+        Relationships: [];
+      };
       staff_invites: {
         Row: {
           id: number;
@@ -835,6 +899,19 @@ export type Database = {
           is_self: boolean;
         }[];
       };
+      price_builds: { Args: { p_builds: Json }; Returns: Json };
+      configurator_parts: {
+        Args: never;
+        Returns: {
+          id: number;
+          kind: Database["public"]["Enums"]["part_kind"];
+          name: string;
+          brand: string | null;
+          specs: Json;
+          image_url: string | null;
+        }[];
+      };
+      machine_build: { Args: { p_slug: string }; Returns: Json };
       staff_pending_users: {
         Args: never;
         Returns: { user_id: string; email: string; created_at: string; confirmed: boolean }[];
@@ -866,6 +943,7 @@ export type Database = {
       raffle_status: "draft" | "active" | "drawn" | "cancelled";
       order_status: "new" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
       staff_role: "admin" | "manager" | "sales" | "technician" | "editor";
+      part_kind: "cpu" | "motherboard" | "ram" | "gpu" | "storage" | "psu" | "case" | "cooler";
     };
     CompositeTypes: { [_ in never]: never };
   };
@@ -885,6 +963,7 @@ export const Constants = {
       raffle_status: ["draft", "active", "drawn", "cancelled"],
       order_status: ["new", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"],
       staff_role: ["admin", "manager", "sales", "technician", "editor"],
+      part_kind: ["cpu", "motherboard", "ram", "gpu", "storage", "psu", "case", "cooler"],
     },
   },
 } as const;

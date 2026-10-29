@@ -74,6 +74,9 @@ export function ConfigTabs({ data }: { data: Record<Tier, TierData> }) {
               <Link href={`/katalog/kompyutri?sub=gsol-${active}`} className="btn btn-primary">
                 Виж всички
               </Link>
+              <Link href="/konfigurator" className="text-[14px] text-accent-ink underline-offset-4 hover:underline">
+                или сглоби си сам →
+              </Link>
             </div>
           </div>
           {hero?.images[0] && (

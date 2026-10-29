@@ -101,7 +101,7 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-10 lg:grid-cols-[1fr_380px]">
+    <form method="post" onSubmit={onSubmit} noValidate className="grid gap-10 lg:grid-cols-[1fr_380px]">
       <div className="space-y-10">
         <Fieldset title="Данни за контакт" icon={Package}>
           <div className="grid gap-4 sm:grid-cols-2">

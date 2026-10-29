@@ -13,7 +13,7 @@ export function PrizeForm({ raffleId }: { raffleId: number }) {
     return result;
   }, null);
   return (
-    <form ref={ref} onSubmit={keepValues(action)} className="mt-5 space-y-3 border-t border-line pt-5">
+    <form ref={ref} method="post" onSubmit={keepValues(action)} className="mt-5 space-y-3 border-t border-line pt-5">
       <input type="hidden" name="raffle_id" value={raffleId} />
       <div className="grid grid-cols-[1fr_80px] gap-2">
         <label className="sr-only" htmlFor="prize-title">

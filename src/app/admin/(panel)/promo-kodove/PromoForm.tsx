@@ -63,7 +63,7 @@ export function PromoForm({
   const [state, action, pending] = useActionState<PromoFormState, FormData>(submit, null);
 
   return (
-    <form onSubmit={keepValues(action)} className="space-y-6">
+    <form method="post" onSubmit={keepValues(action)} className="space-y-6">
       {editing && <input type="hidden" name="id" value={defaults.id} />}
       <input type="hidden" name="mode" value={mode} />
 

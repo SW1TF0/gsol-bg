@@ -12,7 +12,7 @@ export function PageEditor({ page }: Props) {
   const [state, action, pending] = useActionState<PageFormState, FormData>(updatePage, null);
 
   return (
-    <form onSubmit={keepValues(action)} className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <form method="post" onSubmit={keepValues(action)} className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
       <input type="hidden" name="slug" value={page.slug} />
       <div className="space-y-6">
         <Panel>
