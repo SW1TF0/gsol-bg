@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CatalogSkeleton, CatalogView } from "@/components/catalog/CatalogView";
+import { BusinessStrip } from "@/components/business/BusinessStrip";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { getCategories, getCategory } from "@/lib/catalog";
 
@@ -43,6 +44,7 @@ async function CategoryContent({ params, searchParams }: PageProps<"/katalog/[ca
     <>
       <PageHeader title={cat.name} tagline={cat.tagline} crumbs={[{ label: cat.name }]} />
       <div className="mx-auto max-w-[1200px] px-4 pb-24">
+        <BusinessStrip className="mb-8" />
         <CatalogView basePath={`/katalog/${cat.slug}`} params={query} fixed={{ category: cat.slug }} />
       </div>
     </>

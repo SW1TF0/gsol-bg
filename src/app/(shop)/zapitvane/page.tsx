@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Clock, Phone } from "lucide-react";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { InquiryForm } from "@/components/InquiryForm";
+import { getProduct } from "@/lib/catalog";
 import { publicTopics, type InquiryTopic } from "@/lib/inquiries";
 import { getCompany } from "@/lib/settings-data";
 
@@ -67,7 +68,14 @@ const temaToTopic: Record<string, InquiryTopic> = {
 };
 
 async function FormWithTopic({ searchParams }: Pick<PageProps<"/zapitvane">, "searchParams">) {
-  const { tema } = await searchParams;
+  const { tema, produkt } = await searchParams;
   const topic = typeof tema === "string" ? temaToTopic[tema] : undefined;
-  return <InquiryForm defaultTopic={topic && publicTopics.includes(topic) ? topic : undefined} />;
+  // „Фирмена оферта за този продукт“ идва с ?produkt=… — попълваме продукта, клиентът дописва бройката
+  const product = typeof produkt === "string" ? await getProduct(produkt) : null;
+  return (
+    <InquiryForm
+      defaultTopic={topic && publicTopics.includes(topic) ? topic : undefined}
+      defaultMessage={product ? `Оферта за фирма: ${product.name} (код ${product.sku})\nБрой: \nФактура на: ` : undefined}
+    />
+  );
 }

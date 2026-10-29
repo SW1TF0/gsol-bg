@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Building2, Landmark, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
 import { econtAddressBook, placeOrder } from "@/app/(shop)/actions";
+import { useBusinessMode } from "@/components/BusinessToggle";
 import { formatPrice } from "@/lib/format";
 import type { EcontDirectory } from "@/lib/econt-shared";
 import { COD_LIMIT_CENTS, type CheckoutInput, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
@@ -37,6 +38,16 @@ export function CheckoutForm({
   const [quarter, setQuarter] = useState<string | null>(null);
   const [chosenPayment, setPayment] = useState<PaymentMethod>("cod");
   const [invoiceType, setInvoiceType] = useState<"none" | "person" | "company">("none");
+
+  // „За бизнеса“: фактура на фирма и банков превод по подразбиране — докато клиентът не избере сам
+  const business = useBusinessMode();
+  const [seenBusiness, setSeenBusiness] = useState(false);
+  const [touched, setTouched] = useState({ invoice: false, payment: false });
+  if (business !== seenBusiness) {
+    setSeenBusiness(business);
+    if (!touched.invoice) setInvoiceType(business ? "company" : "none");
+    if (!touched.payment) setPayment(business ? "bank" : "cod");
+  }
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
@@ -173,7 +184,15 @@ export function CheckoutForm({
   return (
     <form method="post" onSubmit={onSubmit} noValidate className="grid gap-10 lg:grid-cols-[1fr_380px]">
       <div className="space-y-10">
-        <Fieldset title="Данни за контакт" icon={Package}>
+        <Fieldset
+          title={
+            <>
+              <span className="business:hidden">Данни за контакт</span>
+              <span className="hidden business:inline">Лице за контакт</span>
+            </>
+          }
+          icon={Package}
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <Field name="first_name" label="Име" autoComplete="given-name" errors={errors} required />
             <Field name="last_name" label="Фамилия" autoComplete="family-name" errors={errors} required />
@@ -330,7 +349,10 @@ export function CheckoutForm({
             <Choice
               name="payment_method"
               checked={payment === "cod"}
-              onChange={() => setPayment("cod")}
+              onChange={() => {
+                setPayment("cod");
+                setTouched((t) => ({ ...t, payment: true }));
+              }}
               icon={Wallet}
               title="Наложен платеж"
               hint={codAllowed ? "Плащате при получаване" : "Не е възможен над 5 112,92 €"}
@@ -339,7 +361,10 @@ export function CheckoutForm({
             <Choice
               name="payment_method"
               checked={payment === "bank"}
-              onChange={() => setPayment("bank")}
+              onChange={() => {
+                setPayment("bank");
+                setTouched((t) => ({ ...t, payment: true }));
+              }}
               icon={Landmark}
               title="Банков превод"
               hint="Данните идват с потвърждението"
@@ -363,7 +388,10 @@ export function CheckoutForm({
             <select
               id="f-invoice-type"
               value={invoiceType}
-              onChange={(e) => setInvoiceType(e.target.value as typeof invoiceType)}
+              onChange={(e) => {
+                setInvoiceType(e.target.value as typeof invoiceType);
+                setTouched((t) => ({ ...t, invoice: true }));
+              }}
               className="input"
             >
               <option value="none">Не, не ми е необходима</option>
@@ -514,7 +542,7 @@ function ShippingNote({ quote, pending }: { quote: ReturnType<typeof useQuote>["
   );
 }
 
-function Fieldset({ title, icon: Icon, children }: { title: string; icon: typeof Package; children: React.ReactNode }) {
+function Fieldset({ title, icon: Icon, children }: { title: React.ReactNode; icon: typeof Package; children: React.ReactNode }) {
   return (
     <fieldset>
       <legend className="mb-5 flex items-center gap-3 font-display text-[18px] uppercase tracking-wide text-white">

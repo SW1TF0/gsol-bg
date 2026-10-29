@@ -2,13 +2,27 @@ import { Fragment, Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, Gauge, Phone, ShieldCheck, SlidersHorizontal, Truck, Wallet } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Building2,
+  FileText,
+  Gauge,
+  Landmark,
+  Phone,
+  Receipt,
+  ShieldCheck,
+  SlidersHorizontal,
+  Truck,
+  Wallet,
+} from "lucide-react";
 import { BuyBox } from "@/components/cart/AddToCart";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { Gallery } from "@/components/product/Gallery";
 import { PriceBlock, ProductBadge, ProductGrid } from "@/components/product/ProductCard";
 import { Container, Eyebrow } from "@/components/ui";
 import { getAllSlugs, getCategory, getProduct, getRelated, tierInfo } from "@/lib/catalog";
+import { formatPrice } from "@/lib/format";
 import { getCompany } from "@/lib/settings-data";
 import { partKinds, partLabels } from "@/lib/builder/parts";
 
@@ -120,7 +134,12 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
 
             <div className="mt-8 border-y border-line-soft py-6">
               <PriceBlock product={product} size="lg" />
-              <p className="mt-2 text-[13px] text-muted">Възможност за индивидуална фирмена оферта</p>
+              <p className="mt-2 text-[13px] text-muted business:hidden">Възможност за индивидуална фирмена оферта</p>
+              {/* За бизнеса: цената остава с ДДС, но фирмите виждат и основата */}
+              <p className="mt-2 hidden text-[13px] text-muted business:block">
+                Данъчна основа <span className="text-white">{formatPrice(Math.round(product.price / 1.2))}</span> · ДДС 20%{" "}
+                <span className="text-white">{formatPrice(product.price - Math.round(product.price / 1.2))}</span>
+              </p>
             </div>
 
             <ul className="mt-6 space-y-2.5 text-[14px]">
@@ -153,6 +172,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
                   image: product.images[0],
                 }}
               />
+              <BusinessBox slug={product.slug} />
               <p className="mt-3 text-[13px] text-dim">
                 Без регистрация · Не дължите нищо преди потвърждението ·{" "}
                 <a href={company.phoneHref} className="text-muted underline-offset-4 hover:text-white hover:underline">
@@ -238,5 +258,36 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
         )}
       </Container>
     </>
+  );
+}
+
+/** Само в режим „за бизнеса“: какво получава фирмата и оферта за този продукт */
+function BusinessBox({ slug }: { slug: string }) {
+  const points = [
+    { icon: Receipt, text: "Фактура на фирма — избирате „Да — на фирма“ при поръчката" },
+    { icon: Landmark, text: "Банков превод — данните идват с потвърждението" },
+    { icon: FileText, text: "Оферта за няколко броя или с други части" },
+  ];
+  return (
+    <div className="mt-5 hidden cut-frame cut-sm business:block [--frame:var(--color-accent)]">
+      <div className="cut-inner bg-gradient-to-br from-surface-2 from-50% to-accent/10 p-5">
+        <div className="flex items-center gap-2 font-display text-[13px] uppercase tracking-wide text-white">
+          <Building2 className="h-4 w-4 text-accent-ink" /> За фирми
+        </div>
+        <ul className="mt-3 space-y-2 text-[14px] text-muted">
+          {points.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-start gap-2.5">
+              <Icon className="mt-0.5 h-4 w-4 flex-none text-dim" strokeWidth={1.75} /> {text}
+            </li>
+          ))}
+        </ul>
+        <Link
+          href={`/zapitvane?tema=kompyutar&produkt=${encodeURIComponent(slug)}`}
+          className="btn btn-sm btn-ghost mt-4"
+        >
+          Фирмена оферта за този продукт <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
   );
 }

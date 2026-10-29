@@ -260,7 +260,7 @@ function BusinessPaths() {
       icon: Headphones,
       title: "IT поддръжка",
       text: "Помощ за служителите, работни станции, мрежа и сървъри — по заявка или по абонамент.",
-      href: "/zapitvane?tema=it",
+      href: "/za-biznesa#uslugi",
     },
     {
       icon: Building2,
@@ -272,7 +272,7 @@ function BusinessPaths() {
       icon: FileText,
       title: "Фирмена оферта",
       text: "Кажете какво ви трябва — пращаме оферта с цени и срок. Фактура на фирма за всяка поръчка.",
-      href: "/zapitvane?tema=nov-kompyutar",
+      href: "/za-biznesa#oferta",
     },
     {
       icon: Cctv,

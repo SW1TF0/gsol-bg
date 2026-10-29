@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BusinessStrip } from "@/components/business/BusinessStrip";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { CartView } from "@/components/cart/CartView";
 import { CheckoutSteps } from "@/components/cart/CheckoutSteps";
@@ -16,6 +17,7 @@ export default async function CartPage() {
       <PageHeader title="Вашата" accent="количка" crumbs={[{ label: "Количка" }]} />
       <div className="mx-auto max-w-[1200px] px-4 pb-24">
         <CheckoutSteps current={1} />
+        <BusinessStrip className="mb-8" />
         <CartView phone={company.phone} phoneHref={company.phoneHref} />
       </div>
     </>

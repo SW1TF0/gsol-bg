@@ -30,11 +30,14 @@ export function InquiryForm({
   defaultTopic,
   messageLabel = "Опишете накратко",
   submitLabel = "Изпрати запитване",
+  defaultMessage,
 }: {
   topic?: InquiryTopic;
   defaultTopic?: InquiryTopic;
   messageLabel?: string;
   submitLabel?: string;
+  /** Начален текст — напр. продуктът, за който се иска оферта */
+  defaultMessage?: string;
 }) {
   const [topic, setTopic] = useState<InquiryTopic>(fixedTopic ?? defaultTopic ?? "servis");
   const [state, action, pending] = useActionState<InquiryState, FormData>(submitInquiry, null);
@@ -120,7 +123,15 @@ export function InquiryForm({
           <label htmlFor="inq-message" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
             {messageLabel} <span className="text-accent-ink">*</span>
           </label>
-          <textarea id="inq-message" name="message" rows={5} maxLength={3000} required className="input !h-auto py-3" />
+          <textarea
+            id="inq-message"
+            name="message"
+            rows={5}
+            maxLength={3000}
+            required
+            defaultValue={defaultMessage}
+            className="input !h-auto py-3"
+          />
           {fieldError("message")}
         </div>
 
