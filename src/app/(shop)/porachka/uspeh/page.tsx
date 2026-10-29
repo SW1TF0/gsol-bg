@@ -2,14 +2,17 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { CheckCircle2, Phone } from "lucide-react";
 import { ButtonLink, Container } from "@/components/ui";
-import { company } from "@/lib/site";
+import { formatPrice } from "@/lib/format";
+import { formatIban } from "@/lib/settings";
+import { getSettings } from "@/lib/settings-data";
 
 export const metadata: Metadata = {
   title: "Поръчката е приета",
   robots: { index: false },
 };
 
-export default function OrderSuccessPage(props: PageProps<"/porachka/uspeh">) {
+export default async function OrderSuccessPage(props: PageProps<"/porachka/uspeh">) {
+  const { company } = await getSettings();
   return (
     <Container className="py-24">
       <div className="cut-frame cut-lg mx-auto max-w-2xl [--frame:var(--color-ok)]">
@@ -47,7 +50,9 @@ export default function OrderSuccessPage(props: PageProps<"/porachka/uspeh">) {
 async function Details({ searchParams }: Pick<PageProps<"/porachka/uspeh">, "searchParams">) {
   const params = await searchParams;
   const number = typeof params.n === "string" ? params.n.slice(0, 20) : null;
-  const bank = params.p === "bank";
+  const byBank = params.p === "bank";
+  const total = typeof params.t === "string" && /^\d{1,9}$/.test(params.t) ? Number(params.t) : null;
+  const { bank } = await getSettings();
   return (
     <>
       {number && (
@@ -55,7 +60,32 @@ async function Details({ searchParams }: Pick<PageProps<"/porachka/uspeh">, "sea
           Номер на поръчката: <span className="font-display text-[20px] text-white">{number}</span>
         </p>
       )}
-      {bank && (
+      {byBank && bank.iban && (
+        <div className="mx-auto mt-6 max-w-md bg-bg-deep p-5 text-left text-[14px]">
+          <h2 className="font-display text-[14px] uppercase tracking-wide text-white">Данни за банков превод</h2>
+          <dl className="mt-3 space-y-2">
+            {[
+              ["Получател", bank.holder],
+              ["IBAN", formatIban(bank.iban)],
+              ["BIC", bank.bic],
+              ["Банка", bank.bankName],
+              ["Сума", total ? formatPrice(total) : ""],
+              ["Основание", number ? `Поръчка ${number}` : ""],
+            ]
+              .filter(([, value]) => value)
+              .map(([label, value]) => (
+                <div key={label} className="flex flex-wrap justify-between gap-x-4">
+                  <dt className="text-dim">{label}</dt>
+                  <dd className={`select-all text-white ${label === "IBAN" ? "font-mono" : ""}`}>{value}</dd>
+                </div>
+              ))}
+          </dl>
+          <p className="mt-3 text-[13px] text-muted">
+            Изпращаме след постъпване на плащането. Данните идват и с потвърждението на поръчката.
+          </p>
+        </div>
+      )}
+      {byBank && !bank.iban && (
         <p className="mx-auto mt-4 max-w-md bg-bg-deep p-4 text-[14px] text-muted">
           Избрахте банков превод. Ще получите данните за плащане заедно с потвърждението. Изпращаме след
           постъпване на сумата.

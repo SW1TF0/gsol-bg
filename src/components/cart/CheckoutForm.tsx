@@ -8,13 +8,14 @@ import { Building2, Landmark, MapPin, Package, ShieldCheck, Truck, Wallet } from
 import { placeOrder } from "@/app/(shop)/actions";
 import { formatPrice } from "@/lib/format";
 import type { CheckoutInput, PaymentMethod, ShippingMethod } from "@/lib/orders";
+import type { Shipping } from "@/lib/settings";
 import { useCart } from "./CartProvider";
 import { OrderSummary } from "./OrderSummary";
 import { useQuote } from "./useQuote";
 
 type Errors = Partial<Record<string, string>>;
 
-export function CheckoutForm() {
+export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
   const router = useRouter();
   const { lines, ready, promoCode, clear, setPromoCode } = useCart();
   const [shipping, setShipping] = useState<ShippingMethod>("econt_office");
@@ -24,6 +25,12 @@ export function CheckoutForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
   const { quote, pending, error } = useQuote(shipping);
+  // Същото правило като в базата: прагът е за продуктите след отстъпка; кодът „безплатна доставка“ важи за двата начина
+  const itemsCents = quote ? quote.subtotal_cents - quote.discount_cents : 0;
+  const freeShipping =
+    quote !== null &&
+    ((shippingPrices.freeFromCents > 0 && itemsCents >= shippingPrices.freeFromCents) ||
+      (quote.promo?.ok === true && quote.promo.type === "free_shipping"));
 
   if (!ready) return <div className="h-96 animate-pulse bg-surface-2" aria-busy="true" />;
 
@@ -78,7 +85,7 @@ export function CheckoutForm() {
       if (result.ok) {
         clear();
         setPromoCode(null);
-        router.push(`/porachka/uspeh?n=${encodeURIComponent(result.number)}&p=${payment}`);
+        router.push(`/porachka/uspeh?n=${encodeURIComponent(result.number)}&p=${payment}&t=${result.total_cents}`);
         return;
       }
       if (result.field && result.field !== "items") {
@@ -111,6 +118,7 @@ export function CheckoutForm() {
               icon={Building2}
               title="До офис на Еконт"
               hint="Взимате пратката от удобен офис"
+              price={freeShipping ? 0 : shippingPrices.econtOfficeCents}
             />
             <Choice
               name="shipping_method"
@@ -119,8 +127,20 @@ export function CheckoutForm() {
               icon={MapPin}
               title="До адрес"
               hint="Куриерът идва до вас"
+              price={freeShipping ? 0 : shippingPrices.econtAddressCents}
             />
           </div>
+          {freeShipping ? (
+            <p className="mt-3 text-[13px] text-ok">Доставката е безплатна за тази поръчка.</p>
+          ) : (
+            shippingPrices.freeFromCents > 0 && (
+              <p className="mt-3 text-[13px] text-muted">
+                Безплатна доставка за поръчки над{" "}
+                <span className="text-white">{formatPrice(shippingPrices.freeFromCents)}</span>
+                {quote && ` — добавете още ${formatPrice(shippingPrices.freeFromCents - itemsCents)}`}.
+              </p>
+            )
+          )}
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field name="shipping_city" label="Населено място" autoComplete="address-level2" errors={errors} required />
             {shipping === "econt_office" ? (
@@ -306,6 +326,7 @@ function Choice({
   icon: Icon,
   title,
   hint,
+  price,
 }: {
   name: string;
   checked: boolean;
@@ -313,6 +334,7 @@ function Choice({
   icon: typeof Package;
   title: string;
   hint: string;
+  price?: number;
 }) {
   return (
     <label
@@ -326,6 +348,11 @@ function Choice({
         <span className="block text-[15px] font-medium text-white">{title}</span>
         <span className="block text-[13px] text-muted">{hint}</span>
       </span>
+      {price !== undefined && (
+        <span className="ml-auto whitespace-nowrap pl-2 text-[14px] text-white">
+          {price === 0 ? <span className="text-ok">безплатна</span> : formatPrice(price)}
+        </span>
+      )}
     </label>
   );
 }

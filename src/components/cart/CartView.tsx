@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { company } from "@/lib/site";
 import { useCart } from "./CartProvider";
 import { OrderSummary } from "./OrderSummary";
 import { useQuote } from "./useQuote";
 
-export function CartView() {
+export function CartView({ phone, phoneHref }: { phone: string; phoneHref: string }) {
   const { lines, ready, setQty, remove } = useCart();
   const { quote, pending, error } = useQuote();
 
@@ -94,8 +93,8 @@ export function CartView() {
           </Link>
           <p className="text-[12px] text-dim">
             Без регистрация · Не дължите нищо преди потвърждение · Въпроси на{" "}
-            <a href={company.phoneHref} className="text-muted hover:text-white">
-              {company.phone}
+            <a href={phoneHref} className="text-muted hover:text-white">
+              {phone}
             </a>
           </p>
         </OrderSummary>

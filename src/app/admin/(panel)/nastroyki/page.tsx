@@ -1,0 +1,34 @@
+import { AdminHeader, formatDate } from "@/components/admin/ui";
+import { requireStaff } from "@/lib/admin/auth";
+import { parseSettings, settingKeys } from "@/lib/settings";
+import { BankForm, CompanyForm, ShippingForm } from "./forms";
+
+export const metadata = { title: "Настройки" };
+
+export default async function SettingsPage() {
+  const { db } = await requireStaff(["admin"]);
+  const { data } = await db.from("settings").select("key, value, updated_at").in("key", [...settingKeys]);
+  const settings = parseSettings(data ?? []);
+  const lastSaved = (data ?? []).map((r) => r.updated_at).sort().at(-1);
+
+  return (
+    <>
+      <AdminHeader
+        title="Настройки"
+        subtitle={`Фирмени данни, доставка и банкова сметка · последна промяна ${formatDate(lastSaved)}`}
+      />
+      {!settings.bank.iban && (
+        <p className="mb-6 bg-accent/10 px-4 py-3 text-[14px] text-text ring-1 ring-accent/30">
+          Няма въведен IBAN — клиентите, избрали банков превод, ще чакат данните от вас след потвърждението.
+        </p>
+      )}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <CompanyForm company={settings.company} />
+        <div className="space-y-6">
+          <ShippingForm shipping={settings.shipping} />
+          <BankForm bank={settings.bank} />
+        </div>
+      </div>
+    </>
+  );
+}

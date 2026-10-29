@@ -13,12 +13,10 @@ const items = [
   { href: "/admin/tomboli", label: "Томболи", icon: Ticket },
   { href: "/admin/zapitvaniya", label: "Запитвания", icon: Inbox },
   { href: "/admin/stranitsi", label: "Страници", icon: FileText },
+  { href: "/admin/nastroyki", label: "Настройки", icon: Settings },
 ];
 
-const soon = [
-  { label: "Клиенти", icon: Users },
-  { label: "Настройки", icon: Settings },
-];
+const soon = [{ label: "Клиенти", icon: Users }];
 
 export function AdminNav() {
   return <NavList pathname={usePathname()} />;

@@ -1,21 +1,4 @@
-// Фирмени данни и навигация. По-късно ще се редактират от админ панела (Настройки).
-
-export const company = {
-  brand: "GSOL",
-  legalName: "ГлобалНет Сървис Солюшънс ЕООД",
-  eik: "208548488",
-  vat: "BG208548488",
-  phone: "0898 570 500",
-  phoneHref: "tel:+359898570500",
-  email: "contact.globalnetss@gmail.com",
-  address: "Кърджали, ул. „Булаир“ 35",
-  hours: "Пон–Пет 09:00–18:00",
-  socials: [
-    { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61594105307680" },
-    { name: "Instagram", href: "https://www.instagram.com/gsol.bg/" },
-    { name: "TikTok", href: "https://www.tiktok.com/@gsol.bg" },
-  ],
-};
+// Навигация на сайта. Фирмените данни идват от админа (Настройки) — вижте lib/settings-data.ts.
 
 export const mainNav = [
   { label: "Лаптопи", href: "/katalog/laptopi" },

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, Phone, Search, X } from "lucide-react";
-import { company, mainNav } from "@/lib/site";
+import { mainNav } from "@/lib/site";
 
-export function MobileNav() {
+export function MobileNav({ phone, phoneHref }: { phone: string; phoneHref: string }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -53,9 +53,9 @@ export function MobileNav() {
               </li>
             </ul>
           </nav>
-          <a href={company.phoneHref} className="btn btn-primary mt-8 w-full">
+          <a href={phoneHref} className="btn btn-primary mt-8 w-full">
             <Phone className="h-4 w-4" />
-            {company.phone}
+            {phone}
           </a>
         </div>
       )}

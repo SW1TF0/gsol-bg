@@ -4,14 +4,15 @@ import { Clock, Phone } from "lucide-react";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { InquiryForm } from "@/components/InquiryForm";
 import { publicTopics, type InquiryTopic } from "@/lib/inquiries";
-import { company } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
 export const metadata: Metadata = {
   title: "Бързо запитване",
   description: "Кажете ни какво ви трябва — сервиз, нов компютър, IT поддръжка или видеонаблюдение. Отговор от човек.",
 };
 
-export default function InquiryPage(props: PageProps<"/zapitvane">) {
+export default async function InquiryPage(props: PageProps<"/zapitvane">) {
+  const company = await getCompany();
   return (
     <>
       <PageHeader

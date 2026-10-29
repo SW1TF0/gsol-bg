@@ -3,14 +3,15 @@ import { Archive, ListChecks, Network, ShieldAlert, Users } from "lucide-react";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { InquiryForm } from "@/components/InquiryForm";
 import { Eyebrow } from "@/components/ui";
-import { company } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
 export const metadata: Metadata = {
   title: "Безплатен IT преглед за фирми",
   description: "20-минутен разговор, в който уточняваме IT средата, най-важния риск и правилната следваща стъпка.",
 };
 
-export default function ItReviewPage() {
+export default async function ItReviewPage() {
+  const company = await getCompany();
   return (
     <>
       <PageHeader

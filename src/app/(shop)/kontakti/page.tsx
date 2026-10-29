@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import { Building2, Clock, Mail, MapPin, Phone } from "lucide-react";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { InquiryForm } from "@/components/InquiryForm";
-import { company } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
-export const metadata: Metadata = {
-  title: "Контакти",
-  description: `GSOL — ${company.address}. Телефон ${company.phone}, ${company.hours}.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const company = await getCompany();
+  return {
+    title: "Контакти",
+    description: `${company.brand} — ${company.address}. Телефон ${company.phone}, ${company.hours}.`,
+  };
+}
 
-const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address)}`;
-
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const company = await getCompany();
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address)}`;
   const cards = [
     { icon: Phone, title: "Телефон", value: company.phone, href: company.phoneHref, hint: "Най-бързият път при спешен случай" },
     { icon: Mail, title: "Имейл", value: company.email, href: `mailto:${company.email}`, hint: "Пишете, ако имате снимки или файлове" },
@@ -69,10 +72,12 @@ export default function ContactsPage() {
                 <dt className="text-dim">ЕИК</dt>
                 <dd className="text-white">{company.eik}</dd>
               </div>
-              <div>
-                <dt className="text-dim">ДДС №</dt>
-                <dd className="text-white">{company.vat}</dd>
-              </div>
+              {company.vat && (
+                <div>
+                  <dt className="text-dim">ДДС №</dt>
+                  <dd className="text-white">{company.vat}</dd>
+                </div>
+              )}
               <div>
                 <dt className="text-dim">Адрес</dt>
                 <dd className="text-white">{company.address}</dd>

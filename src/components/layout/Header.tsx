@@ -3,9 +3,11 @@ import { Phone, Search, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { CartButton } from "@/components/cart/CartButton";
 import { MobileNav } from "./MobileNav";
-import { company, mainNav } from "@/lib/site";
+import { mainNav } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
-export function Header() {
+export async function Header() {
+  const company = await getCompany();
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-black/90 shadow-[inset_0_2px_0_var(--color-accent)] backdrop-blur-sm">
       <div className="mx-auto flex h-[70px] max-w-[1400px] items-center gap-6 px-4 lg:px-6">
@@ -65,7 +67,7 @@ export function Header() {
             <User className="h-5 w-5" strokeWidth={1.75} />
           </Link>
           <CartButton />
-          <MobileNav />
+          <MobileNav phone={company.phone} phoneHref={company.phoneHref} />
         </div>
       </div>
     </header>

@@ -9,7 +9,7 @@ import { Gallery } from "@/components/product/Gallery";
 import { PriceBlock, ProductBadge, ProductGrid } from "@/components/product/ProductCard";
 import { Container, Eyebrow } from "@/components/ui";
 import { getAllSlugs, getCategory, getProduct, getRelated, tierInfo } from "@/lib/catalog";
-import { company } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
 export async function generateStaticParams() {
   return (await getAllSlugs()).map((slug) => ({ slug }));
@@ -52,7 +52,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
 
   const category = await getCategory(product.category);
   const sub = category?.subcategories.find((s) => s.slug === product.subcategory);
-  const related = await getRelated(product, 4);
+  const [related, company] = await Promise.all([getRelated(product, 4), getCompany()]);
 
   return (
     <>

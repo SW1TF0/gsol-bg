@@ -29,7 +29,7 @@ import {
   type Tier,
 } from "@/lib/catalog";
 import { listRaffles } from "@/lib/raffle-data";
-import { company } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
 export default async function HomePage() {
   const [promos, configs, gaming, budget, counts, raffles] = await Promise.all([
@@ -395,7 +395,8 @@ function Services() {
   );
 }
 
-function CtaBand() {
+async function CtaBand() {
+  const company = await getCompany();
   return (
     <section className="bg-accent py-16 text-center">
       <Container>

@@ -2,9 +2,11 @@ import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
-import { company, footerColumns } from "@/lib/site";
+import { footerColumns } from "@/lib/site";
+import { getCompany } from "@/lib/settings-data";
 
-export function Footer() {
+export async function Footer() {
+  const company = await getCompany();
   return (
     <footer className="mt-auto bg-black">
       <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-16 lg:grid-cols-[1.2fr_3fr]">
@@ -61,7 +63,8 @@ export function Footer() {
       <div className="border-t border-line-soft">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-6 text-[12px] text-dim md:flex-row md:items-center md:justify-between">
           <p>
-            © <CopyrightYear /> {company.legalName} · ЕИК {company.eik} · ДДС № {company.vat}
+            © <CopyrightYear /> {company.legalName} · ЕИК {company.eik}
+            {company.vat && <> · ДДС № {company.vat}</>}
           </p>
           <ul className="flex gap-2">
             {company.socials.map((s) => (
