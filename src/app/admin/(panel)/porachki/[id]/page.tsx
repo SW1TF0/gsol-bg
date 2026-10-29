@@ -146,6 +146,11 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
               <a href={`mailto:${order.email}`} className="flex items-center gap-2 break-all text-muted hover:text-white">
                 <Mail className="h-4 w-4 flex-none text-accent" /> {order.email}
               </a>
+              {order.customer_id && (
+                <Link href={`/admin/klienti/${order.customer_id}`} className="inline-block pt-1 text-[13px] text-accent hover:underline">
+                  Профил на клиента →
+                </Link>
+              )}
             </div>
           </Panel>
 

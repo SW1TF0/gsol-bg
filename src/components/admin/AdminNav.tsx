@@ -9,14 +9,13 @@ const items = [
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
+  { href: "/admin/klienti", label: "Клиенти", icon: Users },
   { href: "/admin/promo-kodove", label: "Промо кодове", icon: TicketPercent },
   { href: "/admin/tomboli", label: "Томболи", icon: Ticket },
   { href: "/admin/zapitvaniya", label: "Запитвания", icon: Inbox },
   { href: "/admin/stranitsi", label: "Страници", icon: FileText },
   { href: "/admin/nastroyki", label: "Настройки", icon: Settings },
 ];
-
-const soon = [{ label: "Клиенти", icon: Users }];
 
 export function AdminNav() {
   return <NavList pathname={usePathname()} />;
@@ -93,13 +92,6 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
           </Link>
         );
       })}
-      <div className="px-4 pb-2 pt-6 text-[11px] uppercase tracking-[1.5px] text-dim">Скоро</div>
-      {soon.map(({ label, icon: Icon }) => (
-        <span key={label} className="flex h-10 items-center gap-3 px-4 text-[14px] text-dim">
-          <Icon className="h-4 w-4" strokeWidth={1.75} />
-          {label}
-        </span>
-      ))}
     </nav>
   );
 }

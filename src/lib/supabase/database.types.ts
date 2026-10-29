@@ -128,7 +128,11 @@ export type Database = {
           id: string;
           last_name: string | null;
           marketing_opt_in: boolean;
+          marketing_opt_in_at: string | null;
+          note: string | null;
           phone: string | null;
+          tags: string[];
+          updated_at: string;
           user_id: string | null;
         };
         Insert: {
@@ -139,7 +143,11 @@ export type Database = {
           id?: string;
           last_name?: string | null;
           marketing_opt_in?: boolean;
+          marketing_opt_in_at?: string | null;
+          note?: string | null;
           phone?: string | null;
+          tags?: string[];
+          updated_at?: string;
           user_id?: string | null;
         };
         Update: {
@@ -150,7 +158,11 @@ export type Database = {
           id?: string;
           last_name?: string | null;
           marketing_opt_in?: boolean;
+          marketing_opt_in_at?: string | null;
+          note?: string | null;
           phone?: string | null;
+          tags?: string[];
+          updated_at?: string;
           user_id?: string | null;
         };
         Relationships: [];
@@ -734,11 +746,33 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: { [_ in never]: never };
+    Views: {
+      customer_stats: {
+        Row: {
+          id: string;
+          email: string;
+          phone: string | null;
+          first_name: string | null;
+          last_name: string | null;
+          company: Json | null;
+          marketing_opt_in: boolean;
+          marketing_opt_in_at: string | null;
+          note: string | null;
+          tags: string[];
+          created_at: string;
+          orders_count: number;
+          spent_cents: number;
+          first_order_at: string | null;
+          last_order_at: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       place_order: { Args: { p_items: Json; p_order: Json }; Returns: Json };
       track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
       order_receipt: { Args: { p_email: string; p_number: string }; Returns: Json };
+      customer_inquiries: { Args: { p_customer: string }; Returns: Database["public"]["Tables"]["inquiries"]["Row"][] };
       log_order_email: { Args: { p_email: string; p_kind: string; p_number: string; p_result: string }; Returns: undefined };
       get_raffle: { Args: { p_slug: string }; Returns: Json };
       raffle_preview: { Args: { p_amount_cents: number; p_items: Json }; Returns: Json };
