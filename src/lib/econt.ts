@@ -22,6 +22,87 @@ export async function getEcontDirectory(): Promise<EcontDirectory> {
   };
 }
 
+// Справочниците на Еконт за улици и квартали и проверката на адрес са публични (без потребител),
+// затова сайтът ги пита направо — работникът е само за цени и товарителници.
+const econtPublicApi = "https://ee.econt.com/services/";
+
+async function econtPublic(path: string, body: unknown, timeoutMs: number) {
+  const res = await fetch(econtPublicApi + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const text = await res.text();
+  let json: unknown = null;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    // HTML при грешка в шлюза
+  }
+  return { status: res.status, json };
+}
+
+/** Съобщенията на Еконт са вложени (innerErrors) — взимаме непразните */
+function econtMessage(body: unknown): string {
+  const out: string[] = [];
+  const walk = (e: unknown) => {
+    if (!e || typeof e !== "object") return;
+    const { message, innerErrors } = e as { message?: string; innerErrors?: unknown[] };
+    const m = (message ?? "").trim().replace(/:$/, "");
+    if (m) out.push(m);
+    for (const i of innerErrors ?? []) walk(i);
+  };
+  walk(body);
+  return out.join(" ");
+}
+
+export type EcontAddressBook = { streets: string[]; quarters: string[] };
+
+/** Улиците и кварталите на населено място. При грешка хвърля — да не се кешира празен списък за дни. */
+export async function getEcontAddressBook(cityId: number): Promise<EcontAddressBook> {
+  "use cache";
+  cacheLife("days");
+  cacheTag("econt");
+  const [streets, quarters] = await Promise.all([
+    econtPublic("Nomenclatures/NomenclaturesService.getStreets.json", { cityID: cityId }, 10000),
+    econtPublic("Nomenclatures/NomenclaturesService.getQuarters.json", { cityID: cityId }, 10000),
+  ]);
+  if (streets.status !== 200 || quarters.status !== 200) throw new Error("Еконт не върна улиците и кварталите.");
+  const names = (list: { name?: string }[] | undefined) =>
+    [...new Set((list ?? []).map((x) => (x.name ?? "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bg"));
+  return {
+    streets: names((streets.json as { streets?: { name?: string }[] }).streets),
+    quarters: names((quarters.json as { quarters?: { name?: string }[] }).quarters),
+  };
+}
+
+export type EcontAddressParts = { street?: string; num?: string; quarter?: string; other?: string };
+
+/**
+ * Пита Еконт дали знае адреса: ok, или съобщението му защо не; null — Еконт не отговори (тогава
+ * поръчката минава, а товарителницата показва грешката, ако има). Нормализирания адрес на Еконт не
+ * ползваме за показване — той смесва английски съкращения („fl.“, „apt.“).
+ */
+export async function checkEcontAddress(
+  city: { name: string; postCode: string },
+  parts: EcontAddressParts,
+): Promise<{ ok: true } | { ok: false; message: string } | null> {
+  try {
+    const { status, json } = await econtPublic(
+      "Nomenclatures/AddressService.validateAddress.json",
+      { address: { city: { country: { code3: "BGR" }, name: city.name, postCode: city.postCode }, ...parts } },
+      6000,
+    );
+    if (status === 200) return { ok: true };
+    // 517 е отговорът на Еконт за невалидни данни; друга грешка е техническа — не спираме поръчката
+    const message = status === 517 || status === 400 ? econtMessage(json) : "";
+    return message ? { ok: false, message } : null;
+  } catch {
+    return null;
+  }
+}
+
 type WorkerBody =
   | { action: "tick" }
   | { action: "price"; items: { product_id: number; qty: number }[]; code: string | null; shipping: Record<string, unknown> };

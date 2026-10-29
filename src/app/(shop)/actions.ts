@@ -3,7 +3,7 @@
 import { after } from "next/server";
 import { publicClient } from "@/lib/supabase/clients";
 import { sendOrderEmails, siteUrl } from "@/lib/email/notify";
-import { econtWorker } from "@/lib/econt";
+import { checkEcontAddress, econtWorker, getEcontAddressBook, type EcontAddressParts } from "@/lib/econt";
 import { promoMessage } from "@/lib/promo";
 import type {
   CheckoutInput,
@@ -71,6 +71,33 @@ async function withExtras(quote: Quote, items: CartItem[]) {
   };
 }
 
+/** Улиците и кварталите на място от списъка на Еконт. null — Еконт не отговори (тогава адресът е свободен текст). */
+export async function econtAddressBook(cityId: number) {
+  if (!Number.isInteger(cityId) || cityId <= 0) return null;
+  try {
+    return await getEcontAddressBook(cityId);
+  } catch {
+    return null;
+  }
+}
+
+/** Частите на адреса без празните; дължините — като в базата */
+function addressParts(raw: CheckoutInput["econt_address"]): EcontAddressParts | null {
+  if (!raw) return null;
+  const limits = { street: 120, num: 20, quarter: 120, other: 200 } as const;
+  const parts: EcontAddressParts = {};
+  for (const key of Object.keys(limits) as (keyof typeof limits)[]) {
+    const value = String(raw[key] ?? "").trim().slice(0, limits[key]);
+    if (value) parts[key] = value;
+  }
+  return Object.keys(parts).length ? parts : null;
+}
+
+/** Адресът на един ред — за писмата и админа */
+function addressLine(p: EcontAddressParts) {
+  return [p.street && p.num ? `${p.street} ${p.num}` : p.street, p.quarter, p.other].filter(Boolean).join(", ");
+}
+
 // Грешките от place_order идват като кодове (raise exception 'INVALID_PHONE' и т.н.)
 const errorMap: Record<string, { error: string; field?: Exclude<PlaceOrderResult, { ok: true }>["field"] }> = {
   INVALID_EMAIL: { error: "Въведете валиден имейл.", field: "email" },
@@ -102,6 +129,26 @@ export async function placeOrder(items: CartItem[], input: CheckoutInput): Promi
   if (input.website) return { ok: false, error: "Поръчката не можа да бъде изпратена." };
   if (!input.terms) return { ok: false, error: "Трябва да приемете Общите условия.", field: "terms" };
 
+  // Адрес по полетата на Еконт: питаме Еконт дали го знае, преди да приемем поръчката —
+  // иначе товарителницата ще се провали по-късно. Ако Еконт не отговори, поръчката минава.
+  const parts = input.shipping_method === "econt_address" ? addressParts(input.econt_address) : null;
+  const shippingAddress = parts ? addressLine(parts) : input.shipping_address;
+  if (parts && input.econt_city_id) {
+    const { data: city } = await publicClient()
+      .from("econt_cities")
+      .select("name, post_code")
+      .eq("id", input.econt_city_id)
+      .maybeSingle();
+    const check = city ? await checkEcontAddress({ name: city.name, postCode: city.post_code }, parts) : null;
+    if (check && !check.ok) {
+      return {
+        ok: false,
+        field: "shipping_address",
+        error: `Еконт не намира този адрес: ${check.message} Проверете го или изберете доставка до офис.`,
+      };
+    }
+  }
+
   const order = {
     email: input.email,
     phone: input.phone,
@@ -111,7 +158,8 @@ export async function placeOrder(items: CartItem[], input: CheckoutInput): Promi
     shipping_city: input.shipping_city,
     econt_city_id: input.econt_city_id ?? null,
     econt_office_code: input.shipping_method === "econt_office" ? (input.econt_office_code ?? null) : null,
-    shipping_address: input.shipping_method === "econt_address" ? input.shipping_address : null,
+    shipping_address: input.shipping_method === "econt_address" ? shippingAddress : null,
+    econt_address: parts,
     econt_office: input.shipping_method === "econt_office" ? input.econt_office : null,
     payment_method: input.payment_method,
     invoice: input.invoice ?? null,

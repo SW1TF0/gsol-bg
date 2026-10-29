@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
-import { searchCities, searchOffices, type EcontCity, type EcontOffice } from "@/lib/econt-shared";
+import { Check, ChevronDown, X } from "lucide-react";
+import { searchCities, searchNames, searchOffices, type EcontCity, type EcontOffice } from "@/lib/econt-shared";
 
-type Option = { key: string; label: string; sub?: string };
+export type Option = { key: string; label: string; sub?: string };
 
 type PickerProps = {
   id: string;
@@ -15,11 +15,27 @@ type PickerProps = {
   onSelect: (key: string) => void;
   error?: string;
   disabled?: boolean;
-  empty: string;
+  /** Текстът, когато няма съвпадения (може да зависи от търсеното) */
+  empty: string | ((query: string) => string);
+  /** По подразбиране задължително (звездичка); незадължителното може да се изчисти */
+  required?: boolean;
+  onClear?: () => void;
 };
 
 /** Падащ списък с търсене: пише се, избира се със стрелки и Enter или с мишката. Свободен текст не се приема. */
-function Picker({ id, label, placeholder, selected, search, onSelect, error, disabled, empty }: PickerProps) {
+export function Picker({
+  id,
+  label,
+  placeholder,
+  selected,
+  search,
+  onSelect,
+  error,
+  disabled,
+  empty,
+  required = true,
+  onClear,
+}: PickerProps) {
   const listId = useId();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -68,7 +84,7 @@ function Picker({ id, label, placeholder, selected, search, onSelect, error, dis
     <div ref={box} className="relative">
       <label htmlFor={id} className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
         {label}
-        <span className="text-accent-ink"> *</span>
+        {required && <span className="text-accent-ink"> *</span>}
       </label>
       <div className="relative">
         <input
@@ -79,7 +95,6 @@ function Picker({ id, label, placeholder, selected, search, onSelect, error, dis
             setActive(0);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
           onKeyDown={onKeyDown}
           placeholder={selected && open ? selected.label : placeholder}
@@ -94,7 +109,18 @@ function Picker({ id, label, placeholder, selected, search, onSelect, error, dis
           aria-describedby={error ? `e-${id}` : undefined}
           className={`input pr-10 ${error ? "!border-danger" : ""}`}
         />
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dim" />
+        {selected && onClear && !open ? (
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label={`Изчисти: ${label}`}
+            className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-dim hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : (
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dim" />
+        )}
       </div>
       {selected?.sub && !open && <p className="mt-1.5 text-[12px] text-dim">{selected.sub}</p>}
       {error && (
@@ -131,7 +157,7 @@ function Picker({ id, label, placeholder, selected, search, onSelect, error, dis
               </li>
             ))
           ) : (
-            <li className="px-3 py-3 text-[13px] text-muted">{empty}</li>
+            <li className="px-3 py-3 text-[13px] text-muted">{typeof empty === "function" ? empty(query) : empty}</li>
           )}
         </ul>
       )}
@@ -208,6 +234,45 @@ export function OfficePicker({
       disabled={!cityId}
       error={error}
       empty="Няма офис с такова име тук."
+    />
+  );
+}
+
+/** Улица или квартал от списъка на Еконт за избраното място (незадължително — едното от двете) */
+export function NamePicker({
+  id,
+  label,
+  placeholder,
+  names,
+  value,
+  onChange,
+  error,
+}: {
+  id: string;
+  label: string;
+  placeholder: string;
+  names: string[];
+  value: string | null;
+  onChange: (name: string | null) => void;
+  error?: string;
+}) {
+  // Улиците са хиляди — без търсене списъкът е безполезен, затова показваме съвпадения едва след първата буква
+  const search = useMemo(
+    () => (q: string) => (q.trim() || names.length <= 30 ? searchNames(names, q).map((n) => ({ key: n, label: n })) : []),
+    [names],
+  );
+  return (
+    <Picker
+      id={id}
+      label={label}
+      placeholder={placeholder}
+      selected={value ? { key: value, label: value } : null}
+      search={search}
+      onSelect={onChange}
+      onClear={() => onChange(null)}
+      required={false}
+      error={error}
+      empty={(q) => (q.trim() ? "Няма такова име в списъка на Еконт." : "Започнете да пишете името.")}
     />
   );
 }

@@ -42,6 +42,34 @@ export function searchOffices(offices: EcontOffice[], cityId: number | null, que
     .sort((a, b) => a.name.localeCompare(b.name, "bg"));
 }
 
+/** „бул. Цар Борис III“ → „цар борис iii“: без вида отпред и без тирета — за търсене по самото име */
+export function streetKey(s: string) {
+  return s
+    .trim()
+    .toLocaleLowerCase("bg")
+    .replace(/^(ул|бул|пл|кв|ж\.\s?к|жк|м-ст|в\.\s?з|пр)(\.\s*|\s+)/, "")
+    .replace(/[-–]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Улици или квартали по търсене: точно име, после начало, после начало на дума, после съвпадение */
+export function searchNames(names: string[], query: string, limit = 50) {
+  const q = streetKey(query);
+  if (!q) return names.slice(0, limit);
+  const scored: { name: string; rank: number }[] = [];
+  for (const name of names) {
+    const key = streetKey(name);
+    const rank =
+      key === q ? 0 : key.startsWith(q) ? 1 : key.split(" ").some((w) => w.startsWith(q)) ? 2 : key.includes(q) ? 3 : -1;
+    if (rank >= 0) scored.push({ name, rank });
+  }
+  return scored
+    .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, "bg"))
+    .slice(0, limit)
+    .map((s) => s.name);
+}
+
 // ---------------------------------------------------------------- настройки и пратки (за админа)
 
 export type EcontSettings = {

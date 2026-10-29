@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Building2, Landmark, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
-import { placeOrder } from "@/app/(shop)/actions";
+import { econtAddressBook, placeOrder } from "@/app/(shop)/actions";
 import { formatPrice } from "@/lib/format";
 import type { EcontDirectory } from "@/lib/econt-shared";
 import { COD_LIMIT_CENTS, type CheckoutInput, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import type { Shipping } from "@/lib/settings";
 import { useCart } from "./CartProvider";
-import { CityPicker, OfficePicker } from "./EcontPicker";
+import { CityPicker, NamePicker, OfficePicker } from "./EcontPicker";
 import { OrderSummary } from "./OrderSummary";
 import { useQuote } from "./useQuote";
 
@@ -33,6 +33,8 @@ export function CheckoutForm({
   const [shipping, setShipping] = useState<ShippingMethod>("econt_office");
   const [cityId, setCityId] = useState<number | null>(null);
   const [officeCode, setOfficeCode] = useState<string | null>(null);
+  const [street, setStreet] = useState<string | null>(null);
+  const [quarter, setQuarter] = useState<string | null>(null);
   const [chosenPayment, setPayment] = useState<PaymentMethod>("cod");
   const [invoiceType, setInvoiceType] = useState<"none" | "person" | "company">("none");
   const [errors, setErrors] = useState<Errors>({});
@@ -47,6 +49,9 @@ export function CheckoutForm({
   const codAllowed = codRefusedFor !== cartKey;
   const payment: PaymentMethod = codAllowed ? chosenPayment : "bank";
   const listed = econt.offices.length > 0;
+  const book = useAddressBook(listed && shipping === "econt_address" ? cityId : null);
+  // Адрес по полетата на Еконт, ако имаме улиците и кварталите на мястото; иначе — един ред свободен текст
+  const structured = book.state === "ready" && book.streets.length + book.quarters.length > 0;
   const { quote, pending, error } = useQuote({ method: shipping, cityId, officeCode, payment });
   if (codAllowed && payment === "cod" && quote && !pending && quote.total_cents > COD_LIMIT_CENTS) {
     setCodRefusedFor(cartKey);
@@ -87,6 +92,20 @@ export function CheckoutForm({
       document.getElementById("f-econt_office")?.focus();
       return;
     }
+    const parts =
+      shipping === "econt_address" && structured
+        ? { street: street ?? "", num: text("address_num"), quarter: quarter ?? "", other: text("address_other") }
+        : null;
+    if (parts && !((parts.street && parts.num) || (parts.quarter && parts.other))) {
+      setErrors({ shipping_address: "Изберете улица и напишете номер — или квартал и блок, вход." });
+      document.getElementById("f-shipping_address")?.focus();
+      return;
+    }
+    if (shipping === "econt_address" && !parts && text("shipping_address").length < 5) {
+      setErrors({ shipping_address: "Въведете адрес за доставка." });
+      document.getElementById("f-shipping_address")?.focus();
+      return;
+    }
     const input: CheckoutInput = {
       first_name: text("first_name"),
       last_name: text("last_name"),
@@ -96,7 +115,12 @@ export function CheckoutForm({
       shipping_city: city?.name ?? text("shipping_city"),
       econt_city_id: city?.id ?? null,
       econt_office_code: office?.code ?? null,
-      shipping_address: text("shipping_address"),
+      econt_address: parts,
+      shipping_address: parts
+        ? [parts.street && parts.num ? `${parts.street} ${parts.num}` : parts.street, parts.quarter, parts.other]
+            .filter(Boolean)
+            .join(", ")
+        : text("shipping_address"),
       econt_office: office ? `${office.name} — ${office.address}` : text("econt_office"),
       payment_method: payment,
       invoice:
@@ -200,6 +224,8 @@ export function CheckoutForm({
                 onChange={(id) => {
                   setCityId(id);
                   setOfficeCode(null);
+                  setStreet(null);
+                  setQuarter(null);
                   setErrors({});
                 }}
                 withOfficesOnly={shipping === "econt_office"}
@@ -227,6 +253,25 @@ export function CheckoutForm({
                 errors={errors}
                 required
               />
+            ) : structured ? (
+              <NamePicker
+                id="f-shipping_address"
+                label="Улица"
+                placeholder="Започнете да пишете, напр. Витоша"
+                names={book.streets}
+                value={street}
+                onChange={(name) => {
+                  setStreet(name);
+                  setErrors({});
+                }}
+              />
+            ) : listed && cityId && book.state === "loading" ? (
+              <div>
+                <span className="mb-2 block text-[13px] uppercase tracking-wide text-muted">Улица</span>
+                <div className="input flex items-center text-dim" aria-busy="true">
+                  Зареждаме улиците от Еконт…
+                </div>
+              </div>
             ) : (
               <Field
                 name="shipping_address"
@@ -237,7 +282,43 @@ export function CheckoutForm({
                 required
               />
             )}
+            {structured && (
+              <>
+                <Field name="address_num" label="Номер" inputMode="text" maxLength={20} placeholder="напр. 5А" errors={{}} />
+                <NamePicker
+                  id="f-address_quarter"
+                  label="Квартал / ж.к."
+                  placeholder="напр. Младост 1"
+                  names={book.quarters}
+                  value={quarter}
+                  onChange={(name) => {
+                    setQuarter(name);
+                    setErrors({});
+                  }}
+                />
+                <div className="sm:col-span-2">
+                  <Field
+                    name="address_other"
+                    label="Блок, вход, етаж, апартамент"
+                    maxLength={200}
+                    placeholder="напр. бл. 25, вх. А, ет. 3, ап. 9"
+                    errors={{}}
+                  />
+                </div>
+              </>
+            )}
           </div>
+          {structured && (
+            <p className="mt-3 text-[13px] text-muted">
+              Улица и номер — или квартал и блок. Името на улицата и квартала е от списъка на Еконт, за да стигне
+              куриерът без проблем.
+            </p>
+          )}
+          {structured && errors.shipping_address && (
+            <p role="alert" className="mt-2 text-[13px] text-danger">
+              {errors.shipping_address}
+            </p>
+          )}
           {shipping === "econt_office" && (
             <p className="mt-3 text-[13px] text-muted">Доставка до офис на Еконт — не е нужен адрес.</p>
           )}
@@ -393,6 +474,28 @@ export function CheckoutForm({
       </aside>
     </form>
   );
+}
+
+type AddressBook = { state: "idle" | "loading" | "ready" | "failed"; streets: string[]; quarters: string[] };
+
+/** Улиците и кварталите на избраното място — от Еконт, веднъж на място. Докато няма отговор — „loading“. */
+function useAddressBook(cityId: number | null): AddressBook {
+  const [books, setBooks] = useState<Record<number, AddressBook>>({});
+  const requested = useRef(new Set<number>());
+  useEffect(() => {
+    if (!cityId || requested.current.has(cityId)) return;
+    requested.current.add(cityId);
+    econtAddressBook(cityId)
+      .catch(() => null)
+      .then((result) =>
+        setBooks((b) => ({
+          ...b,
+          [cityId]: result ? { state: "ready", ...result } : { state: "failed", streets: [], quarters: [] },
+        })),
+      );
+  }, [cityId]);
+  if (!cityId) return { state: "idle", streets: [], quarters: [] };
+  return books[cityId] ?? { state: "loading", streets: [], quarters: [] };
 }
 
 /** Откъде е цената на доставката — от Еконт по теглото или ориентировъчна */

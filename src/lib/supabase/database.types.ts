@@ -298,6 +298,7 @@ export type Database = {
           created_at: string;
           customer_id: string | null;
           discount_cents: number;
+          econt_address: Json | null;
           econt_city_id: number | null;
           econt_office: string | null;
           econt_office_code: string | null;
@@ -329,6 +330,7 @@ export type Database = {
           created_at?: string;
           customer_id?: string | null;
           discount_cents?: number;
+          econt_address?: Json | null;
           econt_city_id?: number | null;
           econt_office?: string | null;
           econt_office_code?: string | null;
@@ -360,6 +362,7 @@ export type Database = {
           created_at?: string;
           customer_id?: string | null;
           discount_cents?: number;
+          econt_address?: Json | null;
           econt_city_id?: number | null;
           econt_office?: string | null;
           econt_office_code?: string | null;

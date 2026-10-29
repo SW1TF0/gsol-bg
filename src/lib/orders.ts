@@ -72,6 +72,8 @@ export type CheckoutInput = {
   shipping_city: string;
   econt_city_id?: number | null;
   econt_office_code?: string | null;
+  /** Адресът по полетата на Еконт: улица + номер или квартал + блок/вход; „other“ — подробностите */
+  econt_address?: { street?: string; num?: string; quarter?: string; other?: string } | null;
   shipping_address?: string;
   econt_office?: string;
   payment_method: PaymentMethod;

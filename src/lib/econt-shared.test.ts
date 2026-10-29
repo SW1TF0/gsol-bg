@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizeQuery, parseEcontSettings, searchCities, searchOffices, type EcontCity, type EcontOffice } from "./econt-shared.ts";
+import {
+  normalizeQuery,
+  parseEcontSettings,
+  searchCities,
+  searchNames,
+  searchOffices,
+  streetKey,
+  type EcontCity,
+  type EcontOffice,
+} from "./econt-shared.ts";
 
 const cities: EcontCity[] = [
   { id: 1, name: "Кърджали", region: "Кърджали", postCode: "6600", offices: 4 },
@@ -54,4 +63,25 @@ test("настройките на Еконт: непознатото е тест
   });
   assert.equal(parseEcontSettings({ env: "live", auto_label: false }).autoLabel, false);
   assert.equal(parseEcontSettings({ env: "LIVE" }).env, "demo");
+});
+
+const streets = ["бул. Витоша", "бул. Цар Борис III", "ул. Граф Игнатиев", "ул. Цар Симеон", "ул. Борисова"];
+const quarters = ["ж.к. Люлин 5", "кв. Младост-1", "кв. Младост-1А", "кв. Слатина"];
+
+test("улиците: търсене без „ул.“/„бул.“ и без значение от главни букви", () => {
+  assert.equal(streetKey("  бул. Цар Борис III "), "цар борис iii");
+  assert.equal(streetKey("ж.к. Люлин 5"), "люлин 5");
+  assert.equal(streetKey("кв.Младост-1"), "младост 1");
+  assert.deepEqual(searchNames(streets, "ул. цар"), ["бул. Цар Борис III", "ул. Цар Симеон"]);
+  assert.deepEqual(searchNames(streets, "игнатиев"), ["ул. Граф Игнатиев"]);
+});
+
+test("улиците: началото на името е преди началото на дума и съвпадението по средата", () => {
+  assert.deepEqual(searchNames(streets, "борис"), ["ул. Борисова", "бул. Цар Борис III"]);
+});
+
+test("кварталите: „младост 1“ намира „кв. Младост-1“, а празното търсене връща първите", () => {
+  assert.deepEqual(searchNames(quarters, "младост 1"), ["кв. Младост-1", "кв. Младост-1А"]);
+  assert.deepEqual(searchNames(quarters, "", 2), ["ж.к. Люлин 5", "кв. Младост-1"]);
+  assert.deepEqual(searchNames(quarters, "плевен"), []);
 });
