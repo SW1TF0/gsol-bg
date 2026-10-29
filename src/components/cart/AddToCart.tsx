@@ -75,7 +75,7 @@ export function BuyBox({ item, disabled }: { item: Item; disabled?: boolean }) {
         type="button"
         disabled={disabled}
         onClick={() => {
-          add(item, qty);
+          add(item, qty, { silent: true });
           router.push("/kolichka");
         }}
         className="btn btn-lg btn-outline"

@@ -256,6 +256,7 @@ export type Database = {
           first_name: string;
           id: number;
           invoice: Json | null;
+          legal: Json | null;
           last_name: string;
           note: string | null;
           number: string;
@@ -282,6 +283,7 @@ export type Database = {
           first_name: string;
           id?: never;
           invoice?: Json | null;
+          legal?: Json | null;
           last_name: string;
           note?: string | null;
           number?: string;
@@ -308,6 +310,7 @@ export type Database = {
           first_name?: string;
           id?: never;
           invoice?: Json | null;
+          legal?: Json | null;
           last_name?: string;
           note?: string | null;
           number?: string;
@@ -806,6 +809,12 @@ export type Database = {
         };
         Relationships: [];
       };
+      legal_versions: {
+        Row: { id: number; slug: string; version: number; title: string; body: string; sha256: string; created_at: string };
+        Insert: { id?: never; slug: string; version: number; title: string; body: string; sha256: string; created_at?: string };
+        Update: { slug?: string; version?: number; title?: string; body?: string; sha256?: string };
+        Relationships: [];
+      };
       machine_parts: {
         Row: { product_id: number; kind: Database["public"]["Enums"]["part_kind"]; component_id: number };
         Insert: { product_id: number; kind: Database["public"]["Enums"]["part_kind"]; component_id: number };
@@ -900,6 +909,7 @@ export type Database = {
         }[];
       };
       price_builds: { Args: { p_builds: Json }; Returns: Json };
+      catalog_menu: { Args: never; Returns: { category_id: number; brand: string; products: number }[] };
       configurator_parts: {
         Args: never;
         Returns: {

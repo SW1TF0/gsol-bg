@@ -18,6 +18,21 @@ export async function getPage(slug: string) {
   return data;
 }
 
+/** Текущата версия на правен текст (записва се с всяка поръчка) */
+export async function getLegalVersion(slug: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("pages");
+  const { data } = await publicClient()
+    .from("legal_versions")
+    .select("version, sha256, created_at")
+    .eq("slug", slug)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
 export async function getPageSlugs() {
   "use cache";
   cacheLife("hours");

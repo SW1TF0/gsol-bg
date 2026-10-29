@@ -18,7 +18,9 @@ const emailResultLabels: Record<string, string> = {
   disabled: "не е изпратен (изпращането не е настроено)",
 };
 
-type Invoice = { company?: string; eik?: string; vat?: string; mol?: string; address?: string };
+type Invoice = { type?: "person" | "company"; name?: string; egn?: string; company?: string; eik?: string; vat?: string; mol?: string; address?: string };
+type LegalRef = { version: number; sha256: string } | null;
+type Legal = { terms: LegalRef; privacy: LegalRef; consent: string; accepted_at: string } | null;
 
 // Номерът в адреса е известен чак при заявка — рамката на страницата излиза веднага, данните след това
 export default function OrderPage(props: PageProps<"/admin/porachki/[id]">) {
@@ -42,6 +44,7 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
   if (!order) notFound();
 
   const invoice = order.invoice as Invoice | null;
+  const legal = order.legal as Legal;
   const shipping = order.shipping_method as ShippingMethod;
 
   return (
@@ -166,14 +169,39 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
           </Panel>
 
           {invoice && (
-            <Panel title="Фактура">
+            <Panel title={invoice.type === "person" ? "Фактура — физическо лице" : "Фактура — фирма"}>
               <dl className="space-y-2 text-[14px]">
-                <Row label="Фирма" value={invoice.company ?? "—"} />
-                <Row label="ЕИК" value={invoice.eik ?? "—"} />
-                {invoice.vat && <Row label="ДДС №" value={invoice.vat} />}
-                <Row label="МОЛ" value={invoice.mol ?? "—"} />
+                {invoice.type === "person" ? (
+                  <>
+                    <Row label="Име" value={invoice.name ?? "—"} />
+                    {invoice.egn && <Row label="ЕГН" value={invoice.egn} />}
+                  </>
+                ) : (
+                  <>
+                    <Row label="Фирма" value={invoice.company ?? "—"} />
+                    <Row label="ЕИК / Булстат" value={invoice.eik ?? "—"} />
+                    {invoice.vat && <Row label="ДДС №" value={invoice.vat} />}
+                    <Row label="МОЛ" value={invoice.mol ?? "—"} />
+                  </>
+                )}
                 <Row label="Адрес" value={invoice.address ?? "—"} />
               </dl>
+            </Panel>
+          )}
+
+          {legal && (
+            <Panel title="Правен запис">
+              <dl className="space-y-2 text-[14px]">
+                {legal.terms && <Row label="Общи условия" value={`версия ${legal.terms.version}`} />}
+                {legal.privacy && <Row label="Поверителност" value={`версия ${legal.privacy.version}`} />}
+                <Row label="Приети" value={formatDate(legal.accepted_at)} />
+              </dl>
+              <p className="mt-3 text-[13px] text-muted">„{legal.consent}“</p>
+              {legal.terms && (
+                <p className="mt-2 break-all font-mono text-[11px] text-dim" title="SHA-256 на текста на Общите условия">
+                  SHA-256 {legal.terms.sha256}
+                </p>
+              )}
             </Panel>
           )}
         </div>

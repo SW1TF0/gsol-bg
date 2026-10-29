@@ -38,6 +38,18 @@ export const COD_LIMIT_CENTS = 511292;
 
 export type RafflePreview = { slug: string; title: string; entries: number; min_order_cents: number };
 
+/** Фактура: на физическо лице (ЕГН по избор) или на фирма. Старите поръчки са без type — фирма. */
+export type InvoiceInput =
+  | { type: "person"; name: string; egn?: string; address: string }
+  | { type?: "company"; company: string; eik: string; vat?: string; mol: string; address: string };
+
+/** Фактурата на един ред — за писмата и админа */
+export function invoiceLine(i: InvoiceInput) {
+  return i.type === "person"
+    ? `Физическо лице: ${i.name}${i.egn ? `, ЕГН ${i.egn}` : ""}, ${i.address}`
+    : `${i.company}, ЕИК ${i.eik}${i.vat ? `, ДДС № ${i.vat}` : ""}, МОЛ ${i.mol}, ${i.address}`;
+}
+
 export type CheckoutInput = {
   email: string;
   phone: string;
@@ -48,7 +60,7 @@ export type CheckoutInput = {
   shipping_address?: string;
   econt_office?: string;
   payment_method: PaymentMethod;
-  invoice?: { company: string; eik: string; vat?: string; mol: string; address: string } | null;
+  invoice?: InvoiceInput | null;
   note?: string;
   marketing_opt_in?: boolean;
   promo_code?: string | null;

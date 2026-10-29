@@ -1,4 +1,6 @@
 import { CartProvider } from "@/components/cart/CartProvider";
+import { CartToast } from "@/components/cart/CartToast";
+import { CookieConsent } from "@/components/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 
@@ -12,10 +14,12 @@ export default function ShopLayout({ children }: LayoutProps<"/">) {
         Към основното съдържание
       </a>
       <Header />
-      <main id="main" className="flex-1 pt-[70px]">
+      <main id="main" className="flex-1">
         {children}
       </main>
       <Footer />
+      <CartToast />
+      <CookieConsent />
     </CartProvider>
   );
 }

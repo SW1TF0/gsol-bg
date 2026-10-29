@@ -1,14 +1,5 @@
 // Навигация на сайта. Фирмените данни идват от админа (Настройки) — вижте lib/settings-data.ts.
 
-export const mainNav = [
-  { label: "Лаптопи", href: "/katalog/laptopi" },
-  { label: "Компютри", href: "/katalog/kompyutri" },
-  { label: "Компоненти", href: "/katalog/komponenti" },
-  { label: "Периферия", href: "/katalog/periferiya" },
-  { label: "Реновирани", href: "/katalog/renovirani" },
-  { label: "Услуги", href: "/#uslugi" },
-];
-
 export const footerColumns = [
   {
     title: "Магазин",

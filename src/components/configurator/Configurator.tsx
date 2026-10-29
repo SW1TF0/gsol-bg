@@ -177,7 +177,7 @@ export function Configurator({ parts, initial, phone, phoneHref }: { parts: AnyP
       </div>
 
       {/* Обобщение */}
-      <aside className="h-fit space-y-4 lg:sticky lg:top-[94px]">
+      <aside className="h-fit space-y-4 lg:sticky lg:top-[calc(var(--header-sticky)+24px)]">
         <div className="cut-frame">
           <div className="cut-inner space-y-4 bg-surface-2 p-6">
             <h2 className="h-display text-[18px]">Вашата конфигурация</h2>

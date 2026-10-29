@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/catalog/PageHeader";
 import { Prose } from "@/components/Prose";
 import { formatDate } from "@/lib/format";
-import { getPage, getPageSlugs } from "@/lib/content";
+import { getLegalVersion, getPage, getPageSlugs } from "@/lib/content";
 
 // Страници от админа: /obshti-usloviya, /dostavka-i-plashtane, /za-nas и т.н.
 
@@ -26,7 +26,8 @@ export default function InfoPage(props: PageProps<"/[page]">) {
 }
 
 async function InfoContent({ params }: Pick<PageProps<"/[page]">, "params">) {
-  const page = await getPage((await params).page);
+  const slug = (await params).page;
+  const [page, version] = await Promise.all([getPage(slug), getLegalVersion(slug)]);
   if (!page) notFound();
 
   return (
@@ -34,7 +35,18 @@ async function InfoContent({ params }: Pick<PageProps<"/[page]">, "params">) {
       <PageHeader title={page.title} tagline={page.intro ?? undefined} crumbs={[{ label: page.title }]} />
       <div className="mx-auto max-w-[1200px] px-4 pb-24">
         <Prose>{page.body}</Prose>
-        <p className="mt-12 text-[13px] text-dim">Последна промяна: {formatDate(page.updated_at)}</p>
+        <p className="mt-12 text-[13px] text-dim">
+          {version ? (
+            <>
+              Версия {version.version} от {formatDate(version.created_at)} · отпечатък{" "}
+              <span className="font-mono" title={`SHA-256 ${version.sha256}`}>
+                {version.sha256.slice(0, 12)}
+              </span>
+            </>
+          ) : (
+            <>Последна промяна: {formatDate(page.updated_at)}</>
+          )}
+        </p>
       </div>
     </>
   );

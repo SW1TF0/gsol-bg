@@ -342,3 +342,73 @@ export async function countByCategory() {
   );
   return counts;
 }
+
+// ---------------------------------------------------------------- меню
+
+export type MenuLink = { label: string; href: string; count: number };
+export type MenuDepartment = MenuLink & { slug: string; subs: MenuLink[]; brands: MenuLink[] };
+
+/**
+ * Менюто с отдели от живите категории: празна категория изчезва сама, марките са подредени
+ * по брой продукти. „Популярни марки“ водят към отдела, в който марката има най-много продукти.
+ */
+export async function getMenu() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("catalog");
+  const [cats, { data }] = await Promise.all([getCategories(), publicClient().rpc("catalog_menu")]);
+  const rows = data ?? [];
+  const sum = (ids: number[], brand?: string) =>
+    rows.filter((r) => ids.includes(r.category_id) && (!brand || r.brand === brand)).reduce((s, r) => s + r.products, 0);
+
+  const departments: MenuDepartment[] = cats
+    .map((c) => {
+      const ids = [c.id, ...c.subcategories.map((s) => s.id)];
+      const brandCounts = new Map<string, number>();
+      for (const r of rows) if (ids.includes(r.category_id) && r.brand !== "—") brandCounts.set(r.brand, (brandCounts.get(r.brand) ?? 0) + r.products);
+      return {
+        slug: c.slug,
+        label: c.name,
+        href: `/katalog/${c.slug}`,
+        count: sum(ids),
+        subs: c.subcategories
+          .map((s) => ({ label: s.name, href: `/katalog/${c.slug}?sub=${s.slug}`, count: sum([s.id]) }))
+          .filter((s) => s.count > 0),
+        brands: [...brandCounts]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map(([brand, count]) => ({ label: brand, href: `/katalog/${c.slug}?brand=${encodeURIComponent(brand)}`, count })),
+      };
+    })
+    .filter((d) => d.count > 0);
+
+  const topBrands = new Map<string, { count: number; best: { slug: string; count: number } }>();
+  for (const d of departments) {
+    for (const b of d.brands) {
+      const t = topBrands.get(b.label) ?? { count: 0, best: { slug: d.slug, count: 0 } };
+      t.count += b.count;
+      if (b.count > t.best.count) t.best = { slug: d.slug, count: b.count };
+      topBrands.set(b.label, t);
+    }
+  }
+  const brands: MenuLink[] = [...topBrands]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 12)
+    .map(([brand, t]) => ({ label: brand, href: `/katalog/${t.best.slug}?brand=${encodeURIComponent(brand)}`, count: t.count }));
+
+  return { departments, brands };
+}
+
+/** Бързи резултати в търсачката на хедъра */
+export async function suggestProducts(q: string) {
+  const term = q.replace(/[,()%*\\]/g, " ").trim().slice(0, 60);
+  if (term.length < 2) return [];
+  const { data } = await publicClient()
+    .from("products")
+    .select("slug, name, price_cents, images")
+    .eq("is_active", true)
+    .or(`name.ilike.%${term}%,sku.ilike.%${term}%,brand.ilike.%${term}%`)
+    .order("price_cents")
+    .limit(6);
+  return (data ?? []).map((p) => ({ slug: p.slug, name: p.name, price: p.price_cents, image: p.images[0] ?? null }));
+}

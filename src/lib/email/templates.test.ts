@@ -41,7 +41,9 @@ test("escape на въведеното от клиента", () => {
 
 test("потвърждението съдържа сумите, а банковите данни — само при превод с IBAN", () => {
   const cod = orderConfirmation(ctx, receipt, customer, { ...defaultSettings.bank, iban: "BG80BNBG96611020345678" });
-  assert.equal(cod.subject, "Поръчка GS-100200 е приета — GSOL");
+  // Правно поръчката е предложение — писмото казва „получена“, не „приета“
+  assert.equal(cod.subject, "Поръчка GS-100200 е получена — GSOL");
+  assert.ok(!cod.html.includes("Приехме"));
   assert.ok(cod.html.includes(formatPrice(9000)));
   assert.ok(cod.html.includes("Отстъпка (TEST10)"));
   assert.ok(cod.html.includes("безплатна"));
@@ -60,6 +62,13 @@ test("текстов вариант и връзка за проследяван�
   assert.ok(email.text.includes("Мишка <b>X</b> × 2"));
   assert.ok(email.text.includes("https://gsol.bg/profil"));
   assert.ok(email.html.includes('href="https://gsol.bg/profil"'));
+});
+
+test("фактура на физическо лице и на фирма", () => {
+  const person = shopOrderAlert(ctx, receipt, { ...customer, invoice: { type: "person", name: "Иван Петров", egn: "8001011234", address: "ул. Тест 1" } }, "/a");
+  assert.ok(person.text.includes("Фактура: Физическо лице: Иван Петров, ЕГН 8001011234, ул. Тест 1"));
+  const company = shopOrderAlert(ctx, receipt, { ...customer, invoice: { company: "Тест ЕООД", eik: "123456789", mol: "Иван", address: "ул. Тест 2" } }, "/a");
+  assert.ok(company.text.includes("Фактура: Тест ЕООД, ЕИК 123456789, МОЛ Иван, ул. Тест 2"));
 });
 
 test("статус и запитване", () => {

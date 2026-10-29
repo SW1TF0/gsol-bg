@@ -22,7 +22,11 @@ type CartContextValue = {
   setPromoCode: (code: string | null) => void;
   /** Обновява цените по офертата от сървъра и маха продуктите, които вече не се предлагат. */
   syncWithQuote: (lines: { product_id: number; unit_price_cents: number; name: string }[], missing: number[]) => void;
-  add: (line: Omit<CartLine, "qty">, qty?: number) => void;
+  /** silent: без известие (напр. „Купете сега“ води направо в количката) */
+  add: (line: Omit<CartLine, "qty">, qty?: number, options?: { silent?: boolean }) => void;
+  /** Последно добавеният продукт — за известието „Продуктът е добавен в количката“ */
+  added: { name: string; image?: string; at: number } | null;
+  dismissAdded: () => void;
   setQty: (id: number, qty: number) => void;
   remove: (id: number) => void;
   clear: () => void;
@@ -70,6 +74,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [promoCode, setPromoState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [added, setAdded] = useState<CartContextValue["added"]>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- еднократно зареждане от localStorage след хидратация
@@ -113,18 +118,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }),
       count: lines.reduce((s, l) => s + l.qty, 0),
       subtotal: lines.reduce((s, l) => s + l.qty * l.price, 0),
-      add: (line, qty = 1) =>
+      add: (line, qty = 1, options) => {
         update((prev) => {
           const existing = prev.find((l) => l.id === line.id);
           if (existing) return prev.map((l) => (l.id === line.id ? { ...l, qty: l.qty + qty } : l));
           return [...prev, { ...line, qty }];
-        }),
+        });
+        if (!options?.silent) setAdded({ name: line.name, image: line.image, at: Date.now() });
+      },
+      added,
+      dismissAdded: () => setAdded(null),
       setQty: (id, qty) =>
         update((prev) => prev.map((l) => (l.id === id ? { ...l, qty: Math.max(1, Math.min(99, qty)) } : l))),
       remove: (id) => update((prev) => prev.filter((l) => l.id !== id)),
       clear: () => update(() => []),
     }),
-    [lines, ready, promoCode, update],
+    [lines, ready, promoCode, update, added],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

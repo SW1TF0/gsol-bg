@@ -20,7 +20,7 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
   const { lines, ready, promoCode, clear, setPromoCode } = useCart();
   const [shipping, setShipping] = useState<ShippingMethod>("econt_office");
   const [chosenPayment, setPayment] = useState<PaymentMethod>("cod");
-  const [wantsInvoice, setWantsInvoice] = useState(false);
+  const [invoiceType, setInvoiceType] = useState<"none" | "person" | "company">("none");
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
@@ -62,15 +62,24 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
       shipping_address: text("shipping_address"),
       econt_office: text("econt_office"),
       payment_method: payment,
-      invoice: wantsInvoice
-        ? {
-            company: text("company"),
-            eik: text("eik").replace(/\s/g, ""),
-            vat: text("vat") || undefined,
-            mol: text("mol"),
-            address: text("company_address"),
-          }
-        : null,
+      invoice:
+        invoiceType === "company"
+          ? {
+              type: "company",
+              company: text("company"),
+              eik: text("eik").replace(/\s/g, ""),
+              vat: text("vat").replace(/\s/g, "").toUpperCase() || undefined,
+              mol: text("mol"),
+              address: [text("company_city"), text("company_address")].filter(Boolean).join(", "),
+            }
+          : invoiceType === "person"
+            ? {
+                type: "person",
+                name: text("invoice_name"),
+                egn: text("egn").replace(/\s/g, "") || undefined,
+                address: text("invoice_address"),
+              }
+            : null,
       note: text("note"),
       marketing_opt_in: f.get("marketing") === "on",
       promo_code: promoCode,
@@ -198,24 +207,44 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
             </p>
           )}
 
-          <label className="mt-6 flex cursor-pointer items-center gap-3 text-[14px]">
-            <input
-              type="checkbox"
-              checked={wantsInvoice}
-              onChange={(e) => setWantsInvoice(e.target.checked)}
-              className="h-4 w-4 accent-accent"
-            />
-            Искам фактура за фирма
-          </label>
-          {wantsInvoice && (
+          <div className="mt-6 max-w-sm">
+            <label htmlFor="f-invoice-type" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
+              Желаете ли фактура?
+            </label>
+            <select
+              id="f-invoice-type"
+              value={invoiceType}
+              onChange={(e) => setInvoiceType(e.target.value as typeof invoiceType)}
+              className="input"
+            >
+              <option value="none">Не, не ми е необходима</option>
+              <option value="person">Да — на физическо лице</option>
+              <option value="company">Да — на фирма</option>
+            </select>
+          </div>
+          {/* Скритите полета не се рисуват — иначе „задължително“ би спряло изпращането */}
+          {invoiceType === "person" && (
             <div id="f-invoice" tabIndex={-1} className="mt-4 grid gap-4 bg-surface-2 p-5 sm:grid-cols-2">
-              <Field name="company" label="Име на фирмата" errors={{}} required />
-              <Field name="eik" label="ЕИК" inputMode="numeric" errors={{}} required />
-              <Field name="vat" label="ДДС № (по желание)" errors={{}} />
-              <Field name="mol" label="МОЛ" errors={{}} required />
+              <Field name="invoice_name" label="Име и фамилия" autoComplete="name" errors={{}} required />
+              <Field name="egn" label="ЕГН (по желание)" inputMode="numeric" maxLength={10} errors={{}} />
               <div className="sm:col-span-2">
-                <Field name="company_address" label="Адрес на фирмата" errors={{}} required />
+                <Field name="invoice_address" label="Адрес" autoComplete="street-address" errors={{}} required />
               </div>
+              {errors.invoice && (
+                <p role="alert" className="text-[13px] text-danger sm:col-span-2">
+                  {errors.invoice}
+                </p>
+              )}
+            </div>
+          )}
+          {invoiceType === "company" && (
+            <div id="f-invoice" tabIndex={-1} className="mt-4 grid gap-4 bg-surface-2 p-5 sm:grid-cols-2">
+              <Field name="company" label="Фирма" autoComplete="organization" errors={{}} required />
+              <Field name="eik" label="ЕИК / Булстат" inputMode="numeric" maxLength={13} errors={{}} required />
+              <Field name="vat" label="ДДС № (по желание)" placeholder="BG…" errors={{}} />
+              <Field name="mol" label="МОЛ" errors={{}} required />
+              <Field name="company_city" label="Град по регистрация" errors={{}} required />
+              <Field name="company_address" label="Адрес по регистрация" errors={{}} required />
               {errors.invoice && (
                 <p role="alert" className="text-[13px] text-danger sm:col-span-2">
                   {errors.invoice}
@@ -239,7 +268,7 @@ export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPri
         </div>
       </div>
 
-      <aside className="h-fit space-y-4 lg:sticky lg:top-[94px]">
+      <aside className="h-fit space-y-4 lg:sticky lg:top-[calc(var(--header-sticky)+24px)]">
         <ul className="max-h-64 space-y-3 overflow-y-auto bg-surface-2 p-4">
           {lines.map((l) => (
             <li key={l.id} className="flex items-center gap-3 text-[13px]">

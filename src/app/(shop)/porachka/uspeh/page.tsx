@@ -2,19 +2,23 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { CheckCircle2, Phone } from "lucide-react";
 import { ButtonLink, Container } from "@/components/ui";
+import { CheckoutSteps } from "@/components/cart/CheckoutSteps";
 import { formatPrice } from "@/lib/format";
 import { formatIban } from "@/lib/settings";
 import { getSettings } from "@/lib/settings-data";
 
 export const metadata: Metadata = {
-  title: "Поръчката е приета",
+  title: "Поръчката е получена",
   robots: { index: false },
 };
 
 export default async function OrderSuccessPage(props: PageProps<"/porachka/uspeh">) {
   const { company } = await getSettings();
   return (
-    <Container className="py-24">
+    <Container className="py-16">
+      <div className="mx-auto max-w-2xl">
+        <CheckoutSteps current={3} />
+      </div>
       <div className="cut-frame cut-lg mx-auto max-w-2xl [--frame:var(--color-ok)]">
         <div className="cut-inner bg-surface-2 p-10 text-center sm:p-14">
           <CheckCircle2 className="mx-auto h-14 w-14 text-ok" strokeWidth={1.5} />

@@ -86,7 +86,7 @@ export function CartView({ phone, phoneHref }: { phone: string; phoneHref: strin
         ))}
       </ul>
 
-      <aside className="h-fit lg:sticky lg:top-[94px]">
+      <aside className="h-fit lg:sticky lg:top-[calc(var(--header-sticky)+24px)]">
         <OrderSummary quote={quote} pending={pending} error={error}>
           <Link href="/porachka" className="btn btn-primary w-full">
             Продължи към поръчка

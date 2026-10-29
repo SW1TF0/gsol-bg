@@ -1,5 +1,5 @@
 import { formatDate, formatPrice } from "../format.ts";
-import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "../orders.ts";
+import { invoiceLine, orderStatusLabels, paymentLabels, shippingLabels, type InvoiceInput, type PaymentMethod, type ShippingMethod } from "../orders.ts";
 import { formatIban, type Bank, type Company } from "../settings.ts";
 
 // Писмата към клиента и към магазина. Чист HTML с вградени стилове (имейл клиентите не четат CSS файлове)
@@ -38,7 +38,7 @@ export type Customer = {
   shipping_city: string;
   shipping_address?: string | null;
   econt_office?: string | null;
-  invoice?: { company: string; eik: string; vat?: string; mol: string; address: string } | null;
+  invoice?: InvoiceInput | null;
   note?: string | null;
 };
 
@@ -168,14 +168,14 @@ export function orderConfirmation(ctx: Ctx, r: Receipt, c: Customer, bank: Bank)
     preheader: `Поръчка ${r.number} — ${formatPrice(r.total_cents)}. Ще се свържем с вас за потвърждение.`,
     title: `Благодарим за поръчката, ${c.first_name}!`,
     body: [
-      p(`Приехме поръчка <b>${esc(r.number)}</b> от ${esc(formatDate(r.created_at))}. Ще ви се обадим или пишем, за да потвърдим наличността и срока на доставка.`),
+      p(`Получихме поръчка <b>${esc(r.number)}</b> от ${esc(formatDate(r.created_at))}. Ще ви се обадим или пишем, за да потвърдим наличността и срока на доставка — договорът се сключва с потвърждението.`),
       itemsTable(r),
       box(
         `<table role="presentation" cellpadding="0" cellspacing="0">${rows([
           ["Доставка", esc(deliveryLine(r, c))],
           ["Плащане", esc(paymentLabels[r.payment_method])],
           ["Получател", esc(`${c.first_name} ${c.last_name}, ${c.phone}`)],
-          ["Фактура", c.invoice ? esc(`${c.invoice.company}, ЕИК ${c.invoice.eik}`) : ""],
+          ["Фактура", c.invoice ? esc(invoiceLine(c.invoice)) : ""],
           ["Бележка", c.note ? nl2br(c.note) : ""],
         ])}</table>`,
       ),
@@ -190,7 +190,7 @@ export function orderConfirmation(ctx: Ctx, r: Receipt, c: Customer, bank: Bank)
   const text = [
     `Благодарим за поръчката, ${c.first_name}!`,
     "",
-    `Приехме поръчка ${r.number}. Ще ви се обадим или пишем, за да потвърдим наличността и срока на доставка.`,
+    `Получихме поръчка ${r.number}. Ще ви се обадим или пишем, за да потвърдим наличността и срока на доставка — договорът се сключва с потвърждението.`,
     "",
     itemsText(r),
     "",
@@ -205,7 +205,7 @@ export function orderConfirmation(ctx: Ctx, r: Receipt, c: Customer, bank: Bank)
     `Въпроси: ${ctx.company.phone} · ${ctx.company.email}`,
   ].join("\n");
 
-  return { subject: `Поръчка ${r.number} е приета — ${ctx.company.brand}`, html, text };
+  return { subject: `Поръчка ${r.number} е получена — ${ctx.company.brand}`, html, text };
 }
 
 /** Известие до магазина за нова поръчка */
@@ -221,7 +221,7 @@ export function shopOrderAlert(ctx: Ctx, r: Receipt, c: Customer, adminUrl: stri
           ["Имейл", `<a href="mailto:${esc(c.email)}" style="color:${INK};">${esc(c.email)}</a>`],
           ["Доставка", esc(deliveryLine(r, c))],
           ["Плащане", esc(paymentLabels[r.payment_method])],
-          ["Фактура", c.invoice ? esc(`${c.invoice.company}, ЕИК ${c.invoice.eik}${c.invoice.vat ? `, ${c.invoice.vat}` : ""}, МОЛ ${c.invoice.mol}, ${c.invoice.address}`) : ""],
+          ["Фактура", c.invoice ? esc(invoiceLine(c.invoice)) : ""],
           ["Бележка", c.note ? nl2br(c.note) : ""],
         ])}</table>`,
       ),
@@ -237,7 +237,7 @@ export function shopOrderAlert(ctx: Ctx, r: Receipt, c: Customer, adminUrl: stri
     `Имейл: ${c.email}`,
     `Доставка: ${deliveryLine(r, c)}`,
     `Плащане: ${paymentLabels[r.payment_method]}`,
-    ...(c.invoice ? [`Фактура: ${c.invoice.company}, ЕИК ${c.invoice.eik}, МОЛ ${c.invoice.mol}, ${c.invoice.address}`] : []),
+    ...(c.invoice ? [`Фактура: ${invoiceLine(c.invoice)}`] : []),
     ...(c.note ? [`Бележка: ${c.note}`] : []),
     "",
     itemsText(r),

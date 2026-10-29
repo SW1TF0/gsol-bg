@@ -53,7 +53,10 @@ const errorMap: Record<string, { error: string; field?: Exclude<PlaceOrderResult
     error: "Над 5 112,92 € наложеният платеж не е разрешен по закон. Изберете банков превод.",
     field: "payment_method",
   },
-  INVALID_INVOICE: { error: "Проверете данните за фактура: фирма, ЕИК (9–13 цифри) и МОЛ.", field: "invoice" },
+  INVALID_INVOICE: {
+    error: "Проверете данните за фактура: за фирма — име, ЕИК/Булстат (9 или 13 цифри), МОЛ и адрес; ДДС № е BG и цифри; ЕГН е 10 цифри.",
+    field: "invoice",
+  },
   EMPTY_CART: { error: "Количката е празна.", field: "items" },
   ITEMS_UNAVAILABLE: {
     error: "Някой от продуктите вече не е наличен. Върнете се в количката, за да я обновите.",

@@ -164,7 +164,7 @@ export default async function HomePage() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-[calc(100svh-70px)] items-end overflow-hidden bg-bg-deep">
+    <section className="relative flex min-h-[calc(100svh-var(--header-h))] items-end overflow-hidden bg-bg-deep">
       {/* Фон: решетка, червено сияние и голям контурен знак */}
       <div
         aria-hidden="true"
@@ -225,7 +225,7 @@ function PromoStrip({ products }: { products: Awaited<ReturnType<typeof getPromo
   // Статична лента: собственикът не иска движещи се банери
   const words = ["Промоции", "Ограничени оферти", "До изчерпване", "Промо кодове", "Томболи"];
   return (
-    <section id="promo" className="scroll-mt-[70px] bg-bg-deep pb-20">
+    <section id="promo" className="scroll-mt-[var(--header-sticky)] bg-bg-deep pb-20">
       <div className="overflow-hidden bg-accent py-2.5" aria-hidden="true">
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-1 px-4 font-display text-[13px] uppercase tracking-[1.5px] text-white">
           {words.map((w, i) => (
@@ -371,7 +371,7 @@ function Services() {
     },
   ];
   return (
-    <section id="uslugi" className="scroll-mt-[70px] bg-bg-alt py-24 [--section-bg:var(--color-bg-alt)]">
+    <section id="uslugi" className="scroll-mt-[var(--header-sticky)] bg-bg-alt py-24 [--section-bg:var(--color-bg-alt)]">
       <Container>
         <SectionHeading title="Услуги" accent="GSOL" tagline="Когато не търсите продукт, а решение" />
         <div className="mt-16 space-y-16">

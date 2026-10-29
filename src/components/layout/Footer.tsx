@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
 import { footerColumns } from "@/lib/site";
 import { getCompany } from "@/lib/settings-data";
+import { CookieSettingsLink } from "@/components/CookieConsent";
 
 export async function Footer() {
   const company = await getCompany();
@@ -65,6 +66,8 @@ export async function Footer() {
           <p>
             © <CopyrightYear /> {company.legalName} · ЕИК {company.eik}
             {company.vat && <> · ДДС № {company.vat}</>}
+            {" · "}
+            <CookieSettingsLink className="underline underline-offset-2 hover:text-white" />
           </p>
           <ul className="flex gap-2">
             {company.socials.map((s) => (

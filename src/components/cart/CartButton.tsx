@@ -10,7 +10,7 @@ export function CartButton() {
     <Link
       href="/kolichka"
       className="relative flex h-10 w-10 items-center justify-center text-white transition-colors hover:text-accent-ink"
-      aria-label={`Количка${ready && count ? `, ${count} продукта` : ""}`}
+      aria-label={`Количка${ready && count ? `, ${count} ${count === 1 ? "продукт" : "продукта"}` : ""}`}
     >
       <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
       {ready && count > 0 && (
