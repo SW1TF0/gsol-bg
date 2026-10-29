@@ -41,7 +41,7 @@ export function PageHeader({
         </nav>
         {title && (
           <h1 className="h-display mt-5 text-[32px] sm:text-[40px]">
-            {title} {accent && <span className="text-accent">{accent}</span>}
+            {title} {accent && <span className="text-accent-ink">{accent}</span>}
           </h1>
         )}
         {tagline && <p className="tagline mt-2">{tagline}</p>}

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Onest, Tektur } from "next/font/google";
+import Script from "next/script";
+import { themeScript } from "@/components/ThemeToggle";
 import "./globals.css";
 
 const tektur = Tektur({
@@ -25,8 +27,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="bg" data-scroll-behavior="smooth" className={`${tektur.variable} ${onest.variable} antialiased`}>
-      <body className="min-h-dvh flex flex-col">{children}</body>
+    // suppressHydrationWarning: скриптът за тема слага data-theme на <html> преди React
+    <html
+      lang="bg"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+      className={`${tektur.variable} ${onest.variable} antialiased`}
+    >
+      <body className="min-h-dvh flex flex-col">
+        <Script id="theme" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }

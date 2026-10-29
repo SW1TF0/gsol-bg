@@ -37,7 +37,7 @@ export function InquiryForm({ id, status, notes }: { id: number; status: string;
             <Check className="h-4 w-4" /> Записано
           </span>
         )}
-        {state?.error && <span className="text-[14px] text-accent">{state.error}</span>}
+        {state?.error && <span className="text-[14px] text-danger">{state.error}</span>}
       </div>
     </form>
   );

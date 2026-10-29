@@ -13,7 +13,7 @@ export default async function PagesAdmin() {
     <>
       <AdminHeader title="Страници" subtitle="Информационни и правни страници на сайта" />
       <div className="mb-6 flex items-start gap-3 bg-accent/10 p-4 text-[14px] text-text ring-1 ring-accent/30">
-        <Scale className="mt-0.5 h-5 w-5 flex-none text-accent" strokeWidth={1.5} />
+        <Scale className="mt-0.5 h-5 w-5 flex-none text-accent-ink" strokeWidth={1.5} />
         <p>
           Общите условия, поверителността, връщането и гаранцията са <b className="font-medium text-white">чернови</b>.
           Прегледайте ги с юрист преди пускане на сайта. Можете да поставите и текстовете от сегашния сайт.
@@ -23,7 +23,7 @@ export default async function PagesAdmin() {
         {(data ?? []).map((p) => (
           <tr key={p.slug} className="hover:bg-surface">
             <td className="px-4 py-3">
-              <Link href={`/admin/stranitsi/${p.slug}`} className="text-white hover:text-accent">
+              <Link href={`/admin/stranitsi/${p.slug}`} className="text-white hover:text-accent-ink">
                 {p.title}
               </Link>
             </td>

@@ -79,7 +79,7 @@ async function PromoPageContent({ params }: Pick<PageProps<"/admin/promo-kodove/
                   <li key={u.id} className="flex justify-between gap-3">
                     <div className="min-w-0">
                       {o ? (
-                        <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent">
+                        <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent-ink">
                           {o.number}
                         </Link>
                       ) : (

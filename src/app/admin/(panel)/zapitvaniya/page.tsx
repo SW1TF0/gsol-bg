@@ -52,7 +52,7 @@ export default async function InquiriesPage(props: PageProps<"/admin/zapitvaniya
               <td className="whitespace-nowrap px-4 py-3 text-muted">{formatDate(q.created_at)}</td>
               <td className="px-4 py-3 text-white">{inquiryTopics[q.topic as InquiryTopic]?.label ?? q.topic}</td>
               <td className="px-4 py-3">
-                <Link href={`/admin/zapitvaniya/${q.id}`} className="text-white hover:text-accent">
+                <Link href={`/admin/zapitvaniya/${q.id}`} className="text-white hover:text-accent-ink">
                   {q.name}
                 </Link>
                 <div className="text-[12px] text-dim">{q.contact}</div>

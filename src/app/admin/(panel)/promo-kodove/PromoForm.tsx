@@ -260,7 +260,7 @@ export function PromoForm({
           </span>
         )}
         {state?.error && (
-          <span role="alert" className="text-[14px] text-accent">
+          <span role="alert" className="text-[14px] text-danger">
             {state.error}
           </span>
         )}

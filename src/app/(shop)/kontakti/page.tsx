@@ -30,7 +30,7 @@ export default async function ContactsPage() {
           {cards.map(({ icon: Icon, title, value, href, hint }) => {
             const body = (
               <div className="cut-inner h-full bg-gradient-to-br from-surface-2 from-50% to-accent/10 p-6">
-                <Icon className="h-7 w-7 text-accent" strokeWidth={1.5} />
+                <Icon className="h-7 w-7 text-accent-ink" strokeWidth={1.5} />
                 <div className="mt-5 text-[12px] uppercase tracking-[1.5px] text-dim">{title}</div>
                 <div className="mt-1 break-words text-[16px] text-white">{value}</div>
                 <div className="mt-2 text-[13px] text-muted">{hint}</div>
@@ -56,12 +56,12 @@ export default async function ContactsPage() {
         <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_360px]">
           <div>
             <h2 className="h-display mb-6 text-[24px] font-normal">
-              Напишете <span className="text-accent">ни</span>
+              Напишете <span className="text-accent-ink">ни</span>
             </h2>
             <InquiryForm topic="kontakti" messageLabel="Съобщение" submitLabel="Изпрати съобщение" />
           </div>
           <aside className="h-fit bg-surface-2 p-6 ring-1 ring-line-soft">
-            <Building2 className="h-6 w-6 text-accent" strokeWidth={1.5} />
+            <Building2 className="h-6 w-6 text-accent-ink" strokeWidth={1.5} />
             <h2 className="h-display mt-4 text-[16px]">Фирмени данни</h2>
             <dl className="mt-4 space-y-3 text-[14px]">
               <div>

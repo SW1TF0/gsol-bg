@@ -75,9 +75,9 @@ export default async function HomePage() {
             ].map(({ href, label, icon: Icon, count }) => (
               <Link key={label} href={href} className="cut-frame cut-sm group hover:[--frame:var(--color-accent)]">
                 <div className="cut-inner flex flex-col items-start gap-6 bg-gradient-to-br from-transparent from-50% to-accent/10 p-5">
-                  <Icon className="h-8 w-8 text-accent" strokeWidth={1.5} />
+                  <Icon className="h-8 w-8 text-accent-ink" strokeWidth={1.5} />
                   <div>
-                    <div className="h-display text-[16px] group-hover:text-accent">{label}</div>
+                    <div className="h-display text-[16px] group-hover:text-accent-ink">{label}</div>
                     <div className="mt-1 text-[12px] text-dim">{count ? `${count} продукта` : "Запитване за минута"}</div>
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export default async function HomePage() {
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="cut-frame cut-lg [--frame:var(--color-line-soft)]">
                 <div className="cut-inner bg-gradient-to-br from-transparent from-50% to-accent/10 p-8">
-                  <Icon className="h-8 w-8 text-accent" strokeWidth={1.5} />
+                  <Icon className="h-8 w-8 text-accent-ink" strokeWidth={1.5} />
                   <h3 className="h-display mt-6 text-[20px] font-normal">{title}</h3>
                   <p className="mt-3 text-muted">{text}</p>
                 </div>
@@ -171,7 +171,7 @@ function Hero() {
         className="absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)",
+            "linear-gradient(color-mix(in srgb, var(--color-white) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-white) 4%, transparent) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
         }}
       />
@@ -184,11 +184,14 @@ function Hero() {
         viewBox="0 0 40 40"
         className="absolute left-1/2 top-[40%] h-[min(70vw,560px)] w-[min(70vw,560px)] -translate-x-1/2 -translate-y-1/2 rotate-[-8deg]"
       >
-        <path d="M12 2 2 12v26h26l10-10V2H12Z" fill="#141418" stroke="rgba(255,255,255,.18)" strokeWidth=".18" />
+        <path
+          d="M12 2 2 12v26h26l10-10V2H12Z"
+          style={{ fill: "var(--color-surface-2)", stroke: "color-mix(in srgb, var(--color-white) 18%, transparent)" }}
+          strokeWidth=".18"
+        />
         <path
           d="M15 11h15v5H17l-2 2v6l2 2h8v-4h-5v-4h10v13H14l-5-5V16l6-5Z"
-          fill="#0c0c0e"
-          stroke="rgba(255,0,43,.55)"
+          style={{ fill: "var(--color-bg-deep)", stroke: "color-mix(in srgb, var(--color-accent) 55%, transparent)" }}
           strokeWidth=".15"
         />
       </svg>
@@ -196,7 +199,7 @@ function Hero() {
 
       <Container className="relative z-10 pb-14 text-center">
         <h1 className="h-display mx-auto max-w-4xl text-[34px] sm:text-[48px]">
-          <span className="text-accent">Сигурният избор</span> за техника и IT
+          <span className="text-accent-ink">Сигурният избор</span> за техника и IT
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-[18px]">
           Лаптопи, гейминг компютри и компоненти — подбрани, сглобени и тествани от GSOL. Собствен сервиз и IT
@@ -210,7 +213,7 @@ function Hero() {
             Бързо запитване
           </ButtonLink>
         </div>
-        <a href="#promo" aria-label="Надолу към промоциите" className="mt-12 inline-block text-accent">
+        <a href="#promo" aria-label="Надолу към промоциите" className="mt-12 inline-block text-accent-ink">
           <ChevronsDown className="animate-bob h-8 w-8" strokeWidth={1.5} />
         </a>
       </Container>
@@ -219,15 +222,16 @@ function Hero() {
 }
 
 function PromoStrip({ products }: { products: Awaited<ReturnType<typeof getPromoProducts>> }) {
+  // Статична лента: собственикът не иска движещи се банери
   const words = ["Промоции", "Ограничени оферти", "До изчерпване", "Промо кодове", "Томболи"];
-  const run = [...words, ...words, ...words];
   return (
     <section id="promo" className="scroll-mt-[70px] bg-bg-deep pb-20">
       <div className="overflow-hidden bg-accent py-2.5" aria-hidden="true">
-        <div className="animate-marquee flex w-max gap-8 font-display text-[13px] uppercase tracking-[1.5px] text-white">
-          {[...run, ...run].map((w, i) => (
-            <span key={i} className="flex items-center gap-8">
-              {w} <span className="opacity-60">◆</span>
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-1 px-4 font-display text-[13px] uppercase tracking-[1.5px] text-white">
+          {words.map((w, i) => (
+            <span key={w} className="flex items-center gap-8">
+              {i > 0 && <span className="opacity-60">◆</span>}
+              {w}
             </span>
           ))}
         </div>
@@ -259,10 +263,10 @@ function RaffleBanner({ raffle }: { raffle: Awaited<ReturnType<typeof listRaffle
       <Container>
         <Link href={`/tomboli/${raffle.slug}`} className="cut-frame cut-lg group block hover:[--frame:var(--color-accent)]">
           <div className="cut-inner relative grid items-center gap-6 overflow-hidden bg-gradient-to-r from-accent/25 via-surface-2 to-surface-2 p-8 md:grid-cols-[auto_1fr_auto] md:p-10">
-            <Ticket className="h-14 w-14 text-accent" strokeWidth={1.25} />
+            <Ticket className="h-14 w-14 text-accent-ink" strokeWidth={1.25} />
             <div>
               <Eyebrow>Томбола</Eyebrow>
-              <h2 className="h-display mt-2 text-[26px] group-hover:text-accent">{raffle.title}</h2>
+              <h2 className="h-display mt-2 text-[26px] group-hover:text-accent-ink">{raffle.title}</h2>
               <p className="mt-2 text-muted">
                 {raffle.intro ?? "Всяка потвърдена поръчка ви носи участия."}
                 {prizes.length > 0 && <> Награди: {prizes.map((p) => p.title).join(", ")}.</>}
@@ -298,7 +302,7 @@ function Collection({
           <h2 className="h-display mt-2 text-[26px] font-normal">{title}</h2>
           <p className="mt-2 text-muted">{text}</p>
         </div>
-        <Link href={href} className="flex items-center gap-2 font-display text-[13px] uppercase tracking-wide text-white hover:text-accent">
+        <Link href={href} className="flex items-center gap-2 font-display text-[13px] uppercase tracking-wide text-white hover:text-accent-ink">
           Виж всички <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -311,17 +315,17 @@ function Collection({
 
 function BusinessBanner() {
   return (
-    <section className="relative overflow-hidden bg-black py-28 [--section-bg:#000]">
+    <section className="relative overflow-hidden bg-black py-28 [--section-bg:var(--color-black)]">
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-50"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 20% 30%, rgba(255,0,43,.18), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,.06), transparent 45%), repeating-linear-gradient(115deg, rgba(255,255,255,.03) 0 2px, transparent 2px 22px)",
+            "radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 40%), radial-gradient(circle at 80% 70%, color-mix(in srgb, var(--color-white) 6%, transparent), transparent 45%), repeating-linear-gradient(115deg, color-mix(in srgb, var(--color-white) 3%, transparent) 0 2px, transparent 2px 22px)",
         }}
       />
       <Container className="relative text-center">
-        <Building2 className="mx-auto h-10 w-10 text-accent" strokeWidth={1.25} />
+        <Building2 className="mx-auto h-10 w-10 text-accent-ink" strokeWidth={1.25} />
         <div className="mt-6">
           <SectionHeading title="GSOL за" accent="бизнеса" tagline="Вашият IT отдел, без да назначавате цял екип" />
         </div>
@@ -377,7 +381,7 @@ function Services() {
                 className="relative flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-surface to-bg-deep"
                 style={{ clipPath: "polygon(0 101%, 14% 22%, 33% -1px, 100% -1px, 86% 78%, 67% 101%)" }}
               >
-                <Icon className="h-24 w-24 text-accent/80" strokeWidth={1} />
+                <Icon className="h-24 w-24 text-accent-ink/80" strokeWidth={1} />
               </div>
               <div>
                 <Eyebrow>{eyebrow}</Eyebrow>
@@ -403,7 +407,7 @@ async function CtaBand() {
         <h2 className="h-display text-[28px] sm:text-[36px]">Имате задача, а не списък за пазаруване?</h2>
         <p className="tagline mt-2 !text-white/80">Кажете ни какво трябва да постигнете</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href={company.phoneHref} className="btn btn-lg bg-black hover:bg-[#1a1a1d]">
+          <a href={company.phoneHref} className="btn btn-lg bg-black text-white hover:bg-line-soft">
             <Phone className="h-5 w-5" /> {company.phone}
           </a>
           <Link href="/zapitvane" className="btn btn-lg bg-white !text-black hover:bg-white/90">

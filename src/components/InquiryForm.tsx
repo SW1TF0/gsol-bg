@@ -56,7 +56,7 @@ export function InquiryForm({
 
   const fieldError = (name: string) =>
     state?.field === name ? (
-      <p role="alert" className="mt-1.5 text-[13px] text-accent">
+      <p role="alert" className="mt-1.5 text-[13px] text-danger">
         {state.error}
       </p>
     ) : null;
@@ -94,14 +94,14 @@ export function InquiryForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="inq-name" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
-              Име <span className="text-accent">*</span>
+              Име <span className="text-accent-ink">*</span>
             </label>
             <input id="inq-name" name="name" autoComplete="name" required className="input" />
             {fieldError("name")}
           </div>
           <div>
             <label htmlFor="inq-contact" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
-              Телефон или имейл <span className="text-accent">*</span>
+              Телефон или имейл <span className="text-accent-ink">*</span>
             </label>
             <input id="inq-contact" name="contact" required className="input" />
             {fieldError("contact")}
@@ -118,7 +118,7 @@ export function InquiryForm({
 
         <div>
           <label htmlFor="inq-message" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
-            {messageLabel} <span className="text-accent">*</span>
+            {messageLabel} <span className="text-accent-ink">*</span>
           </label>
           <textarea id="inq-message" name="message" rows={5} maxLength={3000} required className="input !h-auto py-3" />
           {fieldError("message")}
@@ -142,7 +142,7 @@ export function InquiryForm({
         {fieldError("privacy")}
 
         {state?.error && !state.field && (
-          <p role="alert" className="text-[14px] text-accent">
+          <p role="alert" className="text-[14px] text-danger">
             {state.error}
           </p>
         )}

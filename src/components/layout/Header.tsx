@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Phone, Search, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { CartButton } from "@/components/cart/CartButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileNav } from "./MobileNav";
 import { mainNav } from "@/lib/site";
 import { getCompany } from "@/lib/settings-data";
@@ -19,7 +20,7 @@ export async function Header() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-[14px] font-normal uppercase tracking-wide text-white transition-colors hover:text-accent"
+                  className="text-[14px] font-normal uppercase tracking-wide text-white transition-colors hover:text-accent-ink"
                 >
                   {item.label}
                 </Link>
@@ -28,7 +29,7 @@ export async function Header() {
             <li>
               <Link
                 href="/promocii"
-                className="text-[14px] font-medium uppercase tracking-wide text-accent transition-colors hover:text-white"
+                className="text-[14px] font-medium uppercase tracking-wide text-accent-ink transition-colors hover:text-white"
               >
                 Промоции
               </Link>
@@ -53,16 +54,17 @@ export async function Header() {
 
           <a
             href={company.phoneHref}
-            className="hidden items-center gap-2 whitespace-nowrap px-2 text-[14px] text-white transition-colors hover:text-accent 2xl:flex"
+            className="hidden items-center gap-2 whitespace-nowrap px-2 text-[14px] text-white transition-colors hover:text-accent-ink 2xl:flex"
           >
-            <Phone className="h-4 w-4 text-accent" strokeWidth={1.75} />
+            <Phone className="h-4 w-4 text-accent-ink" strokeWidth={1.75} />
             {company.phone}
           </a>
 
+          <ThemeToggle />
           <Link
             href="/profil"
             aria-label="Моят профил"
-            className="flex h-10 w-10 items-center justify-center text-white transition-colors hover:text-accent"
+            className="flex h-10 w-10 items-center justify-center text-white transition-colors hover:text-accent-ink"
           >
             <User className="h-5 w-5" strokeWidth={1.75} />
           </Link>

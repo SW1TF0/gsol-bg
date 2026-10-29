@@ -29,7 +29,7 @@ async function RaffleList() {
   if (!raffles.length) {
     return (
       <div className="bg-surface-2 p-10 text-center">
-        <Ticket className="mx-auto h-10 w-10 text-accent" strokeWidth={1.5} />
+        <Ticket className="mx-auto h-10 w-10 text-accent-ink" strokeWidth={1.5} />
         <p className="h-display mt-4 text-[20px]">Скоро нова томбола</p>
         <p className="mt-2 text-muted">Абонирайте се за оферти при следващата си поръчка, за да научите първи.</p>
       </div>
@@ -47,15 +47,15 @@ async function RaffleList() {
           >
             <div className="cut-inner flex h-full flex-col bg-gradient-to-br from-surface-2 from-50% to-accent/15 p-8">
               <span
-                className={`w-fit px-2.5 py-1 font-display text-[11px] uppercase tracking-wide ${r.status === "drawn" ? "bg-ok text-black" : "bg-accent text-white"}`}
+                className={`w-fit px-2.5 py-1 font-display text-[11px] uppercase tracking-wide ${r.status === "drawn" ? "bg-ok text-black" : "bg-accent text-on-accent"}`}
               >
                 {r.status === "drawn" ? "Изтеглена" : "Активна"}
               </span>
-              <h2 className="h-display mt-5 text-[24px] group-hover:text-accent">{r.title}</h2>
+              <h2 className="h-display mt-5 text-[24px] group-hover:text-accent-ink">{r.title}</h2>
               {r.intro && <p className="mt-2 text-muted">{r.intro}</p>}
               <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 text-[13px] text-muted">
                 <span className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-accent" /> {plural(prizes, "награда", "награди")}
+                  <Gift className="h-4 w-4 text-accent-ink" /> {plural(prizes, "награда", "награди")}
                 </span>
                 <span>до {formatDate(r.ends_at)}</span>
               </div>

@@ -14,7 +14,7 @@ export function ProductBadge({ product }: { product: Product }) {
 
 function Badge({ tone, children }: { tone: "accent" | "ok" | "light"; children: React.ReactNode }) {
   const tones = {
-    accent: "bg-accent text-white",
+    accent: "bg-accent text-on-accent",
     ok: "bg-black/80 text-ok",
     light: "bg-black/80 text-white",
   };
@@ -35,7 +35,7 @@ export function PriceBlock({ product, size = "md" }: { product: Product; size?: 
       {saving > 0 && (
         <div className="flex items-baseline gap-2 text-[13px]">
           <s className="text-dim">{formatPrice(product.regularPrice)}</s>
-          <span className="font-medium text-accent">−{formatPrice(saving)}</span>
+          <span className="font-medium text-accent-ink">−{formatPrice(saving)}</span>
         </div>
       )}
       <div className={`font-display font-medium text-white ${size === "lg" ? "text-[36px]" : "text-[22px]"}`}>
@@ -70,16 +70,16 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <div className="flex flex-1 flex-col gap-3 p-4">
           <div className="tagline !text-[11px]">{product.tier ? tierInfo[product.tier].name : product.brand}</div>
           <h3 className="line-clamp-3 text-[14px] font-normal leading-snug text-white">
-            <Link href={href} className="hover:text-accent">
+            <Link href={href} className="hover:text-accent-ink">
               {product.name}
             </Link>
           </h3>
 
           {product.components && (
             <dl className="grid grid-cols-[36px_1fr] gap-x-2 gap-y-1 text-[12px]">
-              <dt className="font-display text-accent">CPU</dt>
+              <dt className="font-display text-accent-ink">CPU</dt>
               <dd className="truncate text-muted">{product.components.cpu}</dd>
-              <dt className="font-display text-accent">GPU</dt>
+              <dt className="font-display text-accent-ink">GPU</dt>
               <dd className="truncate text-muted">{product.components.gpu}</dd>
             </dl>
           )}

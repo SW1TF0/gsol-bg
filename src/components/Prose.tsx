@@ -16,12 +16,12 @@ export function Prose({ children }: { children: string }) {
           ),
           h3: ({ children }) => <h3 className="mb-3 mt-8 font-display text-[18px] text-white">{children}</h3>,
           p: ({ children }) => <p className="my-4 text-muted">{children}</p>,
-          ul: ({ children }) => <ul className="my-4 space-y-2 pl-5 text-muted marker:text-accent [list-style:square]">{children}</ul>,
-          ol: ({ children }) => <ol className="my-4 list-decimal space-y-2 pl-5 text-muted marker:font-display marker:text-accent">{children}</ol>,
+          ul: ({ children }) => <ul className="my-4 space-y-2 pl-5 text-muted marker:text-accent-ink [list-style:square]">{children}</ul>,
+          ol: ({ children }) => <ol className="my-4 list-decimal space-y-2 pl-5 text-muted marker:font-display marker:text-accent-ink">{children}</ol>,
           strong: ({ children }) => <strong className="font-medium text-white">{children}</strong>,
           a: ({ href = "", children }) =>
             href.startsWith("/") ? (
-              <Link href={href} className="text-white underline decoration-accent underline-offset-4 hover:text-accent">
+              <Link href={href} className="text-white underline decoration-accent underline-offset-4 hover:text-accent-ink">
                 {children}
               </Link>
             ) : (
@@ -29,7 +29,7 @@ export function Prose({ children }: { children: string }) {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white underline decoration-accent underline-offset-4 hover:text-accent"
+                className="text-white underline decoration-accent underline-offset-4 hover:text-accent-ink"
               >
                 {children}
               </a>

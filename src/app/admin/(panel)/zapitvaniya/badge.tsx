@@ -1,8 +1,8 @@
 import { inquiryStatusLabels } from "@/lib/inquiries";
 
 const tones: Record<string, string> = {
-  new: "bg-accent text-white",
-  in_progress: "bg-[#2563eb] text-white",
+  new: "bg-accent text-on-accent",
+  in_progress: "bg-[#2563eb] text-[#fff]",
   done: "bg-ok text-black",
   spam: "bg-surface text-dim",
 };

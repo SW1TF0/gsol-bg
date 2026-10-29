@@ -33,6 +33,9 @@ export type Quote = {
   } | null;
 };
 
+/** Законовият лимит за плащане в брой — над него наложеният платеж не се предлага (и базата го отказва) */
+export const COD_LIMIT_CENTS = 511292;
+
 export type RafflePreview = { slug: string; title: string; entries: number; min_order_cents: number };
 
 export type CheckoutInput = {

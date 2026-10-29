@@ -23,16 +23,16 @@ export async function Footer() {
           <ul className="mt-8 space-y-3 text-[14px] text-muted">
             <li>
               <a href={company.phoneHref} className="flex items-center gap-2.5 hover:text-white">
-                <Phone className="h-4 w-4 text-accent" strokeWidth={1.75} /> {company.phone}
+                <Phone className="h-4 w-4 text-accent-ink" strokeWidth={1.75} /> {company.phone}
               </a>
             </li>
             <li>
               <a href={`mailto:${company.email}`} className="flex items-center gap-2.5 break-all hover:text-white">
-                <Mail className="h-4 w-4 flex-none text-accent" strokeWidth={1.75} /> {company.email}
+                <Mail className="h-4 w-4 flex-none text-accent-ink" strokeWidth={1.75} /> {company.email}
               </a>
             </li>
             <li className="flex items-center gap-2.5">
-              <MapPin className="h-4 w-4 text-accent" strokeWidth={1.75} /> {company.address}
+              <MapPin className="h-4 w-4 text-accent-ink" strokeWidth={1.75} /> {company.address}
             </li>
           </ul>
         </div>
@@ -48,7 +48,7 @@ export async function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-[13px] uppercase tracking-wide text-white transition-colors hover:text-accent"
+                      className="text-[13px] uppercase tracking-wide text-white transition-colors hover:text-accent-ink"
                     >
                       {link.label}
                     </Link>

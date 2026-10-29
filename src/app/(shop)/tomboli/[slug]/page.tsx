@@ -52,10 +52,10 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
               )}
               <div className="flex flex-wrap gap-6 text-[14px] text-muted">
                 <span className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-accent" /> {plural(prizeCount, "награда", "награди")}
+                  <Gift className="h-4 w-4 text-accent-ink" /> {plural(prizeCount, "награда", "награди")}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-accent" /> {plural(raffle.stats.participants, "участник", "участници")} ·{" "}
+                  <Users className="h-4 w-4 text-accent-ink" /> {plural(raffle.stats.participants, "участник", "участници")} ·{" "}
                   {plural(raffle.stats.entries, "участие", "участия")}
                 </span>
               </div>
@@ -106,7 +106,7 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_1fr]">
           <section aria-labelledby="prizes">
             <h2 id="prizes" className="h-display text-[24px] font-normal">
-              <span className="text-accent">Награди</span>
+              <span className="text-accent-ink">Награди</span>
             </h2>
             <ul className="mt-6 space-y-3">
               {raffle.prizes.map((p, i) => (
@@ -116,11 +116,11 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
                       <Image src={p.image_url} alt="" fill sizes="64px" className="object-contain p-1 mix-blend-multiply" unoptimized />
                     </span>
                   ) : (
-                    <Gift className="h-8 w-8 flex-none text-accent" strokeWidth={1.5} />
+                    <Gift className="h-8 w-8 flex-none text-accent-ink" strokeWidth={1.5} />
                   )}
                   <div>
                     <div className="text-[16px] text-white">
-                      {p.title} {p.quantity > 1 && <span className="text-accent">× {p.quantity}</span>}
+                      {p.title} {p.quantity > 1 && <span className="text-accent-ink">× {p.quantity}</span>}
                     </div>
                     {p.description && <p className="mt-1 text-[14px] text-muted">{p.description}</p>}
                   </div>
@@ -131,12 +131,12 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
 
           <section aria-labelledby="how">
             <h2 id="how" className="h-display text-[24px] font-normal">
-              Как се <span className="text-accent">участва</span>
+              Как се <span className="text-accent-ink">участва</span>
             </h2>
             <ul className="mt-6 space-y-3">
               {describeEntryRules(raffle, raffle.bonus_items.map((b) => b.name)).map((line) => (
                 <li key={line} className="flex gap-3 text-[15px] text-text">
-                  <Check className="mt-0.5 h-5 w-5 flex-none text-accent" /> {line}
+                  <Check className="mt-0.5 h-5 w-5 flex-none text-accent-ink" /> {line}
                 </li>
               ))}
             </ul>
@@ -165,7 +165,7 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
         {raffle.rules.trim() && (
           <section className="mt-16" aria-labelledby="rules">
             <h2 id="rules" className="h-display mb-8 text-[24px] font-normal">
-              Официални <span className="text-accent">правила</span>
+              Официални <span className="text-accent-ink">правила</span>
             </h2>
             <Prose>{raffle.rules}</Prose>
           </section>

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Building2, Landmark, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
 import { placeOrder } from "@/app/(shop)/actions";
 import { formatPrice } from "@/lib/format";
-import type { CheckoutInput, PaymentMethod, ShippingMethod } from "@/lib/orders";
+import { COD_LIMIT_CENTS, type CheckoutInput, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import type { Shipping } from "@/lib/settings";
 import { useCart } from "./CartProvider";
 import { OrderSummary } from "./OrderSummary";
@@ -15,16 +15,19 @@ import { useQuote } from "./useQuote";
 
 type Errors = Partial<Record<string, string>>;
 
-export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
+export function CheckoutForm({ shippingPrices, phone, phoneHref }: { shippingPrices: Shipping; phone: string; phoneHref: string }) {
   const router = useRouter();
   const { lines, ready, promoCode, clear, setPromoCode } = useCart();
   const [shipping, setShipping] = useState<ShippingMethod>("econt_office");
-  const [payment, setPayment] = useState<PaymentMethod>("cod");
+  const [chosenPayment, setPayment] = useState<PaymentMethod>("cod");
   const [wantsInvoice, setWantsInvoice] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
   const { quote, pending, error } = useQuote(shipping);
+  // Над законовия лимит за плащане в брой остава само банковият превод
+  const codAllowed = !quote || quote.total_cents <= COD_LIMIT_CENTS;
+  const payment: PaymentMethod = codAllowed ? chosenPayment : "bank";
   // Същото правило като в базата: прагът е за продуктите след отстъпка; кодът „безплатна доставка“ важи за двата начина
   const itemsCents = quote ? quote.subtotal_cents - quote.discount_cents : 0;
   const freeShipping =
@@ -172,7 +175,8 @@ export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
               onChange={() => setPayment("cod")}
               icon={Wallet}
               title="Наложен платеж"
-              hint="Плащате при получаване"
+              hint={codAllowed ? "Плащате при получаване" : "Не е възможен над 5 112,92 €"}
+              disabled={!codAllowed}
             />
             <Choice
               name="payment_method"
@@ -183,6 +187,16 @@ export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
               hint="Данните идват с потвърждението"
             />
           </div>
+          {!codAllowed && (
+            <p className="mt-3 text-[13px] text-muted">
+              Над 5 112,92 € законът не позволява плащане в брой, затова наложеният платеж не се предлага. Изберете
+              банков превод или се обадете на{" "}
+              <a href={phoneHref} className="text-white underline underline-offset-2">
+                {phone}
+              </a>
+              .
+            </p>
+          )}
 
           <label className="mt-6 flex cursor-pointer items-center gap-3 text-[14px]">
             <input
@@ -203,7 +217,7 @@ export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
                 <Field name="company_address" label="Адрес на фирмата" errors={{}} required />
               </div>
               {errors.invoice && (
-                <p role="alert" className="text-[13px] text-accent sm:col-span-2">
+                <p role="alert" className="text-[13px] text-danger sm:col-span-2">
                   {errors.invoice}
                 </p>
               )}
@@ -242,7 +256,7 @@ export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
 
         <OrderSummary quote={quote} pending={pending} error={error ?? formError} shippingKnown>
           {errors.promo_code && (
-            <p role="alert" className="text-[13px] text-accent">
+            <p role="alert" className="text-[13px] text-danger">
               {errors.promo_code}
             </p>
           )}
@@ -261,7 +275,7 @@ export function CheckoutForm({ shippingPrices }: { shippingPrices: Shipping }) {
             </span>
           </label>
           {errors.terms && (
-            <p role="alert" className="-mt-2 text-[13px] text-accent">
+            <p role="alert" className="-mt-2 text-[13px] text-danger">
               {errors.terms}
             </p>
           )}
@@ -282,7 +296,7 @@ function Fieldset({ title, icon: Icon, children }: { title: string; icon: typeof
   return (
     <fieldset>
       <legend className="mb-5 flex items-center gap-3 font-display text-[18px] uppercase tracking-wide text-white">
-        <Icon className="h-5 w-5 text-accent" strokeWidth={1.5} /> {title}
+        <Icon className="h-5 w-5 text-accent-ink" strokeWidth={1.5} /> {title}
       </legend>
       {children}
     </fieldset>
@@ -300,18 +314,18 @@ function Field({
     <div>
       <label htmlFor={`f-${name}`} className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
         {label}
-        {rest.required && <span className="text-accent"> *</span>}
+        {rest.required && <span className="text-accent-ink"> *</span>}
       </label>
       <input
         id={`f-${name}`}
         name={name}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `e-${name}` : undefined}
-        className={`input ${error ? "!border-accent" : ""}`}
+        className={`input ${error ? "!border-danger" : ""}`}
         {...rest}
       />
       {error && (
-        <p id={`e-${name}`} role="alert" className="mt-1.5 text-[13px] text-accent">
+        <p id={`e-${name}`} role="alert" className="mt-1.5 text-[13px] text-danger">
           {error}
         </p>
       )}
@@ -327,6 +341,7 @@ function Choice({
   title,
   hint,
   price,
+  disabled,
 }: {
   name: string;
   checked: boolean;
@@ -335,15 +350,16 @@ function Choice({
   title: string;
   hint: string;
   price?: number;
+  disabled?: boolean;
 }) {
   return (
     <label
-      className={`flex cursor-pointer items-center gap-4 p-4 ring-1 transition ${
-        checked ? "bg-accent/10 ring-accent" : "bg-surface-2 ring-line hover:ring-dim"
+      className={`flex items-center gap-4 p-4 ring-1 transition ${
+        disabled ? "cursor-not-allowed bg-surface-2 opacity-50 ring-line" : checked ? "cursor-pointer bg-accent/10 ring-accent" : "cursor-pointer bg-surface-2 ring-line hover:ring-dim"
       }`}
     >
-      <input type="radio" name={name} checked={checked} onChange={onChange} className="sr-only" />
-      <Icon className={`h-6 w-6 flex-none ${checked ? "text-accent" : "text-dim"}`} strokeWidth={1.5} />
+      <input type="radio" name={name} checked={checked} onChange={onChange} disabled={disabled} className="sr-only" />
+      <Icon className={`h-6 w-6 flex-none ${checked ? "text-accent-ink" : "text-dim"}`} strokeWidth={1.5} />
       <span>
         <span className="block text-[15px] font-medium text-white">{title}</span>
         <span className="block text-[13px] text-muted">{hint}</span>

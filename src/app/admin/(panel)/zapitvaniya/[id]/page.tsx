@@ -72,7 +72,7 @@ async function InquiryContent({ params }: Pick<PageProps<"/admin/zapitvaniya/[id
             href={isEmail ? `mailto:${q.contact}` : `tel:${q.contact.replace(/\s/g, "")}`}
             className="mt-3 flex items-center gap-2 break-all text-[14px] text-muted hover:text-white"
           >
-            {isEmail ? <Mail className="h-4 w-4 flex-none text-accent" /> : <Phone className="h-4 w-4 flex-none text-accent" />}
+            {isEmail ? <Mail className="h-4 w-4 flex-none text-accent-ink" /> : <Phone className="h-4 w-4 flex-none text-accent-ink" />}
             {q.contact}
           </a>
         </Panel>

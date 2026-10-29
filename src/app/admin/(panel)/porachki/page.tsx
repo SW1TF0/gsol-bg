@@ -71,7 +71,7 @@ export default async function OrdersPage(props: PageProps<"/admin/porachki">) {
           {data.map((o) => (
             <tr key={o.id} className="hover:bg-surface">
               <td className="px-4 py-3">
-                <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent">
+                <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent-ink">
                   {o.number}
                 </Link>
               </td>

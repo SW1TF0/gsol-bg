@@ -86,7 +86,7 @@ async function RaffleContent({ params, searchParams }: Omit<PageProps<"/admin/to
                   <li key={w.id} className="flex flex-wrap items-center justify-between gap-3 bg-bg-deep p-3 text-[14px]">
                     <div>
                       <div className="text-white">
-                        <span className="mr-2 font-display text-accent">#{w.position}</span>
+                        <span className="mr-2 font-display text-accent-ink">#{w.position}</span>
                         {w.display_name}
                         {w.is_reserve && <span className="ml-2 text-[12px] uppercase tracking-wide text-dim">резерва</span>}
                       </div>
@@ -147,7 +147,7 @@ async function RaffleContent({ params, searchParams }: Omit<PageProps<"/admin/to
                 {participants.slice(0, 200).map((p) => (
                   <tr key={p.order_id}>
                     <td className="px-4 py-2">
-                      <Link href={`/admin/porachki/${p.order_id}`} className="font-display text-white hover:text-accent">
+                      <Link href={`/admin/porachki/${p.order_id}`} className="font-display text-white hover:text-accent-ink">
                         {p.order_number}
                       </Link>
                     </td>
@@ -181,14 +181,14 @@ async function RaffleContent({ params, searchParams }: Omit<PageProps<"/admin/to
               <li key={p.id} className="flex items-start justify-between gap-3 bg-bg-deep p-3 text-[14px]">
                 <div>
                   <div className="text-white">
-                    {p.title} {p.quantity > 1 && <span className="text-accent">× {p.quantity}</span>}
+                    {p.title} {p.quantity > 1 && <span className="text-accent-ink">× {p.quantity}</span>}
                   </div>
                   {p.description && <div className="text-[13px] text-muted">{p.description}</div>}
                 </div>
                 {!drawn && (
                   <form action={deletePrize}>
                     <input type="hidden" name="id" value={p.id} />
-                    <button type="submit" aria-label={`Изтрий ${p.title}`} className="p-1 text-dim hover:text-accent">
+                    <button type="submit" aria-label={`Изтрий ${p.title}`} className="p-1 text-dim hover:text-accent-ink">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </form>

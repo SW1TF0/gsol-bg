@@ -118,7 +118,7 @@ export default async function CustomersPage(props: PageProps<"/admin/klienti">) 
           {data.map((c) => (
             <tr key={c.id} className="hover:bg-surface">
               <td className="px-4 py-3">
-                <Link href={`/admin/klienti/${c.id}`} className="text-white hover:text-accent">
+                <Link href={`/admin/klienti/${c.id}`} className="text-white hover:text-accent-ink">
                   {customerName(c)}
                 </Link>
                 <div className="max-w-[240px] truncate text-[12px] text-dim">{c.email}</div>

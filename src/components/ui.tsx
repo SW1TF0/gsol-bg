@@ -32,7 +32,7 @@ export function SectionHeading({
   return (
     <div className={align === "center" ? "text-center" : ""}>
       <Tag className="h-display text-[30px] sm:text-[40px]">
-        {title} {accent && <span className="text-accent">{accent}</span>}
+        {title} {accent && <span className="text-accent-ink">{accent}</span>}
       </Tag>
       {tagline && <p className="tagline mt-2">{tagline}</p>}
     </div>

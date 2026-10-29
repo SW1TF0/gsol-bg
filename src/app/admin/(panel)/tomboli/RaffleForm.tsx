@@ -271,7 +271,7 @@ export function RaffleForm({
 
         <div className="mt-5 bg-bg-deep p-4 text-[14px]">
           <div className="mb-2 text-[12px] uppercase tracking-wide text-dim">Така ще се вижда в сайта</div>
-          <ul className="list-disc space-y-1 pl-5 text-muted marker:text-accent">
+          <ul className="list-disc space-y-1 pl-5 text-muted marker:text-accent-ink">
             {describeEntryRules({ ...rules, has_bonus_items: bonusNames.length > 0 }, bonusNames).map((l) => (
               <li key={l}>{l}</li>
             ))}
@@ -303,7 +303,7 @@ export function RaffleForm({
           </span>
         )}
         {state?.error && (
-          <span role="alert" className="text-[14px] text-accent">
+          <span role="alert" className="text-[14px] text-danger">
             {state.error}
           </span>
         )}

@@ -48,7 +48,7 @@ export function CustomerForm({ id, note, tags }: { id: string; note: string; tag
           </span>
         )}
         {state?.error && (
-          <span role="alert" className="text-[14px] text-accent">
+          <span role="alert" className="text-[14px] text-danger">
             {state.error}
           </span>
         )}

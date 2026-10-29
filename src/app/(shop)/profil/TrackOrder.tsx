@@ -34,7 +34,7 @@ export function TrackOrder() {
             <PackageSearch className="h-4 w-4" /> {pending ? "Търсене…" : "Провери"}
           </button>
           {state?.error && (
-            <p role="alert" className="text-[14px] text-accent sm:col-span-3">
+            <p role="alert" className="text-[14px] text-danger sm:col-span-3">
               {state.error}
             </p>
           )}
@@ -57,7 +57,7 @@ export function TrackOrder() {
 
           {order.status === "cancelled" || order.status === "returned" ? (
             <p className="mt-8 flex items-center gap-2 bg-bg-deep p-4 text-white">
-              <X className="h-5 w-5 text-accent" /> {orderStatusLabels[order.status]}
+              <X className="h-5 w-5 text-accent-ink" /> {orderStatusLabels[order.status]}
             </p>
           ) : (
             <ol className="mt-8 grid grid-cols-5 gap-2" aria-label="Статус на поръчката">
@@ -69,7 +69,7 @@ export function TrackOrder() {
                     <span
                       className={`inline-flex items-center gap-1 text-[12px] sm:text-[13px] ${reached ? "text-white" : "text-dim"}`}
                     >
-                      {reached && <Check className="hidden h-3.5 w-3.5 text-accent sm:inline" />}
+                      {reached && <Check className="hidden h-3.5 w-3.5 text-accent-ink sm:inline" />}
                       {orderStatusLabels[s]}
                     </span>
                   </li>
@@ -96,7 +96,7 @@ export function TrackOrder() {
                     href={`/tomboli/${r.slug}`}
                     className="flex items-center gap-3 bg-accent/10 p-3 text-[14px] ring-1 ring-accent/30 hover:ring-accent"
                   >
-                    <Ticket className="h-4 w-4 flex-none text-accent" />
+                    <Ticket className="h-4 w-4 flex-none text-accent-ink" />
                     <span>
                       <b className="font-medium text-white">{r.entries}</b> {r.entries === 1 ? "участие" : "участия"} в „{r.title}“
                       {r.status === "drawn" && " — тегленето е проведено"}

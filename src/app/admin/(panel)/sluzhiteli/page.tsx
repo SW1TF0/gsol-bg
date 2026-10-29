@@ -44,7 +44,7 @@ export default async function StaffPage() {
                       </div>
                       <div className="text-right">
                         {m.disabled_at ? (
-                          <div className="text-[12px] uppercase tracking-wide text-accent">
+                          <div className="text-[12px] uppercase tracking-wide text-accent-ink">
                             Спрян от {formatDate(m.disabled_at).split(",")[0]}
                           </div>
                         ) : (
@@ -94,7 +94,7 @@ export default async function StaffPage() {
                           {i.display_name ? `${i.display_name} · ` : ""}
                           {i.email}
                         </div>
-                        <div className={`text-[12px] ${expired ? "text-accent" : "text-dim"}`}>
+                        <div className={`text-[12px] ${expired ? "text-accent-ink" : "text-dim"}`}>
                           {roleLabels[i.role]} · {expired ? "изтекла" : "валидна до"} {formatDate(i.expires_at).split(",")[0]}
                         </div>
                       </div>
@@ -102,7 +102,7 @@ export default async function StaffPage() {
                         <CopyLink link={`${url}/admin/vhod?pokana=${encodeURIComponent(i.email)}`} />
                         <form action={cancelInvite}>
                           <input type="hidden" name="id" value={i.id} />
-                          <button type="submit" className="text-[13px] text-muted underline underline-offset-2 hover:text-accent">
+                          <button type="submit" className="text-[13px] text-muted underline underline-offset-2 hover:text-accent-ink">
                             Отмени
                           </button>
                         </form>

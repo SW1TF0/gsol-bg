@@ -100,7 +100,7 @@ function NavList({ pathname, role, onNavigate }: { pathname: string; role?: Staf
             aria-current={active ? "page" : undefined}
             onClick={onNavigate}
             className={`flex h-11 items-center gap-3 px-4 text-[14px] transition-colors ${
-              active ? "bg-accent text-white" : "text-text hover:bg-surface hover:text-white"
+              active ? "bg-accent text-on-accent" : "text-text hover:bg-surface hover:text-white"
             }`}
             style={{ clipPath: "polygon(0 100%, 0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%)" }}
           >

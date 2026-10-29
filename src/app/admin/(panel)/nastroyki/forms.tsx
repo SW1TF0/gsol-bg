@@ -38,7 +38,7 @@ function SettingsForm({
             </span>
           )}
           {state?.error && (
-            <span role="alert" className="text-[14px] text-accent">
+            <span role="alert" className="text-[14px] text-danger">
               {state.error}
             </span>
           )}
@@ -60,7 +60,7 @@ function Field({
       <label htmlFor={name} className="mb-2 block text-[12px] uppercase tracking-wide text-muted">
         {label}
       </label>
-      <input id={name} name={name} aria-invalid={invalid || undefined} className="input aria-[invalid=true]:!border-accent" {...input} />
+      <input id={name} name={name} aria-invalid={invalid || undefined} className="input aria-[invalid=true]:!border-danger" {...input} />
       {hint && <p className="mt-1.5 text-[12px] text-dim">{hint}</p>}
     </div>
   );
@@ -99,7 +99,7 @@ export function CompanyForm({ company }: { company: SiteSettings["company"] }) {
                     defaultValue={social(name)}
                     placeholder={`${name} — https://…`}
                     aria-invalid={f === `social_${name}` || undefined}
-                    className="input aria-[invalid=true]:!border-accent"
+                    className="input aria-[invalid=true]:!border-danger"
                   />
                 </div>
               ))}
@@ -201,17 +201,17 @@ export function BankForm({ bank }: { bank: SiteSettings["bank"] }) {
               placeholder="BG00 XXXX 0000 0000 0000 00"
               autoComplete="off"
               spellCheck={false}
-              className="input font-mono uppercase aria-[invalid=true]:!border-accent"
+              className="input font-mono uppercase aria-[invalid=true]:!border-danger"
               invalid={f === "iban" || ibanState === "bad"}
             />
             {ibanState && (
-              <p className={`mt-1.5 text-[12px] ${ibanState === "ok" ? "text-ok" : "text-accent"}`}>
+              <p className={`mt-1.5 text-[12px] ${ibanState === "ok" ? "text-ok" : "text-accent-ink"}`}>
                 {ibanState === "ok" ? "IBAN е валиден" : "Контролната сума не съвпада — проверете цифрите"}
               </p>
             )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field name="bic" label="BIC" defaultValue={bank.bic} placeholder="UNCRBGSF" className="input font-mono uppercase aria-[invalid=true]:!border-accent" invalid={f === "bic"} />
+            <Field name="bic" label="BIC" defaultValue={bank.bic} placeholder="UNCRBGSF" className="input font-mono uppercase aria-[invalid=true]:!border-danger" invalid={f === "bic"} />
             <Field name="bank_name" label="Банка" defaultValue={bank.bankName} placeholder="напр. УниКредит Булбанк" />
           </div>
           <p className="text-[13px] text-muted">

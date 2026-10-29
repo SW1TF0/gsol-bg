@@ -7,7 +7,7 @@ import { keepValues } from "@/lib/forms";
 
 const emailResults: Record<string, { text: string; tone: string }> = {
   sent: { text: "Имейлът до клиента е изпратен.", tone: "text-ok" },
-  failed: { text: "Статусът е записан, но имейлът не се изпрати.", tone: "text-accent" },
+  failed: { text: "Статусът е записан, но имейлът не се изпрати.", tone: "text-danger" },
   disabled: { text: "Статусът е записан. Имейлът не е изпратен — изпращането не е настроено.", tone: "text-muted" },
 };
 
@@ -51,7 +51,7 @@ export function StatusForm({ orderId, status, emailEnabled }: { orderId: number;
       <button type="submit" className="btn btn-sm btn-primary w-full" disabled={pending}>
         {pending ? "Записване…" : "Запиши статуса"}
       </button>
-      {state?.error && <p className="text-[13px] text-accent">{state.error}</p>}
+      {state?.error && <p className="text-[13px] text-danger">{state.error}</p>}
       {state?.ok && state.email && (
         <p role="status" className={`text-[13px] ${emailResults[state.email].tone}`}>
           {emailResults[state.email].text}
@@ -78,7 +78,7 @@ export function NoteForm({ orderId }: { orderId: number }) {
       <button type="submit" className="btn btn-sm btn-ghost !h-[42px]" disabled={pending}>
         Добави
       </button>
-      {state?.error && <p className="text-[13px] text-accent">{state.error}</p>}
+      {state?.error && <p className="text-[13px] text-danger">{state.error}</p>}
     </form>
   );
 }

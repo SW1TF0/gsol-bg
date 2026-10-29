@@ -92,7 +92,7 @@ export default async function ProductsPage(props: PageProps<"/admin/produkti">) 
                 </span>
               </td>
               <td className="max-w-[420px] px-4 py-2">
-                <Link href={`/admin/produkti/${p.id}`} className="line-clamp-2 text-white hover:text-accent">
+                <Link href={`/admin/produkti/${p.id}`} className="line-clamp-2 text-white hover:text-accent-ink">
                   {p.name}
                 </Link>
                 <div className="text-[12px] text-dim">
@@ -109,7 +109,7 @@ export default async function ProductsPage(props: PageProps<"/admin/produkti">) 
               <td className="px-4 py-2 text-muted">{stockLabels[p.stock_status] ?? p.stock_status}</td>
               <td className="space-x-1 whitespace-nowrap px-4 py-2">
                 <Pill on={p.is_active}>{p.is_active ? "Видим" : "Скрит"}</Pill>
-                {p.is_promo && <span className="inline-flex h-6 items-center bg-accent px-2.5 text-[12px] text-white">Промо</span>}
+                {p.is_promo && <span className="inline-flex h-6 items-center bg-accent px-2.5 text-[12px] text-on-accent">Промо</span>}
               </td>
             </tr>
           ))}

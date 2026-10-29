@@ -38,11 +38,11 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
         {promoCode ? (
           <div
             className={`flex items-center justify-between gap-3 px-3 py-2.5 text-[14px] ring-1 ${
-              promoError ? "bg-accent/10 ring-accent/40" : "bg-ok/10 ring-ok/30"
+              promoError ? "bg-danger/10 ring-danger/40" : "bg-ok/10 ring-ok/30"
             }`}
           >
             <span className="flex items-center gap-2">
-              {promoError ? <X className="h-4 w-4 text-accent" /> : <Check className="h-4 w-4 text-ok" />}
+              {promoError ? <X className="h-4 w-4 text-danger" /> : <Check className="h-4 w-4 text-ok" />}
               <span className="font-display tracking-wide text-white">{promoCode}</span>
             </span>
             <button
@@ -83,7 +83,7 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
           </form>
         )}
         {promoError && (
-          <p role="alert" className="-mt-2 text-[13px] text-accent">
+          <p role="alert" className="-mt-2 text-[13px] text-danger">
             {promoError}
             {quote?.promo?.reason === "min_subtotal" && quote.promo.min_subtotal_cents
               ? ` Минимум: ${formatPrice(quote.promo.min_subtotal_cents)}.`
@@ -129,7 +129,7 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
               href={`/tomboli/${r.slug}`}
               className="flex items-start gap-3 bg-accent/10 p-3 text-[13px] ring-1 ring-accent/30 hover:ring-accent"
             >
-              <Ticket className="mt-0.5 h-4 w-4 flex-none text-accent" />
+              <Ticket className="mt-0.5 h-4 w-4 flex-none text-accent-ink" />
               {r.entries > 0 ? (
                 <span className="text-text">
                   С тази поръчка печелите <b className="font-medium text-white">{r.entries}</b>{" "}
@@ -145,7 +145,7 @@ export function OrderSummary({ quote, pending, error, shippingKnown = false, chi
         })}
 
         {error && (
-          <p role="alert" className="text-[13px] text-accent">
+          <p role="alert" className="text-[13px] text-danger">
             {error}
           </p>
         )}

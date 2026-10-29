@@ -18,7 +18,7 @@ export function CartView({ phone, phoneHref }: { phone: string; phoneHref: strin
     return (
       <div className="cut-frame cut-lg mx-auto max-w-xl">
         <div className="cut-inner bg-surface-2 p-12 text-center">
-          <ShoppingCart className="mx-auto h-10 w-10 text-accent" strokeWidth={1.5} />
+          <ShoppingCart className="mx-auto h-10 w-10 text-accent-ink" strokeWidth={1.5} />
           <p className="h-display mt-5 text-[22px]">Количката е празна</p>
           <p className="mt-2 text-muted">Разгледайте промоциите или изберете готова конфигурация.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -45,14 +45,14 @@ export function CartView({ phone, phoneHref }: { phone: string; phoneHref: strin
               )}
             </Link>
             <div className="min-w-0">
-              <Link href={`/produkt/${line.slug}`} className="line-clamp-2 text-[14px] text-white hover:text-accent">
+              <Link href={`/produkt/${line.slug}`} className="line-clamp-2 text-[14px] text-white hover:text-accent-ink">
                 {line.name}
               </Link>
               <p className="mt-1 text-[13px] text-dim">{formatPrice(line.price)} / бр.</p>
               <button
                 type="button"
                 onClick={() => remove(line.id)}
-                className="mt-2 inline-flex items-center gap-1.5 text-[12px] uppercase tracking-wide text-dim hover:text-accent"
+                className="mt-2 inline-flex items-center gap-1.5 text-[12px] uppercase tracking-wide text-dim hover:text-accent-ink"
               >
                 <Trash2 className="h-3.5 w-3.5" /> Премахни
               </button>

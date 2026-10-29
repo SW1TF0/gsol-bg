@@ -46,10 +46,10 @@ export function Stat({ label, value, hint, href }: { label: string; value: strin
 }
 
 const statusTone: Record<string, string> = {
-  new: "bg-accent text-white",
-  confirmed: "bg-[#2563eb] text-white",
-  processing: "bg-[#a855f7] text-white",
-  shipped: "bg-[#f59e0b] text-black",
+  new: "bg-accent text-on-accent",
+  confirmed: "bg-[#2563eb] text-[#fff]",
+  processing: "bg-[#a855f7] text-[#fff]",
+  shipped: "bg-[#f59e0b] text-[#000]",
   delivered: "bg-ok text-black",
   cancelled: "bg-surface text-dim",
   returned: "bg-surface text-muted",

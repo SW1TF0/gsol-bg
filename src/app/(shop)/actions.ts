@@ -49,6 +49,10 @@ const errorMap: Record<string, { error: string; field?: Exclude<PlaceOrderResult
   INVALID_ADDRESS: { error: "Въведете адрес за доставка.", field: "shipping_address" },
   INVALID_OFFICE: { error: "Въведете офис на Еконт.", field: "econt_office" },
   INVALID_PAYMENT: { error: "Изберете начин на плащане.", field: "payment_method" },
+  COD_LIMIT: {
+    error: "Над 5 112,92 € наложеният платеж не е разрешен по закон. Изберете банков превод.",
+    field: "payment_method",
+  },
   INVALID_INVOICE: { error: "Проверете данните за фактура: фирма, ЕИК (9–13 цифри) и МОЛ.", field: "invoice" },
   EMPTY_CART: { error: "Количката е празна.", field: "items" },
   ITEMS_UNAVAILABLE: {

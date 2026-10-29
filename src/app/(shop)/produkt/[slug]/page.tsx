@@ -84,11 +84,11 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
 
             {product.components && (
               <dl className="mt-6 grid grid-cols-[56px_1fr] gap-x-3 gap-y-2 bg-surface-2 p-5 text-[14px]">
-                <dt className="font-display text-accent">CPU</dt>
+                <dt className="font-display text-accent-ink">CPU</dt>
                 <dd className="text-white">{product.components.cpu}</dd>
-                <dt className="font-display text-accent">GPU</dt>
+                <dt className="font-display text-accent-ink">GPU</dt>
                 <dd className="text-white">{product.components.gpu}</dd>
-                <dt className="font-display text-accent">Кутия</dt>
+                <dt className="font-display text-accent-ink">Кутия</dt>
                 <dd className="text-white">{product.components.case}</dd>
               </dl>
             )}
@@ -100,7 +100,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
 
             <ul className="mt-6 space-y-2.5 text-[14px]">
               <li className="flex items-start gap-3">
-                <Truck className="mt-0.5 h-4 w-4 flex-none text-accent" strokeWidth={1.75} />
+                <Truck className="mt-0.5 h-4 w-4 flex-none text-accent-ink" strokeWidth={1.75} />
                 <span>
                   <b className="font-medium text-white">{product.inStock ? "Налично" : "По запитване"}</b> · очакван срок{" "}
                   {product.deliveryDays} работни дни · потвърждаваме преди изпълнение
@@ -108,12 +108,12 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
               </li>
               {product.freeWindows && (
                 <li className="flex items-start gap-3">
-                  <BadgeCheck className="mt-0.5 h-4 w-4 flex-none text-accent" strokeWidth={1.75} />
+                  <BadgeCheck className="mt-0.5 h-4 w-4 flex-none text-accent-ink" strokeWidth={1.75} />
                   <span>Безплатна инсталация и начална настройка на Windows. Лицензът не е включен.</span>
                 </li>
               )}
               <li className="flex items-start gap-3">
-                <Wallet className="mt-0.5 h-4 w-4 flex-none text-accent" strokeWidth={1.75} />
+                <Wallet className="mt-0.5 h-4 w-4 flex-none text-accent-ink" strokeWidth={1.75} />
                 <span>Наложен платеж или банков превод · доставка с Еконт до офис или адрес</span>
               </li>
             </ul>
@@ -143,7 +143,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
                 { icon: Phone, label: "Потвърждение от човек" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="bg-surface-2 px-2 py-4">
-                  <Icon className="mx-auto mb-2 h-5 w-5 text-accent" strokeWidth={1.5} />
+                  <Icon className="mx-auto mb-2 h-5 w-5 text-accent-ink" strokeWidth={1.5} />
                   {label}
                 </div>
               ))}
@@ -154,7 +154,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
         {product.specs.length > 0 && (
           <section className="mt-20" aria-labelledby="specs">
             <h2 id="specs" className="h-display text-[26px] font-normal">
-              Технически <span className="text-accent">характеристики</span>
+              Технически <span className="text-accent-ink">характеристики</span>
             </h2>
             <dl className="mt-6 divide-y divide-line-soft border-y border-line-soft">
               {product.specs.map((s, i) => (
@@ -195,7 +195,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/produkt/[slug]">, "pa
           <section className="mt-20" aria-labelledby="related">
             <div className="flex items-end justify-between gap-4">
               <h2 id="related" className="h-display text-[26px] font-normal">
-                Подобни <span className="text-accent">предложения</span>
+                Подобни <span className="text-accent-ink">предложения</span>
               </h2>
               {category && (
                 <Link

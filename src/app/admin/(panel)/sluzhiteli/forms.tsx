@@ -77,7 +77,7 @@ export function InviteForm() {
         <UserPlus className="h-4 w-4" /> {pending ? "Изпращане…" : "Покани"}
       </button>
       {state?.error && (
-        <p role="alert" className="text-[14px] text-accent">
+        <p role="alert" className="text-[14px] text-danger">
           {state.error}
         </p>
       )}
@@ -124,7 +124,7 @@ export function StaffEditForm({ userId, name, role, isSelf }: { userId: string; 
       </button>
       {state?.ok && <Check className="h-4 w-4 self-center text-ok" aria-label="Записано" />}
       {state?.error && (
-        <p role="alert" className="w-full text-[13px] text-accent">
+        <p role="alert" className="w-full text-[13px] text-danger">
           {state.error}
         </p>
       )}
@@ -149,12 +149,12 @@ export function AccessButton({ userId, disabled, label }: { userId: string; disa
       <button
         type="submit"
         disabled={pending}
-        className={`text-[13px] underline underline-offset-2 ${disabled ? "text-ok hover:text-white" : "text-muted hover:text-accent"}`}
+        className={`text-[13px] underline underline-offset-2 ${disabled ? "text-ok hover:text-white" : "text-muted hover:text-accent-ink"}`}
       >
         {disabled ? "Върни достъпа" : "Спри достъпа"}
       </button>
       {state?.error && (
-        <span role="alert" className="ml-2 text-[13px] text-accent">
+        <span role="alert" className="ml-2 text-[13px] text-danger">
           {state.error}
         </span>
       )}
@@ -178,7 +178,7 @@ export function ApproveForm({ email }: { email: string }) {
         Дай достъп
       </button>
       {state?.error && (
-        <span role="alert" className="text-[13px] text-accent">
+        <span role="alert" className="text-[13px] text-danger">
           {state.error}
         </span>
       )}

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const { shipping } = await getSettings();
+  const { shipping, company } = await getSettings();
   return (
     <>
       <PageHeader
@@ -19,7 +19,7 @@ export default async function CheckoutPage() {
         crumbs={[{ label: "Количка", href: "/kolichka" }, { label: "Поръчка" }]}
       />
       <div className="mx-auto max-w-[1200px] px-4 pb-24">
-        <CheckoutForm shippingPrices={shipping} />
+        <CheckoutForm shippingPrices={shipping} phone={company.phone} phoneHref={company.phoneHref} />
       </div>
     </>
   );

@@ -28,7 +28,7 @@ export default async function InquiryPage(props: PageProps<"/zapitvane">) {
 
         <aside className="space-y-6">
           <div className="bg-surface-2 p-6 ring-1 ring-line-soft">
-            <Phone className="h-6 w-6 text-accent" strokeWidth={1.5} />
+            <Phone className="h-6 w-6 text-accent-ink" strokeWidth={1.5} />
             <p className="h-display mt-4 text-[18px]">Спешно е?</p>
             <p className="mt-2 text-[14px] text-muted">Обаждането е най-бързият път. Човек приема разговора.</p>
             <a href={company.phoneHref} className="btn btn-primary mt-5 w-full">

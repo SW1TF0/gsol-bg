@@ -119,7 +119,7 @@ export default async function PromoCodesPage(props: PageProps<"/admin/promo-kodo
             return (
               <tr key={p.id} className="hover:bg-surface">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/promo-kodove/${p.id}`} className="font-display tracking-wide text-white hover:text-accent">
+                  <Link href={`/admin/promo-kodove/${p.id}`} className="font-display tracking-wide text-white hover:text-accent-ink">
                     {p.code}
                   </Link>
                   {(p.partner || p.description) && (
@@ -165,7 +165,7 @@ export default async function PromoCodesPage(props: PageProps<"/admin/promo-kodo
       ) : (
         <Empty>
           {batch ? "Няма кодове в тази партида." : "Още няма промо кодове."}{" "}
-          <Link href="/admin/promo-kodove/nov" className="text-accent hover:underline">
+          <Link href="/admin/promo-kodove/nov" className="text-accent-ink hover:underline">
             Създайте първия
           </Link>
           .

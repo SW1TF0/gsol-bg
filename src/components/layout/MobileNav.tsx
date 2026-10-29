@@ -47,7 +47,7 @@ export function MobileNav({ phone, phoneHref }: { phone: string; phoneHref: stri
                 </li>
               ))}
               <li>
-                <Link href="/promocii" onClick={close} className="h-display block py-4 text-[18px] !text-accent">
+                <Link href="/promocii" onClick={close} className="h-display block py-4 text-[18px] !text-accent-ink">
                   Промоции
                 </Link>
               </li>

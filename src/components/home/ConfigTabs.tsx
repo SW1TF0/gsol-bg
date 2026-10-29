@@ -35,7 +35,7 @@ export function ConfigTabs({ data }: { data: Record<Tier, TierData> }) {
               aria-controls="config-panel"
               onClick={() => setActive(tier)}
               className={`flex h-11 flex-none items-center gap-3 px-4 font-display text-[13px] uppercase tracking-wide transition-colors lg:w-full ${
-                selected ? "bg-accent text-white" : "bg-surface text-text hover:bg-[#303036]"
+                selected ? "bg-accent text-on-accent" : "bg-surface text-text hover:bg-surface-hover"
               }`}
               style={{ clipPath: "polygon(0 100%, 0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%)" }}
             >
@@ -56,11 +56,11 @@ export function ConfigTabs({ data }: { data: Record<Tier, TierData> }) {
             <p className="max-w-md text-muted">{current.blurb}</p>
             {hero?.components && (
               <dl className="grid max-w-md grid-cols-[48px_1fr] gap-x-3 gap-y-2 text-[14px]">
-                <dt className="font-display text-accent">CPU</dt>
+                <dt className="font-display text-accent-ink">CPU</dt>
                 <dd className="text-white">{hero.components.cpu}</dd>
-                <dt className="font-display text-accent">GPU</dt>
+                <dt className="font-display text-accent-ink">GPU</dt>
                 <dd className="text-white">{hero.components.gpu}</dd>
-                <dt className="font-display text-accent">Кутия</dt>
+                <dt className="font-display text-accent-ink">Кутия</dt>
                 <dd className="text-white">{hero.components.case}</dd>
               </dl>
             )}

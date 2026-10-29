@@ -29,7 +29,7 @@ export default async function ItReviewPage() {
         <section className="mt-16" aria-labelledby="when">
           <Eyebrow>Подходящо начало</Eyebrow>
           <h2 id="when" className="h-display mt-2 text-[26px] font-normal">
-            Кога разговорът ще ви е <span className="text-accent">полезен</span>
+            Кога разговорът ще ви е <span className="text-accent-ink">полезен</span>
           </h2>
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             {[
@@ -39,7 +39,7 @@ export default async function ItReviewPage() {
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="cut-frame cut-lg [--frame:var(--color-line-soft)]">
                 <div className="cut-inner bg-gradient-to-br from-transparent from-50% to-accent/10 p-8">
-                  <Icon className="h-8 w-8 text-accent" strokeWidth={1.5} />
+                  <Icon className="h-8 w-8 text-accent-ink" strokeWidth={1.5} />
                   <h3 className="h-display mt-6 text-[19px] font-normal">{title}</h3>
                   <p className="mt-3 text-muted">{text}</p>
                 </div>
@@ -52,7 +52,7 @@ export default async function ItReviewPage() {
           <div>
             <Eyebrow>Как започваме</Eyebrow>
             <h2 id="steps" className="h-display mt-2 text-[26px] font-normal">
-              Четири ясни <span className="text-accent">стъпки</span>
+              Четири ясни <span className="text-accent-ink">стъпки</span>
             </h2>
             <ol className="mt-8 space-y-6">
               {[
@@ -62,7 +62,7 @@ export default async function ItReviewPage() {
                 ["Решение по избор", "Продължаваме само ако GSOL е подходящият партньор за задачата."],
               ].map(([title, text], i) => (
                 <li key={title} className="flex gap-5">
-                  <span className="font-display text-[28px] leading-none text-accent">0{i + 1}</span>
+                  <span className="font-display text-[28px] leading-none text-accent-ink">0{i + 1}</span>
                   <div>
                     <div className="text-[17px] text-white">{title}</div>
                     <p className="mt-1 text-muted">{text}</p>
@@ -71,13 +71,13 @@ export default async function ItReviewPage() {
               ))}
             </ol>
             <div className="mt-8 flex items-start gap-3 bg-surface-2 p-5 text-[14px] text-muted">
-              <ShieldAlert className="mt-0.5 h-5 w-5 flex-none text-accent" strokeWidth={1.5} />
+              <ShieldAlert className="mt-0.5 h-5 w-5 flex-none text-accent-ink" strokeWidth={1.5} />
               Пароли, клиентски списъци и друг чувствителен достъп не са нужни. Формата и разговорът са достатъчни за
               първа посока.
             </div>
             <p className="mt-6 flex items-center gap-2 text-[14px] text-muted">
-              <ListChecks className="h-4 w-4 text-accent" /> Предпочитате разговор веднага?{" "}
-              <a href={company.phoneHref} className="text-white hover:text-accent">
+              <ListChecks className="h-4 w-4 text-accent-ink" /> Предпочитате разговор веднага?{" "}
+              <a href={company.phoneHref} className="text-white hover:text-accent-ink">
                 {company.phone}
               </a>
             </p>

@@ -36,7 +36,7 @@ export function PrizeForm({ raffleId }: { raffleId: number }) {
       <button type="submit" className="btn btn-sm btn-ghost w-full" disabled={pending}>
         <Plus className="h-4 w-4" /> Добави награда
       </button>
-      {state?.error && <p className="text-[13px] text-accent">{state.error}</p>}
+      {state?.error && <p className="text-[13px] text-danger">{state.error}</p>}
     </form>
   );
 }
@@ -54,7 +54,7 @@ export function DrawForm({ raffleId, canDraw }: { raffleId: number; canDraw: boo
         <Dices className="h-4 w-4" /> {pending ? "Теглене…" : "Изтегли победителите"}
       </button>
       {state?.error && (
-        <p role="alert" className="text-[14px] text-accent">
+        <p role="alert" className="text-[14px] text-danger">
           {state.error}
         </p>
       )}

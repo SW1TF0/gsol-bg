@@ -8,7 +8,7 @@ export const metadata = { title: "Томболи" };
 
 const tones: Record<string, string> = {
   draft: "bg-surface text-muted",
-  active: "bg-accent text-white",
+  active: "bg-accent text-on-accent",
   drawn: "bg-ok text-black",
   cancelled: "bg-surface text-dim",
 };
@@ -36,7 +36,7 @@ export default async function RafflesPage() {
           {data.map((r) => (
             <tr key={r.id} className="hover:bg-surface">
               <td className="px-4 py-3">
-                <Link href={`/admin/tomboli/${r.id}`} className="text-white hover:text-accent">
+                <Link href={`/admin/tomboli/${r.id}`} className="text-white hover:text-accent-ink">
                   {r.title}
                 </Link>
                 <div className="font-mono text-[12px] text-dim">/tomboli/{r.slug}</div>
@@ -56,7 +56,7 @@ export default async function RafflesPage() {
       ) : (
         <Empty>
           Още няма томболи.{" "}
-          <Link href="/admin/tomboli/nova" className="text-accent hover:underline">
+          <Link href="/admin/tomboli/nova" className="text-accent-ink hover:underline">
             Създайте първата
           </Link>
           .

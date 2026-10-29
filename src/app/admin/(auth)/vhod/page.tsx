@@ -15,7 +15,7 @@ export default function AdminLoginPage(props: PageProps<"/admin/vhod">) {
         <div className="mb-8 flex items-center justify-center gap-3">
           <LogoMark className="h-10 w-10" />
           <div className="font-display text-[22px] uppercase tracking-wide text-white">
-            GSOL <span className="text-accent">админ</span>
+            GSOL <span className="text-accent-ink">админ</span>
           </div>
         </div>
         <Suspense fallback={<div className="h-80 animate-pulse bg-surface-2" />}>

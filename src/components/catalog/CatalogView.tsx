@@ -138,7 +138,7 @@ export async function CatalogView({
       )}
 
       {hasFilters && (
-        <Link href={basePath} className="flex items-center gap-2 text-[13px] uppercase tracking-wide text-accent hover:text-white">
+        <Link href={basePath} className="flex items-center gap-2 text-[13px] uppercase tracking-wide text-accent-ink hover:text-white">
           <X className="h-4 w-4" /> Изчисти филтрите
         </Link>
       )}

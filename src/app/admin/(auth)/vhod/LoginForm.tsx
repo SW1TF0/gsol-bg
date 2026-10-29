@@ -24,7 +24,7 @@ export function LoginForm({ invitedEmail }: { invitedEmail?: string }) {
               aria-selected={mode === m}
               onClick={() => setMode(m)}
               className={`h-10 font-display text-[13px] uppercase tracking-wide ${
-                mode === m ? "bg-accent text-white" : "bg-surface text-muted hover:text-white"
+                mode === m ? "bg-accent text-on-accent" : "bg-surface text-muted hover:text-white"
               }`}
             >
               {m === "in" ? "Вход" : "Регистрация"}
@@ -56,7 +56,7 @@ export function LoginForm({ invitedEmail }: { invitedEmail?: string }) {
           </div>
 
           {state?.error && (
-            <p role="alert" className="text-[14px] text-accent">
+            <p role="alert" className="text-[14px] text-danger">
               {state.error}
             </p>
           )}

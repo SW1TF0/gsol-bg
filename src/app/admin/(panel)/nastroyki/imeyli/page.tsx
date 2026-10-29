@@ -63,7 +63,7 @@ async function EmailsContent({ searchParams }: Pick<PageProps<"/admin/nastroyki/
 
           {!config.enabled && (
             <Panel title="Как да се включи">
-              <ol className="list-decimal space-y-2.5 pl-5 text-[14px] text-muted marker:text-accent">
+              <ol className="list-decimal space-y-2.5 pl-5 text-[14px] text-muted marker:text-accent-ink">
                 <li>
                   Регистрация в <span className="text-white">resend.com</span> — безплатно до 3000 писма на месец.
                 </li>

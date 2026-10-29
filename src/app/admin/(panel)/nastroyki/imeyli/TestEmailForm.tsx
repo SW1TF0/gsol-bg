@@ -7,7 +7,7 @@ import { sendTestEmail, type TestEmailState } from "../actions";
 
 const messages = {
   sent: { text: "Изпратено — проверете пощата си", tone: "text-ok" },
-  failed: { text: "Не се изпрати. Проверете ключа и подателя в Resend.", tone: "text-accent" },
+  failed: { text: "Не се изпрати. Проверете ключа и подателя в Resend.", tone: "text-danger" },
   disabled: { text: "Изпращането не е настроено — вижте стъпките по-горе.", tone: "text-muted" },
 };
 

@@ -116,7 +116,7 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                           {data.kind === "shop_alert" && "Известие до магазина за новата поръчка"}
                           {data.kind === "status" && <>Имейл до клиента: „{orderStatusLabels[data.status ?? ""] ?? data.status}“</>}
                           {" — "}
-                          <span className={data.result === "sent" ? "text-ok" : data.result === "failed" ? "text-accent" : "text-dim"}>
+                          <span className={data.result === "sent" ? "text-ok" : data.result === "failed" ? "text-accent-ink" : "text-dim"}>
                             {emailResultLabels[data.result ?? ""] ?? data.result}
                           </span>
                           {data.message && <span className="mt-1 block whitespace-pre-line text-muted">{data.message}</span>}
@@ -141,13 +141,13 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                 {order.first_name} {order.last_name}
               </div>
               <a href={`tel:${order.phone}`} className="flex items-center gap-2 text-muted hover:text-white">
-                <Phone className="h-4 w-4 text-accent" /> {order.phone}
+                <Phone className="h-4 w-4 text-accent-ink" /> {order.phone}
               </a>
               <a href={`mailto:${order.email}`} className="flex items-center gap-2 break-all text-muted hover:text-white">
-                <Mail className="h-4 w-4 flex-none text-accent" /> {order.email}
+                <Mail className="h-4 w-4 flex-none text-accent-ink" /> {order.email}
               </a>
               {order.customer_id && (
-                <Link href={`/admin/klienti/${order.customer_id}`} className="inline-block pt-1 text-[13px] text-accent hover:underline">
+                <Link href={`/admin/klienti/${order.customer_id}`} className="inline-block pt-1 text-[13px] text-accent-ink hover:underline">
                   Профил на клиента →
                 </Link>
               )}

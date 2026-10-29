@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLink, LogOut } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminMobileMenu, AdminMobileMenuFallback, AdminNav, AdminNavFallback } from "@/components/admin/AdminNav";
 import { requireStaff, roleLabels } from "@/lib/admin/auth";
 import { signOut } from "@/app/admin/actions";
@@ -19,7 +20,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
         <Link href="/admin" className="mb-8 flex items-center gap-2.5 px-3">
           <LogoMark className="h-8 w-8" />
           <span className="font-display text-[18px] uppercase tracking-wide text-white">
-            GSOL <span className="text-accent">админ</span>
+            GSOL <span className="text-accent-ink">админ</span>
           </span>
         </Link>
         <Suspense fallback={<AdminNavFallback />}>
@@ -33,7 +34,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
       <div className="min-w-0 flex-1">
         <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-line-soft bg-black px-4 shadow-[inset_0_2px_0_var(--color-accent)] lg:hidden">
           <Link href="/admin" className="font-display uppercase text-white">
-            GSOL <span className="text-accent">админ</span>
+            GSOL <span className="text-accent-ink">админ</span>
           </Link>
           <Suspense fallback={<AdminMobileMenuFallback />}>
             <RoleMobileMenu />
@@ -63,9 +64,12 @@ function SidebarFooter() {
       <Suspense fallback={<div className="h-10" />}>
         <CurrentUser />
       </Suspense>
-      <Link href="/" className="flex items-center gap-2 text-[13px] text-muted hover:text-white">
-        <ExternalLink className="h-3.5 w-3.5" /> Към сайта
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 text-[13px] text-muted hover:text-white">
+          <ExternalLink className="h-3.5 w-3.5" /> Към сайта
+        </Link>
+        <ThemeToggle className="!h-8 !w-8" />
+      </div>
     </>
   );
 }
@@ -79,7 +83,7 @@ async function CurrentUser() {
         <div className="text-[11px] uppercase tracking-wide text-dim">{roleLabels[staff.role]}</div>
       </div>
       <form action={signOut}>
-        <button type="submit" aria-label="Изход" className="p-2 text-muted hover:text-accent">
+        <button type="submit" aria-label="Изход" className="p-2 text-muted hover:text-accent-ink">
           <LogOut className="h-4 w-4" />
         </button>
       </form>

@@ -75,7 +75,7 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
                 {orders.map((o) => (
                   <tr key={o.id} className="hover:bg-surface">
                     <td className="px-4 py-3">
-                      <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent">
+                      <Link href={`/admin/porachki/${o.id}`} className="font-display text-white hover:text-accent-ink">
                         {o.number}
                       </Link>
                     </td>
@@ -101,7 +101,7 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
                 {inquiries.map((q) => (
                   <li key={q.id} className="flex flex-wrap items-start justify-between gap-3 py-3 text-[14px]">
                     <div className="min-w-0 flex-1">
-                      <Link href={`/admin/zapitvaniya/${q.id}`} className="text-white hover:text-accent">
+                      <Link href={`/admin/zapitvaniya/${q.id}`} className="text-white hover:text-accent-ink">
                         {inquiryTopics[q.topic as InquiryTopic]?.label ?? q.topic}
                       </Link>
                       <p className="mt-0.5 line-clamp-2 text-[13px] text-muted">{q.message}</p>
@@ -121,8 +121,8 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
               <ul className="space-y-2 text-[14px]">
                 {wins!.map((w) => (
                   <li key={`${w.raffle_id}-${w.position}`} className="flex items-center gap-2.5">
-                    <Trophy className="h-4 w-4 flex-none text-accent" />
-                    <Link href={`/admin/tomboli/${w.raffle_id}`} className="text-white hover:text-accent">
+                    <Trophy className="h-4 w-4 flex-none text-accent-ink" />
+                    <Link href={`/admin/tomboli/${w.raffle_id}`} className="text-white hover:text-accent-ink">
                       {raffles?.find((r) => r.id === w.raffle_id)?.title ?? "Томбола"}
                     </Link>
                     <span className="text-muted">
@@ -140,11 +140,11 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
             <div className="space-y-2 text-[14px]">
               {c.phone && (
                 <a href={`tel:${c.phone}`} className="flex items-center gap-2 text-muted hover:text-white">
-                  <Phone className="h-4 w-4 text-accent" /> {c.phone}
+                  <Phone className="h-4 w-4 text-accent-ink" /> {c.phone}
                 </a>
               )}
               <a href={`mailto:${c.email}`} className="flex items-center gap-2 break-all text-muted hover:text-white">
-                <Mail className="h-4 w-4 flex-none text-accent" /> {c.email}
+                <Mail className="h-4 w-4 flex-none text-accent-ink" /> {c.email}
               </a>
             </div>
             <div className="mt-4 border-t border-line pt-4 text-[14px]">
@@ -155,7 +155,7 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
                   </span>
                   <form action={unsubscribeCustomer}>
                     <input type="hidden" name="id" value={c.id} />
-                    <button type="submit" className="text-[13px] text-muted underline underline-offset-2 hover:text-accent">
+                    <button type="submit" className="text-[13px] text-muted underline underline-offset-2 hover:text-accent-ink">
                       Отпиши
                     </button>
                   </form>
@@ -169,7 +169,7 @@ async function CustomerContent({ params }: Pick<PageProps<"/admin/klienti/[id]">
           {company?.company && (
             <Panel title="Фирма (от фактурата)">
               <div className="flex items-start gap-2.5 text-[14px]">
-                <Building2 className="mt-0.5 h-4 w-4 flex-none text-accent" />
+                <Building2 className="mt-0.5 h-4 w-4 flex-none text-accent-ink" />
                 <div className="space-y-1">
                   <div className="text-white">{company.company}</div>
                   <div className="text-muted">
