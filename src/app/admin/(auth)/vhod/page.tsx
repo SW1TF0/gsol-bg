@@ -19,20 +19,44 @@ export default function AdminLoginPage(props: PageProps<"/admin/vhod">) {
           </div>
         </div>
         <Suspense fallback={<div className="h-80 animate-pulse bg-surface-2" />}>
-          <Notice searchParams={props.searchParams} />
+          <NoticeAndForm searchParams={props.searchParams} />
         </Suspense>
-        <LoginForm />
       </div>
     </main>
   );
 }
 
-async function Notice({ searchParams }: Pick<PageProps<"/admin/vhod">, "searchParams">) {
+async function NoticeAndForm({ searchParams }: Pick<PageProps<"/admin/vhod">, "searchParams">) {
   const params = await searchParams;
+  const invited = typeof params.pokana === "string" && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(params.pokana) ? params.pokana : undefined;
+  return (
+    <>
+      <Notice params={params} invited={invited} />
+      <LoginForm key={invited ?? ""} invitedEmail={invited} />
+    </>
+  );
+}
+
+function Notice({ params, invited }: { params: Awaited<PageProps<"/admin/vhod">["searchParams"]>; invited?: string }) {
+  if (invited) {
+    return (
+      <p className="mb-4 bg-bg-deep p-3 text-[14px] text-text ring-1 ring-line">
+        Поканени сте в админ панела. Създайте парола за <span className="text-white">{invited}</span> и потвърдете
+        имейла — достъпът се включва веднага след това. Ако вече имате профил, изберете „Вход“.
+      </p>
+    );
+  }
   if (params.potvarden) {
     return (
       <p className="mb-4 bg-ok/10 p-3 text-[14px] text-ok ring-1 ring-ok/30">
         Имейлът е потвърден. Влезте с паролата си.
+      </p>
+    );
+  }
+  if (params.greshka === "spryan") {
+    return (
+      <p className="mb-4 bg-accent/10 p-3 text-[14px] text-white ring-1 ring-accent/40">
+        Достъпът ви до админ панела е спрян. Ако смятате, че това е грешка, свържете се с администратор.
       </p>
     );
   }

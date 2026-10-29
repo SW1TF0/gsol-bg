@@ -726,22 +726,67 @@ export type Database = {
       };
       staff: {
         Row: {
+          added_by: string | null;
           created_at: string;
+          disabled_at: string | null;
           display_name: string | null;
           role: Database["public"]["Enums"]["staff_role"];
+          updated_at: string;
           user_id: string;
         };
         Insert: {
+          added_by?: string | null;
           created_at?: string;
+          disabled_at?: string | null;
           display_name?: string | null;
           role?: Database["public"]["Enums"]["staff_role"];
+          updated_at?: string;
           user_id: string;
         };
         Update: {
+          added_by?: string | null;
           created_at?: string;
+          disabled_at?: string | null;
           display_name?: string | null;
           role?: Database["public"]["Enums"]["staff_role"];
+          updated_at?: string;
           user_id?: string;
+        };
+        Relationships: [];
+      };
+      staff_invites: {
+        Row: {
+          id: number;
+          email: string;
+          role: Database["public"]["Enums"]["staff_role"];
+          display_name: string | null;
+          invited_by: string | null;
+          created_at: string;
+          expires_at: string;
+          accepted_at: string | null;
+          accepted_user: string | null;
+        };
+        Insert: {
+          id?: never;
+          email: string;
+          role: Database["public"]["Enums"]["staff_role"];
+          display_name?: string | null;
+          invited_by?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          accepted_at?: string | null;
+          accepted_user?: string | null;
+        };
+        Update: {
+          id?: never;
+          email?: string;
+          role?: Database["public"]["Enums"]["staff_role"];
+          display_name?: string | null;
+          invited_by?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          accepted_at?: string | null;
+          accepted_user?: string | null;
         };
         Relationships: [];
       };
@@ -773,6 +818,27 @@ export type Database = {
       track_order: { Args: { p_email: string; p_number: string }; Returns: Json };
       order_receipt: { Args: { p_email: string; p_number: string }; Returns: Json };
       customer_inquiries: { Args: { p_customer: string }; Returns: Database["public"]["Tables"]["inquiries"]["Row"][] };
+      invite_staff: {
+        Args: { p_email: string; p_role: Database["public"]["Enums"]["staff_role"]; p_name?: string };
+        Returns: string;
+      };
+      staff_members: {
+        Args: never;
+        Returns: {
+          user_id: string;
+          email: string;
+          role: Database["public"]["Enums"]["staff_role"];
+          display_name: string | null;
+          created_at: string;
+          disabled_at: string | null;
+          last_sign_in_at: string | null;
+          is_self: boolean;
+        }[];
+      };
+      staff_pending_users: {
+        Args: never;
+        Returns: { user_id: string; email: string; created_at: string; confirmed: boolean }[];
+      };
       log_order_email: { Args: { p_email: string; p_kind: string; p_number: string; p_result: string }; Returns: undefined };
       get_raffle: { Args: { p_slug: string }; Returns: Json };
       raffle_preview: { Args: { p_amount_cents: number; p_items: Json }; Returns: Json };

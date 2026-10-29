@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { formatPrice } from "../format.ts";
 import { defaultSettings } from "../settings.ts";
-import { esc, inquiryAlert, orderConfirmation, orderStatusEmail, shopOrderAlert, type Customer, type Receipt } from "./templates.ts";
+import { esc, inquiryAlert, orderConfirmation, orderStatusEmail, shopOrderAlert, staffInvite, type Customer, type Receipt } from "./templates.ts";
 
 const ctx = { company: defaultSettings.company, siteUrl: "https://gsol.bg" };
 
@@ -70,4 +70,11 @@ test("статус и запитване", () => {
   const q = inquiryAlert(ctx, { topicLabel: "Ремонт", name: "Мария", contact: "m@example.com", message: "Здравейте", details: { city: "Ардино" }, sourceUrl: null }, "https://gsol.bg/admin/zapitvaniya");
   assert.ok(q.html.includes("mailto:m@example.com"));
   assert.ok(q.text.includes("Населено място: Ардино"));
+});
+
+test("покана за служител", () => {
+  const e = staffInvite(ctx, { roleLabel: "Мениджър", name: "Мария <M>", link: "https://gsol.bg/admin/vhod?pokana=m%40x.bg", invitedBy: "Красимир" });
+  assert.ok(e.html.includes("Мария &lt;M&gt;, поканени"));
+  assert.ok(e.html.includes('href="https://gsol.bg/admin/vhod?pokana=m%40x.bg"'));
+  assert.ok(e.text.includes("Мениджър"));
 });

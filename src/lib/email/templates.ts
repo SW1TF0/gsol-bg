@@ -344,3 +344,27 @@ export function orderStatusEmail(
   ].join("\n");
   return { subject: `${o.number}: ${t.title}`, html, text };
 }
+
+/** Покана за служител в админ панела */
+export function staffInvite(ctx: Ctx, i: { roleLabel: string; name: string | null; link: string; invitedBy: string }): Email {
+  const html = layout(ctx, {
+    preheader: `${i.invitedBy} ви кани в админ панела като ${i.roleLabel}.`,
+    title: `${i.name ? `${i.name}, поканени` : "Поканени"} сте в админ панела`,
+    body: [
+      p(`${esc(i.invitedBy)} ви добави в админ панела на ${esc(ctx.company.brand)} с роля <b>${esc(i.roleLabel)}</b>.`),
+      p("Създайте парола с този имейл и потвърдете регистрацията от писмото, което ще получите. Достъпът се включва веднага след потвърждението."),
+      button(i.link, "Създай профил"),
+      p(`<span style="color:${MUTED};font-size:13px;">Поканата важи 14 дни. Ако не я очаквате, просто игнорирайте това писмо.</span>`),
+    ].join(""),
+  });
+  const text = [
+    `Поканени сте в админ панела на ${ctx.company.brand} с роля ${i.roleLabel}.`,
+    "",
+    "Създайте парола с този имейл и потвърдете регистрацията. Достъпът се включва веднага след потвърждението.",
+    "",
+    i.link,
+    "",
+    "Поканата важи 14 дни.",
+  ].join("\n");
+  return { subject: `Покана за админ панела на ${ctx.company.brand}`, html, text };
+}

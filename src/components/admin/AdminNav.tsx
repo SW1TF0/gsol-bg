@@ -3,31 +3,47 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Gauge, Inbox, Menu, Package, Receipt, Settings, Ticket, TicketPercent, Users, X } from "lucide-react";
+import {
+  FileText,
+  Gauge,
+  Inbox,
+  Menu,
+  Package,
+  Receipt,
+  Settings,
+  Ticket,
+  TicketPercent,
+  UserCog,
+  Users,
+  X,
+} from "lucide-react";
+import type { StaffRole } from "@/lib/staff";
 
-const items = [
+// roles: кои роли виждат раздела (същите като в requireStaff на страницата); без roles — всички
+const items: { href: string; label: string; icon: typeof Gauge; exact?: boolean; roles?: StaffRole[] }[] = [
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
-  { href: "/admin/klienti", label: "Клиенти", icon: Users },
+  { href: "/admin/klienti", label: "Клиенти", icon: Users, roles: ["admin", "manager", "sales"] },
   { href: "/admin/promo-kodove", label: "Промо кодове", icon: TicketPercent },
-  { href: "/admin/tomboli", label: "Томболи", icon: Ticket },
+  { href: "/admin/tomboli", label: "Томболи", icon: Ticket, roles: ["admin", "manager"] },
   { href: "/admin/zapitvaniya", label: "Запитвания", icon: Inbox },
   { href: "/admin/stranitsi", label: "Страници", icon: FileText },
-  { href: "/admin/nastroyki", label: "Настройки", icon: Settings },
+  { href: "/admin/sluzhiteli", label: "Служители", icon: UserCog, roles: ["admin"] },
+  { href: "/admin/nastroyki", label: "Настройки", icon: Settings, roles: ["admin"] },
 ];
 
-export function AdminNav() {
-  return <NavList pathname={usePathname()} />;
+export function AdminNav({ role }: { role: StaffRole }) {
+  return <NavList pathname={usePathname()} role={role} />;
 }
 
-/** Същото меню без активен елемент — показва се, докато адресът се зарежда */
+/** Общите раздели без активен елемент — показват се, докато се зареждат адресът и ролята */
 export function AdminNavFallback() {
   return <NavList pathname="" />;
 }
 
 /** Бутон „Меню“ за тесни екрани — показва цялото меню и долната част на страничната лента */
-export function AdminMobileMenu({ footer }: { footer: React.ReactNode }) {
+export function AdminMobileMenu({ footer, role }: { footer: React.ReactNode; role: StaffRole }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -44,7 +60,7 @@ export function AdminMobileMenu({ footer }: { footer: React.ReactNode }) {
       <MenuButton open={open} onClick={() => setOpen((v) => !v)} />
       {open && (
         <div className="fixed inset-x-0 bottom-0 top-16 z-40 flex flex-col overflow-y-auto bg-black px-3 pb-6 pt-4">
-          <NavList pathname={pathname} onNavigate={close} />
+          <NavList pathname={pathname} role={role} onNavigate={close} />
           <div className="mt-6 space-y-2 border-t border-line-soft px-3 pt-4">{footer}</div>
         </div>
       )}
@@ -71,10 +87,11 @@ function MenuButton({ open, onClick }: { open: boolean; onClick?: () => void }) 
   );
 }
 
-function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavList({ pathname, role, onNavigate }: { pathname: string; role?: StaffRole; onNavigate?: () => void }) {
+  const visible = items.filter((i) => !i.roles || (role && i.roles.includes(role)));
   return (
     <nav aria-label="Админ меню" className="space-y-1">
-      {items.map(({ href, label, icon: Icon, exact }) => {
+      {visible.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link

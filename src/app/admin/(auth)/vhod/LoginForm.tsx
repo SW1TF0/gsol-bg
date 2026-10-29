@@ -4,8 +4,9 @@ import { useActionState, useState } from "react";
 import { signIn, signUp, type AuthState } from "@/app/admin/actions";
 import { keepValues } from "@/lib/forms";
 
-export function LoginForm() {
-  const [mode, setMode] = useState<"in" | "up">("in");
+/** invitedEmail — от връзката в поканата: отваря регистрацията с попълнен имейл */
+export function LoginForm({ invitedEmail }: { invitedEmail?: string }) {
+  const [mode, setMode] = useState<"in" | "up">(invitedEmail ? "up" : "in");
   const [inState, inAction, inPending] = useActionState<AuthState, FormData>(signIn, null);
   const [upState, upAction, upPending] = useActionState<AuthState, FormData>(signUp, null);
   const state = mode === "in" ? inState : upState;
@@ -36,7 +37,7 @@ export function LoginForm() {
             <label htmlFor="email" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
               Имейл
             </label>
-            <input id="email" name="email" type="email" autoComplete="email" required className="input" />
+            <input id="email" name="email" type="email" autoComplete="email" defaultValue={invitedEmail} required className="input" />
           </div>
           <div>
             <label htmlFor="password" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">

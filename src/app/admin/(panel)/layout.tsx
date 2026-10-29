@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
           </span>
         </Link>
         <Suspense fallback={<AdminNavFallback />}>
-          <AdminNav />
+          <RoleNav />
         </Suspense>
         <div className="mt-auto space-y-2 border-t border-line-soft px-3 pt-4">
           <SidebarFooter />
@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
             GSOL <span className="text-accent">админ</span>
           </Link>
           <Suspense fallback={<AdminMobileMenuFallback />}>
-            <AdminMobileMenu footer={<SidebarFooter />} />
+            <RoleMobileMenu />
           </Suspense>
         </div>
         <main className="mx-auto max-w-[1280px] px-4 py-8 lg:px-8">
@@ -45,6 +45,16 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
       </div>
     </div>
   );
+}
+
+async function RoleNav() {
+  const { staff } = await requireStaff();
+  return <AdminNav role={staff.role} />;
+}
+
+async function RoleMobileMenu() {
+  const { staff } = await requireStaff();
+  return <AdminMobileMenu role={staff.role} footer={<SidebarFooter />} />;
 }
 
 function SidebarFooter() {
