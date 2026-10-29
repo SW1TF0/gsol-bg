@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Check } from "lucide-react";
 import { Panel } from "@/components/admin/ui";
 import { updatePage, type PageFormState } from "../actions";
+import { keepValues } from "@/lib/forms";
 
 type Props = { page: { slug: string; title: string; intro: string; body: string; is_published: boolean } };
 
@@ -11,7 +12,7 @@ export function PageEditor({ page }: Props) {
   const [state, action, pending] = useActionState<PageFormState, FormData>(updatePage, null);
 
   return (
-    <form action={action} className="grid gap-6 xl:grid-cols-[1fr_300px]">
+    <form onSubmit={keepValues(action)} className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
       <input type="hidden" name="slug" value={page.slug} />
       <div className="space-y-6">
         <Panel>

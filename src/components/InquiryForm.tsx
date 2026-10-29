@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, Send } from "lucide-react";
 import { submitInquiry } from "@/app/(shop)/inquiry-actions";
 import { inquiryTopics, publicTopics, type InquiryState, type InquiryTopic } from "@/lib/inquiries";
+import { keepValues } from "@/lib/forms";
 
 type Extra = "city" | "devices" | "budget" | "purpose" | "contact_time";
 
@@ -61,7 +62,7 @@ export function InquiryForm({
     ) : null;
 
   return (
-    <form action={action} className="cut-frame cut-lg">
+    <form onSubmit={keepValues(action)} className="cut-frame cut-lg">
       <div className="cut-inner space-y-5 bg-surface-2 p-6 sm:p-8">
         {fixedTopic ? (
           <input type="hidden" name="topic" value={fixedTopic} />

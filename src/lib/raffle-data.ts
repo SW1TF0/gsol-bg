@@ -15,6 +15,7 @@ export type PublicRaffle = RaffleRules & {
   starts_at: string;
   ends_at: string;
   status: "active" | "drawn";
+  bonus_items: { name: string; href: string }[];
   prizes: { title: string; description: string | null; image_url: string | null; quantity: number }[];
   stats: { participants: number; entries: number };
   winners: { position: number; name: string; prize: string | null }[] | null;

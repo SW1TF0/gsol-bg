@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/catalog/PageHeader";
 import { Prose } from "@/components/Prose";
 import { Countdown } from "@/components/raffle/Countdown";
 import { ButtonLink } from "@/components/ui";
-import { formatDate } from "@/lib/format";
+import { formatDate, plural } from "@/lib/format";
 import { getRaffle } from "@/lib/raffle-data";
 import { describeEntryRules } from "@/lib/raffles";
 
@@ -52,10 +52,11 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
               )}
               <div className="flex flex-wrap gap-6 text-[14px] text-muted">
                 <span className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-accent" /> {prizeCount} {prizeCount === 1 ? "награда" : "награди"}
+                  <Gift className="h-4 w-4 text-accent" /> {plural(prizeCount, "награда", "награди")}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-accent" /> {raffle.stats.participants} участници · {raffle.stats.entries} участия
+                  <Users className="h-4 w-4 text-accent" /> {plural(raffle.stats.participants, "участник", "участници")} ·{" "}
+                  {plural(raffle.stats.entries, "участие", "участия")}
                 </span>
               </div>
               {!drawn && (
@@ -133,12 +134,24 @@ async function RaffleContent({ params }: Pick<PageProps<"/tomboli/[slug]">, "par
               Как се <span className="text-accent">участва</span>
             </h2>
             <ul className="mt-6 space-y-3">
-              {describeEntryRules(raffle).map((line) => (
+              {describeEntryRules(raffle, raffle.bonus_items.map((b) => b.name)).map((line) => (
                 <li key={line} className="flex gap-3 text-[15px] text-text">
                   <Check className="mt-0.5 h-5 w-5 flex-none text-accent" /> {line}
                 </li>
               ))}
             </ul>
+            {raffle.bonus_entries > 0 && raffle.bonus_items.length > 0 && (
+              <div className="mt-5">
+                <div className="mb-2 text-[12px] uppercase tracking-[1.5px] text-dim">С бонус участия</div>
+                <div className="flex flex-wrap gap-2">
+                  {raffle.bonus_items.map((b) => (
+                    <Link key={b.href} href={b.href} className="chip hover:text-white">
+                      {b.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="mt-6 text-[14px] text-muted">
               Броят на участията ви виждате в количката преди поръчка и в{" "}
               <Link href="/profil" className="text-white underline underline-offset-2">

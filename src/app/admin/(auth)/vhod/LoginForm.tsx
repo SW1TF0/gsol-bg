@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { signIn, signUp, type AuthState } from "@/app/admin/actions";
+import { keepValues } from "@/lib/forms";
 
 export function LoginForm() {
   const [mode, setMode] = useState<"in" | "up">("in");
@@ -30,7 +31,7 @@ export function LoginForm() {
           ))}
         </div>
 
-        <form action={mode === "in" ? inAction : upAction} className="space-y-4">
+        <form onSubmit={keepValues(mode === "in" ? inAction : upAction)} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">
               Имейл

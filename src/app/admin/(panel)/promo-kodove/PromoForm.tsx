@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Check } from "lucide-react";
 import { Panel } from "@/components/admin/ui";
 import { createPromo, updatePromo, type PromoFormState } from "./actions";
+import { keepValues } from "@/lib/forms";
 
 export type PromoDefaults = {
   id?: number;
@@ -62,7 +63,7 @@ export function PromoForm({
   const [state, action, pending] = useActionState<PromoFormState, FormData>(submit, null);
 
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={keepValues(action)} className="space-y-6">
       {editing && <input type="hidden" name="id" value={defaults.id} />}
       <input type="hidden" name="mode" value={mode} />
 

@@ -62,7 +62,7 @@ async function PromoPageContent({ params }: Pick<PageProps<"/admin/promo-kodove/
         <Stat label="Дадена отстъпка" value={formatPrice(given)} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <PromoForm
           categories={categories}
           defaults={{

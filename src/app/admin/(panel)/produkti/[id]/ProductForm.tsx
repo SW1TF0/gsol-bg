@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Check } from "lucide-react";
 import { Panel } from "@/components/admin/ui";
 import { updateProduct, type ProductFormState } from "../actions";
+import { keepValues } from "@/lib/forms";
 
 type Props = {
   product: {
@@ -28,7 +29,7 @@ export function ProductForm({ product, categories }: Props) {
   const [state, action, pending] = useActionState<ProductFormState, FormData>(updateProduct, null);
 
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={keepValues(action)} className="space-y-6">
       <input type="hidden" name="id" value={product.id} />
       <Panel title="Основни данни">
         <div className="space-y-4">

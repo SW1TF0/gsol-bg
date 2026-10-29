@@ -6,6 +6,7 @@ import { Panel } from "@/components/admin/ui";
 import { describeEntryRules, slugify } from "@/lib/raffles";
 import { orderStatusLabels } from "@/lib/orders";
 import { createRaffle, updateRaffle, type RaffleFormState } from "./actions";
+import { keepValues } from "@/lib/forms";
 
 export type RaffleDefaults = {
   id?: number;
@@ -78,9 +79,15 @@ export function RaffleForm({
     base_entries: defaults.base_entries ?? 1,
     per_amount_cents: defaults.per_amount_cents ?? null,
     bonus_entries: defaults.bonus_entries ?? 0,
-    has_bonus_items: Boolean(defaults.bonus_category_ids?.length || defaults.bonus_product_ids?.length),
     max_entries_per_order: defaults.max_entries_per_order ?? null,
   });
+  const [bonusCats, setBonusCats] = useState<number[]>(defaults.bonus_category_ids ?? []);
+  const [bonusProducts, setBonusProducts] = useState(defaults.bonus_product_ids?.join(", ") ?? "");
+  const productIds = bonusProducts.split(/[\s,]+/).filter((v) => /^\d+$/.test(v));
+  const bonusNames = [
+    ...categories.filter((c) => bonusCats.includes(c.id)).map((c) => c.label),
+    ...productIds.map((id) => `продукт №${id}`),
+  ];
 
   const submit = async (prev: RaffleFormState, form: FormData) => {
     for (const key of ["starts_at", "ends_at"]) {
@@ -98,7 +105,7 @@ export function RaffleForm({
   const statuses = defaults.count_statuses ?? ["confirmed", "processing", "shipped", "delivered"];
 
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={keepValues(action)} className="space-y-6">
       {editing && <input type="hidden" name="id" value={defaults.id} />}
 
       <Panel title="Кампания">
@@ -222,7 +229,9 @@ export function RaffleForm({
                   name="bonus_category_ids"
                   value={c.id}
                   defaultChecked={defaults.bonus_category_ids?.includes(c.id)}
-                  onChange={(e) => e.target.checked && setRules((r) => ({ ...r, has_bonus_items: true }))}
+                  onChange={(e) =>
+                    setBonusCats((ids) => (e.target.checked ? [...ids, c.id] : ids.filter((id) => id !== c.id)))
+                  }
                   className="h-4 w-4 accent-accent"
                 />
                 {c.label}
@@ -232,7 +241,13 @@ export function RaffleForm({
         </fieldset>
         <div className="mt-4">
           <Field label="Бонус продукти (номера, разделени със запетая)" htmlFor="bonus_product_ids">
-            <input id="bonus_product_ids" name="bonus_product_ids" defaultValue={defaults.bonus_product_ids?.join(", ")} className="input" />
+            <input
+              id="bonus_product_ids"
+              name="bonus_product_ids"
+              value={bonusProducts}
+              onChange={(e) => setBonusProducts(e.target.value)}
+              className="input"
+            />
           </Field>
         </div>
 
@@ -257,7 +272,7 @@ export function RaffleForm({
         <div className="mt-5 bg-bg-deep p-4 text-[14px]">
           <div className="mb-2 text-[12px] uppercase tracking-wide text-dim">Така ще се вижда в сайта</div>
           <ul className="list-disc space-y-1 pl-5 text-muted marker:text-accent">
-            {describeEntryRules(rules).map((l) => (
+            {describeEntryRules({ ...rules, has_bonus_items: bonusNames.length > 0 }, bonusNames).map((l) => (
               <li key={l}>{l}</li>
             ))}
           </ul>

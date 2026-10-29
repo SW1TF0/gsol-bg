@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Gauge, Inbox, Package, Receipt, Settings, Ticket, TicketPercent, Users } from "lucide-react";
+import { FileText, Gauge, Inbox, Menu, Package, Receipt, Settings, Ticket, TicketPercent, Users, X } from "lucide-react";
 
 const items = [
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
@@ -28,7 +29,52 @@ export function AdminNavFallback() {
   return <NavList pathname="" />;
 }
 
-function NavList({ pathname }: { pathname: string }) {
+/** Бутон „Меню“ за тесни екрани — показва цялото меню и долната част на страничната лента */
+export function AdminMobileMenu({ footer }: { footer: React.ReactNode }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  return (
+    <>
+      <MenuButton open={open} onClick={() => setOpen((v) => !v)} />
+      {open && (
+        <div className="fixed inset-x-0 bottom-0 top-16 z-40 flex flex-col overflow-y-auto bg-black px-3 pb-6 pt-4">
+          <NavList pathname={pathname} onNavigate={close} />
+          <div className="mt-6 space-y-2 border-t border-line-soft px-3 pt-4">{footer}</div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Неактивен бутон, докато адресът се зарежда */
+export function AdminMobileMenuFallback() {
+  return <MenuButton open={false} />;
+}
+
+function MenuButton({ open, onClick }: { open: boolean; onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label={open ? "Затвори менюто" : "Отвори менюто"}
+      aria-expanded={open}
+      onClick={onClick}
+      className="flex h-10 w-10 items-center justify-center text-white"
+    >
+      {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+    </button>
+  );
+}
+
+function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <nav aria-label="Админ меню" className="space-y-1">
       {items.map(({ href, label, icon: Icon, exact }) => {
@@ -38,6 +84,7 @@ function NavList({ pathname }: { pathname: string }) {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
+            onClick={onNavigate}
             className={`flex h-11 items-center gap-3 px-4 text-[14px] transition-colors ${
               active ? "bg-accent text-white" : "text-text hover:bg-surface hover:text-white"
             }`}

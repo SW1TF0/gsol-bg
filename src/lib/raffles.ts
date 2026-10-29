@@ -1,4 +1,4 @@
-import { formatPrice } from "./format";
+import { formatPrice } from "./format.ts";
 
 // Общи помощници за томболите — ползват се и в сайта, и в админа.
 
@@ -18,8 +18,11 @@ export type RaffleRules = {
   max_entries_per_order: number | null;
 };
 
-/** Правилата за участия на човешки език — показват се в сайта и в админа */
-export function describeEntryRules(r: RaffleRules) {
+/**
+ * Правилата за участия на човешки език — показват се в сайта и в админа.
+ * bonusNames са категориите и продуктите с бонус участия (ако са известни).
+ */
+export function describeEntryRules(r: RaffleRules, bonusNames: string[] = []) {
   const lines: string[] = [];
   const min = r.min_order_cents > 0 ? ` над ${formatPrice(r.min_order_cents)}` : "";
   if (r.base_entries > 0) {
@@ -29,7 +32,13 @@ export function describeEntryRules(r: RaffleRules) {
   }
   if (r.per_amount_cents) lines.push(`+1 участие за всеки ${formatPrice(r.per_amount_cents)} от сумата на продуктите.`);
   if (r.bonus_entries > 0 && r.has_bonus_items) {
-    lines.push(`+${r.bonus_entries} ${r.bonus_entries === 1 ? "участие" : "участия"} за всеки продукт от участващите в кампанията.`);
+    const shown = bonusNames.slice(0, 5).join(", ");
+    const from = !bonusNames.length
+      ? "от участващите в кампанията"
+      : bonusNames.length > 5
+        ? `от: ${shown} и още ${bonusNames.length - 5}`
+        : `от: ${shown}`;
+    lines.push(`+${r.bonus_entries} ${r.bonus_entries === 1 ? "участие" : "участия"} за всеки продукт ${from}.`);
   }
   if (r.max_entries_per_order) lines.push(`До ${r.max_entries_per_order} участия на поръчка.`);
   lines.push("Участията се зачитат, след като поръчката бъде потвърдена. Отказани и върнати поръчки отпадат.");

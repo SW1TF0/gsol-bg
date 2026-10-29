@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Trash2 } from "lucide-react";
 import { AdminHeader, Panel, Stat, Table, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, plural } from "@/lib/format";
 import { raffleStatusLabels } from "@/lib/raffles";
 import AdminLoading from "@/app/admin/(panel)/loading";
 import { categoryOptions } from "../../promo-kodove/categories";
@@ -17,14 +17,15 @@ export const metadata = { title: "Томбола" };
 export default function RafflePage(props: PageProps<"/admin/tomboli/[id]">) {
   return (
     <Suspense fallback={<AdminLoading />}>
-      <RaffleContent params={props.params} />
+      <RaffleContent params={props.params} searchParams={props.searchParams} />
     </Suspense>
   );
 }
 
-async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, "params">) {
+async function RaffleContent({ params, searchParams }: Omit<PageProps<"/admin/tomboli/[id]">, "children">) {
   const { db } = await requireStaff(["admin", "manager"]);
   const id = Number((await params).id);
+  const justCreated = (await searchParams).nova === "1";
   if (!id) notFound();
 
   const [{ data: raffle }, { data: prizes }, { data: participants }, { data: winners }, { data: draw }, categories] =
@@ -42,6 +43,7 @@ async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, 
   const totalEntries = (participants ?? []).reduce((s, p) => s + p.entries, 0);
   const prizeCount = (prizes ?? []).reduce((s, p) => s + p.quantity, 0);
   const prizeTitle = new Map((prizes ?? []).map((p) => [p.id, p.title]));
+  const orderNumber = new Map((participants ?? []).map((p) => [p.order_id, p.order_number]));
   const ended = await hasEnded(raffle.ends_at);
   const drawn = raffle.status === "drawn";
 
@@ -62,13 +64,20 @@ async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, 
         }
       />
 
+      {justCreated && (
+        <p role="status" className="mb-6 bg-ok/10 px-4 py-3 text-[14px] text-text ring-1 ring-ok/30">
+          {raffle.status === "draft"
+            ? "Томболата е създадена като чернова. Добавете наградите по-долу и сменете статуса на „Активна“, за да се появи в сайта."
+            : "Томболата е създадена. Добавете наградите по-долу."}
+        </p>
+      )}
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Stat label="Участници" value={String(people)} hint="уникални имейли" />
-        <Stat label="Участия" value={String(totalEntries)} hint={`от ${participants?.length ?? 0} поръчки`} />
+        <Stat label="Участия" value={String(totalEntries)} hint={`от ${plural(participants?.length ?? 0, "поръчка", "поръчки")}`} />
         <Stat label="Награди" value={String(prizeCount)} hint={`+ ${raffle.reserves_count} резерв.`} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           {drawn ? (
             <Panel title="Победители">
@@ -87,8 +96,8 @@ async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, 
                         {w.order_id && (
                           <>
                             {" · "}
-                            <Link href={`/admin/porachki/${w.order_id}`} className="hover:text-white">
-                              поръчка
+                            <Link href={`/admin/porachki/${w.order_id}`} className="font-mono hover:text-white">
+                              {orderNumber.get(w.order_id) ?? "поръчка"}
                             </Link>
                           </>
                         )}
@@ -109,7 +118,8 @@ async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, 
               </ol>
               {draw && (
                 <p className="mt-4 break-all text-[12px] text-dim">
-                  Изтеглено {formatDate(draw.drawn_at)} · {draw.participants} участници · {draw.total_entries} участия · seed{" "}
+                  Изтеглено {formatDate(draw.drawn_at)} · {plural(draw.participants, "участник", "участници")} ·{" "}
+                  {plural(draw.total_entries, "участие", "участия")} · seed{" "}
                   <span className="font-mono text-muted">{draw.seed}</span>
                 </p>
               )}
@@ -131,7 +141,7 @@ async function RaffleContent({ params }: Pick<PageProps<"/admin/tomboli/[id]">, 
             </Panel>
           )}
 
-          <Panel title={`Участници (${participants?.length ?? 0} поръчки)`}>
+          <Panel title={`Участници (${plural(participants?.length ?? 0, "поръчка", "поръчки")})`}>
             {participants?.length ? (
               <Table head={["Поръчка", "Клиент", "Сума", "Участия"]}>
                 {participants.slice(0, 200).map((p) => (

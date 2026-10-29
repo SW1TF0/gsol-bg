@@ -3,6 +3,7 @@
 import { useActionState, useRef } from "react";
 import { orderStatusLabels } from "@/lib/orders";
 import { addOrderNote, updateOrderStatus, type ActionState } from "../actions";
+import { keepValues } from "@/lib/forms";
 
 export function StatusForm({ orderId, status }: { orderId: number; status: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(updateOrderStatus, null);
@@ -35,7 +36,7 @@ export function NoteForm({ orderId }: { orderId: number }) {
     return result;
   }, null);
   return (
-    <form ref={ref} action={action} className="flex flex-col gap-2 sm:flex-row">
+    <form ref={ref} onSubmit={keepValues(action)} className="flex flex-col gap-2 sm:flex-row">
       <input type="hidden" name="order_id" value={orderId} />
       <label htmlFor="note" className="sr-only">
         Бележка

@@ -6,6 +6,7 @@ import { Check, PackageSearch, Ticket, X } from "lucide-react";
 import { formatDate, formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import { trackOrder, type TrackState } from "./actions";
+import { keepValues } from "@/lib/forms";
 
 const steps = ["new", "confirmed", "processing", "shipped", "delivered"] as const;
 
@@ -15,7 +16,7 @@ export function TrackOrder() {
 
   return (
     <div className="space-y-8">
-      <form action={action} className="cut-frame cut-lg">
+      <form onSubmit={keepValues(action)} className="cut-frame cut-lg">
         <div className="cut-inner grid gap-4 bg-surface-2 p-6 sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-8">
           <div>
             <label htmlFor="t-number" className="mb-2 block text-[13px] uppercase tracking-wide text-muted">

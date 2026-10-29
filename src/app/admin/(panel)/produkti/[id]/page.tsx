@@ -52,7 +52,7 @@ async function ProductEditPageContent({ params }: Pick<PageProps<"/admin/produkt
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ProductForm
           product={{
             id: product.id,

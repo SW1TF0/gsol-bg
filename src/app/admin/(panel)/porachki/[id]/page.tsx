@@ -48,7 +48,7 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
         actions={<StatusBadge status={order.status} />}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <Panel title="Продукти">
             <ul className="divide-y divide-line-soft">

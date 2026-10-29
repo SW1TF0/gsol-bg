@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Gift, Ticket } from "lucide-react";
 import { PageHeader } from "@/components/catalog/PageHeader";
-import { formatDate } from "@/lib/format";
+import { formatDate, plural } from "@/lib/format";
 import { listRaffles } from "@/lib/raffle-data";
 
 export const metadata: Metadata = {
@@ -55,7 +55,7 @@ async function RaffleList() {
               {r.intro && <p className="mt-2 text-muted">{r.intro}</p>}
               <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 text-[13px] text-muted">
                 <span className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-accent" /> {prizes} {prizes === 1 ? "награда" : "награди"}
+                  <Gift className="h-4 w-4 text-accent" /> {plural(prizes, "награда", "награди")}
                 </span>
                 <span>до {formatDate(r.ends_at)}</span>
               </div>

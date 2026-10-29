@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLink, LogOut } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
-import { AdminNav, AdminNavFallback } from "@/components/admin/AdminNav";
+import { AdminMobileMenu, AdminMobileMenuFallback, AdminNav, AdminNavFallback } from "@/components/admin/AdminNav";
 import { requireStaff, roleLabels } from "@/lib/admin/auth";
 import { signOut } from "@/app/admin/actions";
 
@@ -26,31 +26,37 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
           <AdminNav />
         </Suspense>
         <div className="mt-auto space-y-2 border-t border-line-soft px-3 pt-4">
-          <Suspense fallback={<div className="h-10" />}>
-            <CurrentUser />
-          </Suspense>
-          <Link href="/" className="flex items-center gap-2 text-[13px] text-muted hover:text-white">
-            <ExternalLink className="h-3.5 w-3.5" /> Към сайта
-          </Link>
+          <SidebarFooter />
         </div>
       </aside>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between border-b border-line-soft bg-black px-4 py-3 shadow-[inset_0_2px_0_var(--color-accent)] lg:hidden">
+        <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-line-soft bg-black px-4 shadow-[inset_0_2px_0_var(--color-accent)] lg:hidden">
           <Link href="/admin" className="font-display uppercase text-white">
             GSOL <span className="text-accent">админ</span>
           </Link>
-          <nav className="flex gap-3 text-[13px]">
-            <Link href="/admin/porachki">Поръчки</Link>
-            <Link href="/admin/produkti">Продукти</Link>
-            <Link href="/admin/promo-kodove">Кодове</Link>
-          </nav>
+          <Suspense fallback={<AdminMobileMenuFallback />}>
+            <AdminMobileMenu footer={<SidebarFooter />} />
+          </Suspense>
         </div>
         <main className="mx-auto max-w-[1280px] px-4 py-8 lg:px-8">
           {children}
         </main>
       </div>
     </div>
+  );
+}
+
+function SidebarFooter() {
+  return (
+    <>
+      <Suspense fallback={<div className="h-10" />}>
+        <CurrentUser />
+      </Suspense>
+      <Link href="/" className="flex items-center gap-2 text-[13px] text-muted hover:text-white">
+        <ExternalLink className="h-3.5 w-3.5" /> Към сайта
+      </Link>
+    </>
   );
 }
 

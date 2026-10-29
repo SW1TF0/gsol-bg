@@ -47,7 +47,7 @@ async function InquiryContent({ params }: Pick<PageProps<"/admin/zapitvaniya/[id
         subtitle={`Получено ${formatDate(q.created_at)}${q.source_url ? ` · от ${q.source_url}` : ""}`}
         actions={<InquiryStatusBadge status={q.status} />}
       />
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <Panel title="Съобщение">
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-text">{q.message}</p>
