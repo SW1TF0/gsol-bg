@@ -104,10 +104,10 @@ function Toggle({ label, hint, checked, disabled, onChange }: { label: string; h
 }
 
 /** Връзка „Настройки на бисквитките“ (за футъра) */
-export function CookieSettingsLink({ className = "" }: { className?: string }) {
+export function CookieSettingsLink({ className = "", label = "Настройки на бисквитките" }: { className?: string; label?: string }) {
   return (
     <button type="button" data-action="cookie-settings" onClick={openCookieSettings} className={className}>
-      Настройки на бисквитките
+      {label}
     </button>
   );
 }

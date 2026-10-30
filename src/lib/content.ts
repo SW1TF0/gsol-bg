@@ -11,7 +11,7 @@ export async function getPage(slug: string) {
   cacheTag("pages");
   const { data } = await publicClient()
     .from("pages")
-    .select("slug, title, intro, body, updated_at")
+    .select("slug, title, intro, body, updated_at, kind, cta, published_at, version_label")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
@@ -39,4 +39,29 @@ export async function getPageSlugs() {
   cacheTag("pages");
   const { data } = await publicClient().from("pages").select("slug").eq("is_published", true);
   return (data ?? []).map((p) => p.slug);
+}
+
+export type PostCta = { title: string; text: string; links: { label: string; href: string }[] };
+
+/** „Съвети“ — статиите, най-новите първо */
+export async function getPosts() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("pages");
+  const { data } = await publicClient()
+    .from("pages")
+    .select("slug, title, intro, published_at")
+    .eq("kind", "post")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false });
+  return data ?? [];
+}
+
+/** Въведенията на правните страници — за „Правна информация“ */
+export async function getLegalIntros() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("pages");
+  const { data } = await publicClient().from("pages").select("slug, title, intro").eq("kind", "page").eq("is_published", true);
+  return data ?? [];
 }

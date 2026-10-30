@@ -119,7 +119,7 @@ const fixedLabels: Record<string, string> = {
 export function PricingForm({ params, lines }: { params: PricingParams | null; lines: LinePolicy[] }) {
   const [state, action, pending] = useActionState<FormState, FormData>(savePricing, null);
   const num = (name: string, label: string, value: string, suffix: string) => (
-    <label className="block">
+    <label key={name} className="block">
       <span className="mb-1.5 block text-[12px] uppercase tracking-wide text-muted">{label}</span>
       <span className="flex items-center gap-2">
         <input name={name} defaultValue={value} inputMode="decimal" className="input !h-9 text-[14px]" />

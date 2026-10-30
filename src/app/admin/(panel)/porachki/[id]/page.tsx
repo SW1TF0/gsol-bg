@@ -8,7 +8,8 @@ import { formatDay, formatPrice } from "@/lib/format";
 import { orderStatusLabels, paymentLabels, shippingLabels, type PaymentMethod, type ShippingMethod } from "@/lib/orders";
 import { emailConfig } from "@/lib/email/send";
 import { shipmentStateLabels } from "@/lib/econt-shared";
-import { NoteForm, ShipmentButtons, StatusForm } from "./forms";
+import { InvoiceBox, NoteForm, ShipmentButtons, StatusForm } from "./forms";
+import type { InvoiceKind } from "@/lib/invoices";
 import AdminLoading from "@/app/admin/(panel)/loading";
 
 export const metadata = { title: "Поръчка" };
@@ -33,15 +34,16 @@ export default function OrderPage(props: PageProps<"/admin/porachki/[id]">) {
 }
 
 async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]">, "params">) {
-  const { db } = await requireStaff();
+  const { db, staff } = await requireStaff();
   const id = Number((await params).id);
   if (!id) notFound();
 
-  const [{ data: order }, { data: items }, { data: events }, { data: shipments }] = await Promise.all([
+  const [{ data: order }, { data: items }, { data: events }, { data: shipments }, { data: docs }] = await Promise.all([
     db.from("orders").select("*").eq("id", id).maybeSingle(),
     db.from("order_items").select("*").eq("order_id", id).order("id"),
     db.from("order_events").select("*").eq("order_id", id).order("created_at", { ascending: false }),
     db.from("shipments").select("*").eq("order_id", id).order("id", { ascending: false }),
+    db.from("invoices").select("id, kind, number, cancelled, issue_date").eq("order_id", id).order("id"),
   ]);
   if (!order) notFound();
 
@@ -107,6 +109,8 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                   number?: string;
                   error?: string;
                   env?: string;
+                  credit_of?: string;
+                  reason?: string;
                 };
                 return (
                   <li key={e.id} className="border-l-2 border-line pl-4">
@@ -132,6 +136,16 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
                         </>
                       )}
                       {e.type === "shipment_cancelled" && <>Товарителница {data.number} е анулирана.</>}
+                      {e.type === "invoice_issued" && (
+                        <>
+                          {data.kind === "proforma" ? "Проформа" : "Фактура"} <b className="font-medium text-white">№ {data.number}</b> е издадена.
+                        </>
+                      )}
+                      {e.type === "invoice_credited" && (
+                        <>
+                          Кредитно известие № {data.number} към фактура № {data.credit_of}: {data.reason}
+                        </>
+                      )}
                       {e.type === "shipment_cancel_failed" && (
                         <>
                           Анулирането на {data.number} не мина: <span className="text-danger">{data.error}</span>
@@ -191,6 +205,16 @@ async function OrderPageContent({ params }: Pick<PageProps<"/admin/porachki/[id]
             </dl>
             {order.note && <p className="mt-4 whitespace-pre-line bg-bg-deep p-3 text-[14px] text-muted">{order.note}</p>}
           </Panel>
+
+          {["admin", "manager", "sales"].includes(staff.role) && (
+            <Panel title="Документи">
+              <InvoiceBox
+                orderId={order.id}
+                docs={(docs ?? []).map((d) => ({ ...d, kind: d.kind as InvoiceKind }))}
+                canCredit={staff.role === "admin" || staff.role === "manager"}
+              />
+            </Panel>
+          )}
 
           <Panel title="Еконт">
             <dl className="space-y-2 text-[14px]">

@@ -5,12 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Cpu,
+  FileSpreadsheet,
   FileText,
   Gauge,
   Inbox,
   Menu,
   Package,
   Receipt,
+  ReceiptText,
   Settings,
   Ticket,
   TicketPercent,
@@ -24,6 +26,8 @@ import type { StaffRole } from "@/lib/staff";
 const items: { href: string; label: string; icon: typeof Gauge; exact?: boolean; roles?: StaffRole[] }[] = [
   { href: "/admin", label: "Табло", icon: Gauge, exact: true },
   { href: "/admin/porachki", label: "Поръчки", icon: Receipt },
+  { href: "/admin/oferti", label: "Оферти", icon: FileSpreadsheet, roles: ["admin", "manager", "sales"] },
+  { href: "/admin/fakturi", label: "Фактури", icon: ReceiptText, roles: ["admin", "manager", "sales"] },
   { href: "/admin/produkti", label: "Продукти", icon: Package },
   { href: "/admin/bildar", label: "Билдър", icon: Cpu, roles: ["admin", "manager"] },
   { href: "/admin/klienti", label: "Клиенти", icon: Users, roles: ["admin", "manager", "sales"] },

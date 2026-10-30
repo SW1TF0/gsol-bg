@@ -100,3 +100,12 @@ export async function sendTestEmail(_prev: TestEmailState, form: FormData): Prom
   const result = await sendEmail(user.email, { ...email, subject: `[Тест] ${email.subject}` });
   return { result, to: user.email };
 }
+
+/** Оценката и броят отзиви от Google — пишат се на ръка (както в стария сайт); празно = без числа */
+export async function saveReviews(_prev: SettingsFormState, form: FormData): Promise<SettingsFormState> {
+  const rating = text(form, "rating").replace(".", ",");
+  const countText = text(form, "count").replace(/\s/g, "");
+  if (rating && !/^[1-5](,[0-9])?$/.test(rating)) return { error: "Оценката е от 1 до 5, напр. 4,9.", field: "rating" };
+  if (countText && !/^\d{1,6}$/.test(countText)) return { error: "Броят е цяло число.", field: "count" };
+  return save("reviews", { rating, count: countText ? Number(countText) : 0 });
+}

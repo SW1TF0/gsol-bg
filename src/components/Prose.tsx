@@ -19,6 +19,7 @@ export function Prose({ children }: { children: string }) {
           ul: ({ children }) => <ul className="my-4 space-y-2 pl-5 text-muted marker:text-accent-ink [list-style:square]">{children}</ul>,
           ol: ({ children }) => <ol className="my-4 list-decimal space-y-2 pl-5 text-muted marker:font-display marker:text-accent-ink">{children}</ol>,
           strong: ({ children }) => <strong className="font-medium text-white">{children}</strong>,
+          code: ({ children }) => <code className="bg-surface-2 px-1.5 py-0.5 font-mono text-[14px] text-white">{children}</code>,
           a: ({ href = "", children }) =>
             href.startsWith("/") ? (
               <Link href={href} className="text-white underline decoration-accent underline-offset-4 hover:text-accent-ink">

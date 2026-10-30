@@ -88,10 +88,65 @@ export type Database = {
           },
         ];
       };
+      quotes: {
+        Row: {
+          client_company: string;
+          client_eik: string;
+          client_email: string;
+          client_name: string;
+          client_phone: string;
+          created_at: string;
+          created_by: string | null;
+          deleted_at: string | null;
+          id: number;
+          lines: Json;
+          note: string;
+          number: string;
+          source: string;
+          source_url: string | null;
+          status: Database["public"]["Enums"]["quote_status"];
+          updated_at: string;
+          updated_by: string | null;
+          valid_until: string;
+          version: number;
+        };
+        Insert: { number: string };
+        Update: { status?: Database["public"]["Enums"]["quote_status"] };
+        Relationships: [];
+      };
+      quote_versions: {
+        Row: { data: Json; quote_id: number; saved_at: string; saved_by: string | null; version: number };
+        Insert: { data: Json; quote_id: number; version: number };
+        Update: { data?: Json };
+        Relationships: [];
+      };
+      invoices: {
+        Row: {
+          cancelled: boolean;
+          created_at: string;
+          created_by: string | null;
+          credit_of: number | null;
+          data: Json;
+          id: number;
+          issue_date: string;
+          kind: string;
+          number: string;
+          order_id: number;
+          tax_date: string;
+          total_cents: number;
+        };
+        Insert: { data: Json; issue_date: string; kind: string; number: string; order_id: number; tax_date: string; total_cents: number };
+        Update: { cancelled?: boolean };
+        Relationships: [];
+      };
       pages: {
         Row: {
           body: string;
+          cta: Json | null;
           intro: string | null;
+          kind: string;
+          published_at: string | null;
+          version_label: string | null;
           is_published: boolean;
           slug: string;
           sort_order: number;
@@ -101,7 +156,11 @@ export type Database = {
         };
         Insert: {
           body?: string;
+          cta?: Json | null;
           intro?: string | null;
+          kind?: string;
+          published_at?: string | null;
+          version_label?: string | null;
           is_published?: boolean;
           slug: string;
           sort_order?: number;
@@ -111,7 +170,11 @@ export type Database = {
         };
         Update: {
           body?: string;
+          cta?: Json | null;
           intro?: string | null;
+          kind?: string;
+          published_at?: string | null;
+          version_label?: string | null;
           is_published?: boolean;
           slug?: string;
           sort_order?: number;
@@ -952,6 +1015,15 @@ export type Database = {
       };
     };
     Functions: {
+      create_quote: { Args: { p_items?: Json; p_source?: string; p_source_url?: string }; Returns: Json };
+      save_quote: { Args: { p_data: Json; p_id: number; p_version: number }; Returns: number };
+      restore_quote: { Args: { p_from_version: number; p_id: number; p_version: number }; Returns: number };
+      delete_quote: { Args: { p_id: number }; Returns: undefined };
+      issue_invoice: { Args: { p_kind: string; p_order_id: number }; Returns: Json };
+      issue_credit_note: { Args: { p_invoice_id: number; p_reason: string }; Returns: Json };
+      invoice_preview: { Args: { p_order_id: number }; Returns: Json };
+      invoice_counters: { Args: never; Returns: Json };
+      set_invoice_start: { Args: { p_next: string; p_series: string }; Returns: undefined };
       econt_cancel: { Args: { p_order_id: number }; Returns: undefined };
       econt_overview: { Args: never; Returns: Json };
       econt_refresh: { Args: { p_order_id: number }; Returns: undefined };
@@ -1025,6 +1097,7 @@ export type Database = {
       raffle_status: "draft" | "active" | "drawn" | "cancelled";
       order_status: "new" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
       staff_role: "admin" | "manager" | "sales" | "technician" | "editor";
+      quote_status: "draft" | "sent" | "accepted" | "declined" | "expired";
       part_kind: "cpu" | "motherboard" | "ram" | "gpu" | "storage" | "psu" | "case" | "cooler";
     };
     CompositeTypes: { [_ in never]: never };

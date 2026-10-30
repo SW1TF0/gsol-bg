@@ -6,7 +6,7 @@ import { Panel } from "@/components/admin/ui";
 import { keepValues } from "@/lib/forms";
 import { formatPrice } from "@/lib/format";
 import { formatIban, isValidIban, shippingPriceLabel, socialNetworks, type SiteSettings } from "@/lib/settings";
-import { saveBank, saveCompany, saveShipping, type SettingsFormState } from "./actions";
+import { saveBank, saveCompany, saveReviews, saveShipping, type SettingsFormState } from "./actions";
 
 type Action = (prev: SettingsFormState, form: FormData) => Promise<SettingsFormState>;
 
@@ -217,6 +217,25 @@ export function BankForm({ bank }: { bank: SiteSettings["bank"] }) {
           </div>
           <p className="text-[13px] text-muted">
             Показва се на клиента след поръчка с банков превод, с номера на поръчката като основание.
+          </p>
+        </>
+      )}
+    </SettingsForm>
+  );
+}
+
+export function ReviewsForm({ reviews }: { reviews: SiteSettings["reviews"] }) {
+  return (
+    <SettingsForm title="Отзиви в Google" action={saveReviews}>
+      {(f) => (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field name="rating" label="Оценка" defaultValue={reviews.rating} placeholder="напр. 4,9" invalid={f === "rating"} />
+            <Field name="count" label="Брой отзиви" defaultValue={reviews.count ? String(reviews.count) : ""} inputMode="numeric" invalid={f === "count"} />
+          </div>
+          <p className="text-[13px] text-muted">
+            Показват се в лентата преди футъра. Препишете ги от профила в Google; празно — лентата е само с връзка
+            „Оставете отзив“.
           </p>
         </>
       )}

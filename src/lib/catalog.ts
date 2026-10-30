@@ -2,6 +2,8 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { publicClient } from "@/lib/supabase/clients";
 import type { Tables } from "@/lib/supabase/database.types";
+import { fetchAll } from "@/lib/supabase/fetch-all";
+import { compareFacetValues, extractFacets, facetDefs, FACET_MIN_SHARE, type FacetKey } from "@/lib/facets";
 
 // Достъп до каталога в Supabase. Всичко е кеширано с таг "catalog";
 // админ панелът го изчиства с updateTag("catalog") след промяна.
@@ -60,7 +62,10 @@ export type CatalogQuery = {
   category?: string;
   sub?: string;
   brands?: string[];
-  range?: number;
+  /** Технически филтри: избор в една група = ИЛИ, между групите = И */
+  facets?: Partial<Record<FacetKey, string[]>>;
+  /** Ценови ленти на категорията (индекси); няколко = ИЛИ */
+  ranges?: number[];
   promo?: boolean;
   q?: string;
   sort?: SortKey;
@@ -185,72 +190,142 @@ function orSafe(text: string) {
   return text.replace(/[,()%*\\]/g, " ").trim();
 }
 
+type ShelfRow = {
+  id: number;
+  price: number;
+  brand: string;
+  promo: boolean;
+  stock: string;
+  facets: Partial<Record<FacetKey, string>>;
+};
+
+/**
+ * Рафтът наведнъж (до ~1000 продукта): цена, марка, наличност и разчетените технически стойности.
+ * Кешира се — филтрите, броенето и подреждането стават в паметта, без нова заявка за всеки избор.
+ */
+async function loadShelf(category: string | undefined, sub: string | undefined, promo: boolean, q: string): Promise<ShelfRow[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("catalog");
+  const db = publicClient();
+  const ids = category ? await categoryIds(category, sub) : null;
+  const cats = await loadCategoryRows();
+  const byId = new Map(cats.map((c) => [c.id, c]));
+  type Row = Pick<Tables<"products">, "id" | "name" | "brand" | "category_id" | "price_cents" | "is_promo" | "stock_status" | "specs" | "components">;
+  const rows = await fetchAll<Row>((from, to) => {
+    // Веригата с условни филтри е с any — иначе типовете на PostgREST се извеждат наново при всяко
+    // присвояване и проверката на типовете става много бавна
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let b: any = db
+      .from("products")
+      .select("id, name, brand, category_id, price_cents, is_promo, stock_status, specs, components")
+      .eq("is_active", true);
+    if (ids) b = b.in("category_id", ids.length ? ids : [-1]);
+    if (promo) b = b.eq("is_promo", true);
+    if (q) b = b.or(`name.ilike.%${q}%,sku.ilike.%${q}%,brand.ilike.%${q}%`);
+    return b.order("id").range(from, to);
+  });
+  return rows.map((r) => {
+    const cat = r.category_id ? byId.get(r.category_id) : undefined;
+    const parent = cat?.parent_id ? byId.get(cat.parent_id) : undefined;
+    return {
+      id: r.id,
+      price: r.price_cents,
+      brand: r.brand ?? "",
+      promo: r.is_promo,
+      stock: r.stock_status,
+      facets: extractFacets({
+        name: r.name,
+        category: [parent?.slug, cat?.slug].filter(Boolean).join("/"),
+        stockStatus: r.stock_status,
+        specs: Array.isArray(r.specs) ? (r.specs as { k: string; v: string }[]) : [],
+        components: (r.components as Record<string, string> | null) ?? null,
+      }),
+    };
+  });
+}
+
+export type FacetGroup = { key: FacetKey; label: string; values: { value: string; count: number; active: boolean }[] };
+
 export async function queryProducts(query: CatalogQuery) {
   "use cache";
   cacheLife("minutes");
   cacheTag("catalog");
 
-  const db = publicClient();
   const perPage = query.perPage ?? 24;
-  const page = Math.max(1, query.page ?? 1);
   const category = query.category ? await getCategory(query.category) : undefined;
-  const ids = query.category ? await categoryIds(query.category, query.sub) : null;
-  const range = category && query.range !== undefined ? category.priceRanges[query.range] : undefined;
-  const q = query.q ? orSafe(query.q) : "";
+  const bands = category ? (query.ranges ?? []).map((i) => category.priceRanges[i]).filter(Boolean) : [];
+  const shelf = await loadShelf(query.category, query.sub, Boolean(query.promo), query.q ? orSafe(query.q) : "");
 
-  // Общите филтри без марката — върху тях броим марките.
-  // PostgREST builder-ите са с различни generic типове за двете заявки, затова тук е any.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scoped = (builder: any) => {
-    let b = builder.eq("is_active", true);
-    if (ids) b = b.in("category_id", ids.length ? ids : [-1]);
-    if (query.promo) b = b.eq("is_promo", true);
-    if (range) {
-      b = b.gte("price_cents", range[0]);
-      if (range[1] !== null) b = b.lte("price_cents", range[1]);
-    }
-    if (q) b = b.or(`name.ilike.%${q}%,sku.ilike.%${q}%,brand.ilike.%${q}%`);
-    return b;
-  };
+  const base = bands.length
+    ? shelf.filter((r) => bands.some(([min, max]) => r.price >= min && (max === null || r.price <= max)))
+    : shelf;
+  const selected = Object.entries(query.facets ?? {}).filter(([, v]) => v?.length) as [FacetKey, string[]][];
+  const facetsOk = (r: ShelfRow, except?: FacetKey) => selected.every(([k, v]) => k === except || v.includes(r.facets[k] ?? ""));
+  const brandOk = (r: ShelfRow) => !query.brands?.length || query.brands.includes(r.brand);
 
-  const brandRows: { data: { brand: string | null }[] | null; error: { message: string } | null } = await scoped(
-    db.from("products").select("brand"),
-  );
-  if (brandRows.error) throw new Error(brandRows.error.message);
+  // Марките се броят с техническите филтри, но без избора на марка (и обратно за всяка група)
   const brandCounts = new Map<string, number>();
-  for (const r of brandRows.data ?? []) {
-    if (r.brand) brandCounts.set(r.brand, (brandCounts.get(r.brand) ?? 0) + 1);
+  for (const r of base) if (r.brand && facetsOk(r)) brandCounts.set(r.brand, (brandCounts.get(r.brand) ?? 0) + 1);
+
+  const facets: FacetGroup[] = [];
+  for (const def of facetDefs) {
+    const covered = base.filter((r) => r.facets[def.key]);
+    const distinct = new Set(covered.map((r) => r.facets[def.key]!));
+    const chosen = selected.find(([k]) => k === def.key)?.[1] ?? [];
+    // „Не се чете надеждно = няма филтър“ — освен ако групата вече е избрана
+    if (!chosen.length && (base.length === 0 || covered.length / base.length < FACET_MIN_SHARE || distinct.size < 2)) continue;
+    const counts = new Map<string, number>();
+    for (const r of base) {
+      const v = r.facets[def.key];
+      if (v && brandOk(r) && facetsOk(r, def.key)) counts.set(v, (counts.get(v) ?? 0) + 1);
+    }
+    const values = [...new Set([...distinct, ...chosen])]
+      .sort(compareFacetValues)
+      .map((value) => ({ value, count: counts.get(value) ?? 0, active: chosen.includes(value) }));
+    facets.push({ key: def.key, label: def.label, values });
   }
 
-  let list = scoped(db.from("products").select(PRODUCT_COLUMNS, { count: "exact" }));
-  if (query.brands?.length) list = list.in("brand", query.brands);
-  switch (query.sort) {
-    case "new":
-      list = list.order("id", { ascending: false });
-      break;
-    case "price-asc":
-      list = list.order("price_cents", { ascending: true });
-      break;
-    case "price-desc":
-      list = list.order("price_cents", { ascending: false });
-      break;
-    default:
-      list = list
-        .order("is_promo", { ascending: false })
-        .order("stock_status", { ascending: true })
-        .order("id", { ascending: false });
-  }
-  const { data, count, error }: { data: ProductRow[] | null; count: number | null; error: { message: string } | null } =
-    await list.range((page - 1) * perPage, page * perPage - 1);
-  if (error) throw new Error(error.message);
+  // Колко продукта има във всяка ценова лента при останалите филтри (за помощника „Избери решение“)
+  const rangeCounts = (category?.priceRanges ?? []).map(
+    ([min, max]) => shelf.filter((r) => r.price >= min && (max === null || r.price <= max) && brandOk(r) && facetsOk(r)).length,
+  );
 
-  const total = count ?? 0;
+  const matches = base.filter((r) => brandOk(r) && facetsOk(r));
+  const stockRank = (s: string) => (s === "in_stock" ? 0 : s === "on_request" ? 1 : 2);
+  matches.sort((a, b) => {
+    switch (query.sort) {
+      case "new":
+        return b.id - a.id;
+      case "price-asc":
+        return a.price - b.price || b.id - a.id;
+      case "price-desc":
+        return b.price - a.price || b.id - a.id;
+      default:
+        return Number(b.promo) - Number(a.promo) || stockRank(a.stock) - stockRank(b.stock) || b.id - a.id;
+    }
+  });
+
+  const total = matches.length;
+  const pages = Math.max(1, Math.ceil(total / perPage));
+  const page = Math.min(Math.max(1, query.page ?? 1), pages);
+  const ids = matches.slice((page - 1) * perPage, page * perPage).map((r) => r.id);
+  let items: Product[] = [];
+  if (ids.length) {
+    const { data, error } = await publicClient().from("products").select(PRODUCT_COLUMNS).in("id", ids);
+    if (error) throw new Error(error.message);
+    const order = new Map(ids.map((id, i) => [id, i]));
+    items = await toProducts(((data ?? []) as ProductRow[]).sort((a, b) => order.get(a.id)! - order.get(b.id)!));
+  }
+
   return {
     total,
     page,
-    pages: Math.max(1, Math.ceil(total / perPage)),
-    items: await toProducts(data ?? []),
+    pages,
+    items,
     brands: [...brandCounts.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+    facets,
+    rangeCounts,
   };
 }
 

@@ -38,3 +38,9 @@ export async function requireStaff(roles?: StaffRole[]) {
 
   return { db, user, staff };
 }
+
+/** Без пренасочване: дали текущият потребител е активен служител с една от ролите (за бутоните в магазина) */
+export async function hasStaffRole(roles: StaffRole[]) {
+  const { staff } = await loadStaff();
+  return Boolean(staff && !staff.disabled_at && roles.includes(staff.role));
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SlidersHorizontal, X } from "lucide-react";
 import { ProductGrid } from "@/components/product/ProductCard";
+import { facetDefs, type FacetKey } from "@/lib/facets";
 import {
   getCategory,
   queryProducts,
@@ -14,14 +15,22 @@ type Params = Record<string, string | string[] | undefined>;
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+/** Стойностите в една група са разделени с „|“ (в някои има запетая — 15,6") */
+const FACET_SEP = "|";
+
 export function parseQuery(params: Params, fixed: CatalogQuery = {}): CatalogQuery {
-  const range = first(params.range);
   const sort = first(params.sort) as SortKey | undefined;
+  const facets: Partial<Record<FacetKey, string[]>> = {};
+  for (const def of facetDefs) {
+    const values = first(params[def.key])?.split(FACET_SEP).filter(Boolean);
+    if (values?.length) facets[def.key] = values;
+  }
   return {
     ...fixed,
     sub: first(params.sub) ?? fixed.sub,
     brands: first(params.brand)?.split(",").filter(Boolean),
-    range: range !== undefined && /^\d+$/.test(range) ? Number(range) : undefined,
+    facets,
+    ranges: (first(params.range) ?? "").split(FACET_SEP).filter((r) => /^\d+$/.test(r)).map(Number),
     sort: sortOptions.some((o) => o.key === sort) ? sort : "recommended",
     page: Number(first(params.page)) || 1,
     q: first(params.q) ?? fixed.q,
@@ -66,7 +75,33 @@ export async function CatalogView({
     return hrefWith(basePath, params, { brand: set.size ? [...set].join(",") : null });
   };
 
-  const hasFilters = Boolean(activeBrands.length || query.range !== undefined || first(params.sub));
+  const toggleRange = (i: number) => {
+    const set = new Set(query.ranges ?? []);
+    if (set.has(i)) set.delete(i);
+    else set.add(i);
+    return hrefWith(basePath, params, { range: set.size ? [...set].sort().join(FACET_SEP) : null });
+  };
+
+  const toggleFacet = (key: FacetKey, value: string) => {
+    const set = new Set(query.facets?.[key] ?? []);
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+    return hrefWith(basePath, params, { [key]: set.size ? [...set].join(FACET_SEP) : null });
+  };
+
+  // Избраните филтри като чипове с × над резултатите
+  const chips: { label: string; href: string }[] = [
+    ...activeBrands.map((b) => ({ label: b, href: toggleBrand(b) })),
+    ...Object.entries(query.facets ?? {}).flatMap(([key, values]) =>
+      (values ?? []).map((v) => ({ label: v, href: toggleFacet(key as FacetKey, v) })),
+    ),
+    ...(category
+      ? (query.ranges ?? [])
+          .filter((i) => category.priceRanges[i])
+          .map((i) => ({ label: rangeLabel(category.priceRanges[i]), href: toggleRange(i) }))
+      : []),
+  ];
+  const hasFilters = Boolean(chips.length || first(params.sub));
 
   const filters = (
     <div className="space-y-8">
@@ -120,15 +155,41 @@ export async function CatalogView({
         </FilterGroup>
       )}
 
+      {result.facets.map((g) => (
+        <FilterGroup key={g.key} title={g.label}>
+          <ul className="space-y-1">
+            {g.values.map((v) => (
+              <li key={v.value}>
+                <Link
+                  href={toggleFacet(g.key, v.value)}
+                  className={`flex items-center justify-between gap-3 py-1.5 text-[14px] hover:text-white ${v.count || v.active ? "text-text" : "pointer-events-none text-dim"}`}
+                  aria-current={v.active ? "true" : undefined}
+                  aria-disabled={!v.count && !v.active ? true : undefined}
+                  rel="nofollow"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span className={`flex h-4 w-4 items-center justify-center ring-1 ${v.active ? "bg-accent ring-accent" : "ring-line"}`} aria-hidden="true">
+                      {v.active && <span className="h-1.5 w-1.5 bg-white" />}
+                    </span>
+                    {v.value}
+                  </span>
+                  <span className="text-[12px] text-dim">{v.count}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </FilterGroup>
+      ))}
+
       {category && (
         <FilterGroup title="Цена">
           <div className="flex flex-wrap gap-2">
             {category.priceRanges.map((r, i) => (
               <Link
                 key={i}
-                href={hrefWith(basePath, params, { range: query.range === i ? null : String(i) })}
+                href={toggleRange(i)}
                 className="chip"
-                data-active={query.range === i}
+                data-active={query.ranges?.includes(i) ?? false}
               >
                 {rangeLabel(r)}
               </Link>
@@ -154,7 +215,7 @@ export async function CatalogView({
       <div>
         <details className="mb-6 lg:hidden">
           <summary className="btn btn-ghost btn-sm w-full list-none [&::-webkit-details-marker]:hidden">
-            <SlidersHorizontal className="h-4 w-4" /> Филтри
+            <SlidersHorizontal className="h-4 w-4" /> Филтри{chips.length ? ` (${chips.length})` : ""}
           </summary>
           <div className="mt-4 bg-surface-2 p-5">{filters}</div>
         </details>
@@ -185,14 +246,31 @@ export async function CatalogView({
           </nav>
         </div>
 
+        {chips.length > 0 && (
+          <ul className="mb-6 flex flex-wrap gap-2" aria-label="Избрани филтри">
+            {chips.map((c) => (
+              <li key={c.label}>
+                <Link href={c.href} className="chip !h-8 !text-[12px]" data-active="true" aria-label={`Премахни филтъра ${c.label}`}>
+                  {c.label} <X className="h-3.5 w-3.5" />
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href={basePath} className="flex h-8 items-center px-2 text-[12px] uppercase tracking-wide text-accent-ink hover:text-white">
+                Изчисти филтрите
+              </Link>
+            </li>
+          </ul>
+        )}
+
         {result.items.length ? (
           <ProductGrid products={result.items} />
         ) : (
           <div className="bg-surface-2 p-10 text-center">
-            <p className="h-display text-[20px]">Няма продукти по тези критерии</p>
+            <p className="h-display text-[20px]">Няма продукт с тази комбинация</p>
             <p className="mt-2 text-muted">Опитайте с по-малко филтри или ни пишете — ще намерим подходящ вариант.</p>
-            <Link href="/zapitvane" className="btn btn-primary btn-sm mt-6">
-              Бързо запитване
+            <Link href="/zapitvane?tema=nov-kompyutar" className="btn btn-primary btn-sm mt-6">
+              Изпрати запитване
             </Link>
           </div>
         )}
