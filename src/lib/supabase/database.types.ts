@@ -142,7 +142,11 @@ export type Database = {
       pages: {
         Row: {
           body: string;
+          cta: Json | null;
           intro: string | null;
+          kind: string;
+          published_at: string | null;
+          version_label: string | null;
           is_published: boolean;
           slug: string;
           sort_order: number;
@@ -152,7 +156,11 @@ export type Database = {
         };
         Insert: {
           body?: string;
+          cta?: Json | null;
           intro?: string | null;
+          kind?: string;
+          published_at?: string | null;
+          version_label?: string | null;
           is_published?: boolean;
           slug: string;
           sort_order?: number;
@@ -162,7 +170,11 @@ export type Database = {
         };
         Update: {
           body?: string;
+          cta?: Json | null;
           intro?: string | null;
+          kind?: string;
+          published_at?: string | null;
+          version_label?: string | null;
           is_published?: boolean;
           slug?: string;
           sort_order?: number;

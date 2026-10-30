@@ -4,7 +4,7 @@ import { AdminHeader, Panel, formatDate } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { parseSettings, settingKeys } from "@/lib/settings";
 import { emailConfig } from "@/lib/email/send";
-import { BankForm, CompanyForm, ShippingForm } from "./forms";
+import { BankForm, CompanyForm, ReviewsForm, ShippingForm } from "./forms";
 
 export const metadata = { title: "Настройки" };
 
@@ -38,6 +38,7 @@ export default async function SettingsPage() {
           </Panel>
           <ShippingForm shipping={settings.shipping} />
           <BankForm bank={settings.bank} />
+          <ReviewsForm reviews={settings.reviews} />
           <Panel title="Имейли">
             <p className="text-[14px] text-muted">
               {emailConfig().enabled

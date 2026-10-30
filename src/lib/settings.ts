@@ -20,9 +20,11 @@ export type Company = {
 
 export type Shipping = { econtOfficeCents: number; econtAddressCents: number; freeFromCents: number };
 export type Bank = { holder: string; iban: string; bic: string; bankName: string };
-export type SiteSettings = { company: Company; shipping: Shipping; bank: Bank };
+/** Отзивите в Google: оценката и броят се въвеждат от собственика; празно — лентата е без числа */
+export type Reviews = { rating: string; count: number };
+export type SiteSettings = { company: Company; shipping: Shipping; bank: Bank; reviews: Reviews };
 
-export const settingKeys = ["company", "shipping", "bank"] as const;
+export const settingKeys = ["company", "shipping", "bank", "reviews"] as const;
 export type SettingKey = (typeof settingKeys)[number];
 
 export const socialNetworks = ["Facebook", "Instagram", "TikTok", "YouTube"] as const;
@@ -43,6 +45,7 @@ export const defaultSettings: SiteSettings = {
   },
   shipping: { econtOfficeCents: 690, econtAddressCents: 990, freeFromCents: 0 },
   bank: { holder: "ГлобалНет Сървис Солюшънс ЕООД", iban: "", bic: "", bankName: "" },
+  reviews: { rating: "", count: 0 },
 };
 
 type Row = { key: string; value: unknown };
@@ -73,6 +76,7 @@ export function parseSettings(rows: Row[]): SiteSettings {
   const ds = defaultSettings.shipping;
   const b = get("bank");
   const db = defaultSettings.bank;
+  const r = get("reviews");
 
   return {
     company: {
@@ -98,6 +102,7 @@ export function parseSettings(rows: Row[]): SiteSettings {
       bic: str(b, "bic", db.bic),
       bankName: str(b, "bank_name", db.bankName),
     },
+    reviews: { rating: str(r, "rating", ""), count: cents(r, "count", 0) },
   };
 }
 
