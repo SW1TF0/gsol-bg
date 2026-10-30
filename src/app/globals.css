@@ -173,6 +173,26 @@
   color: rgb(255 255 255 / 0.75);
 }
 
+/* Документи (оферта, фактура): бял лист A4, лентата с бутони не се печата */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .doc-page {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

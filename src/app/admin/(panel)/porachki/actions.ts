@@ -85,3 +85,29 @@ export async function shipmentAction(op: "create" | "refresh" | "cancel", orderI
   refresh();
   return { ok: true };
 }
+
+const invoiceErrors: Record<string, string> = {
+  REASON_REQUIRED: "Напишете основание за кредитното известие.",
+  ALREADY_CREDITED: "Фактурата вече е кредитирана.",
+  INVOICE_NOT_FOUND: "Фактурата не е намерена.",
+  INVOICE_SERIES_FULL: "Серията номера е изчерпана — проверете „Фактури“.",
+  FORBIDDEN: "Нямате права за това действие.",
+};
+
+/** „Издай фактура“ / „Издай проформа“ — номерът се дава тук; втори натиск връща същия документ */
+export async function issueDocument(orderId: number, kind: "invoice" | "proforma"): Promise<{ id: number } | { error: string }> {
+  const { db } = await requireStaff(["admin", "manager", "sales"]);
+  const { data, error } = await db.rpc("issue_invoice", { p_order_id: orderId, p_kind: kind });
+  if (error) return { error: invoiceErrors[error.message.trim()] ?? "Документът не се издаде." };
+  refresh();
+  return { id: (data as { id: number }).id };
+}
+
+/** Грешна фактура се поправя с кредитно известие — не с презаписване */
+export async function issueCreditNote(invoiceId: number, reason: string): Promise<{ id: number } | { error: string }> {
+  const { db } = await requireStaff(["admin", "manager"]);
+  const { data, error } = await db.rpc("issue_credit_note", { p_invoice_id: invoiceId, p_reason: reason });
+  if (error) return { error: invoiceErrors[error.message.trim()] ?? "Кредитното известие не се издаде." };
+  refresh();
+  return { id: (data as { id: number }).id };
+}

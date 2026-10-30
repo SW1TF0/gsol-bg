@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useCart, type CartLine } from "./CartProvider";
+import { StaffQuoteButton } from "@/components/StaffQuoteButton";
 
 type Item = Omit<CartLine, "qty">;
 
@@ -82,6 +83,12 @@ export function BuyBox({ item, disabled }: { item: Item; disabled?: boolean }) {
       >
         <span>Купи сега</span>
       </button>
+      <StaffQuoteButton
+        source="product"
+        label="Изготви оферта"
+        items={() => [{ product_id: Number(item.id), qty }]}
+        className="basis-full"
+      />
     </div>
   );
 }

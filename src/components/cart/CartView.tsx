@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { useCart } from "./CartProvider";
 import { OrderSummary } from "./OrderSummary";
 import { useQuote } from "./useQuote";
+import { StaffQuoteButton } from "@/components/StaffQuoteButton";
 
 export function CartView({ phone, phoneHref }: { phone: string; phoneHref: string }) {
   const { lines, ready, setQty, remove } = useCart();
@@ -98,6 +99,12 @@ export function CartView({ phone, phoneHref }: { phone: string; phoneHref: strin
             </a>
           </p>
         </OrderSummary>
+        <StaffQuoteButton
+          source="cart"
+          label="Оферта от количката"
+          items={() => lines.map((l) => ({ product_id: Number(l.id), qty: l.qty }))}
+          className="mt-4"
+        />
       </aside>
     </div>
   );
