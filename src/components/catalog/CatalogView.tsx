@@ -19,7 +19,6 @@ const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v
 const FACET_SEP = "|";
 
 export function parseQuery(params: Params, fixed: CatalogQuery = {}): CatalogQuery {
-  const range = first(params.range);
   const sort = first(params.sort) as SortKey | undefined;
   const facets: Partial<Record<FacetKey, string[]>> = {};
   for (const def of facetDefs) {
@@ -31,7 +30,7 @@ export function parseQuery(params: Params, fixed: CatalogQuery = {}): CatalogQue
     sub: first(params.sub) ?? fixed.sub,
     brands: first(params.brand)?.split(",").filter(Boolean),
     facets,
-    range: range !== undefined && /^\d+$/.test(range) ? Number(range) : undefined,
+    ranges: (first(params.range) ?? "").split(FACET_SEP).filter((r) => /^\d+$/.test(r)).map(Number),
     sort: sortOptions.some((o) => o.key === sort) ? sort : "recommended",
     page: Number(first(params.page)) || 1,
     q: first(params.q) ?? fixed.q,
@@ -76,6 +75,13 @@ export async function CatalogView({
     return hrefWith(basePath, params, { brand: set.size ? [...set].join(",") : null });
   };
 
+  const toggleRange = (i: number) => {
+    const set = new Set(query.ranges ?? []);
+    if (set.has(i)) set.delete(i);
+    else set.add(i);
+    return hrefWith(basePath, params, { range: set.size ? [...set].sort().join(FACET_SEP) : null });
+  };
+
   const toggleFacet = (key: FacetKey, value: string) => {
     const set = new Set(query.facets?.[key] ?? []);
     if (set.has(value)) set.delete(value);
@@ -89,8 +95,10 @@ export async function CatalogView({
     ...Object.entries(query.facets ?? {}).flatMap(([key, values]) =>
       (values ?? []).map((v) => ({ label: v, href: toggleFacet(key as FacetKey, v) })),
     ),
-    ...(category && query.range !== undefined && category.priceRanges[query.range]
-      ? [{ label: rangeLabel(category.priceRanges[query.range]), href: hrefWith(basePath, params, { range: null }) }]
+    ...(category
+      ? (query.ranges ?? [])
+          .filter((i) => category.priceRanges[i])
+          .map((i) => ({ label: rangeLabel(category.priceRanges[i]), href: toggleRange(i) }))
       : []),
   ];
   const hasFilters = Boolean(chips.length || first(params.sub));
@@ -179,9 +187,9 @@ export async function CatalogView({
             {category.priceRanges.map((r, i) => (
               <Link
                 key={i}
-                href={hrefWith(basePath, params, { range: query.range === i ? null : String(i) })}
+                href={toggleRange(i)}
                 className="chip"
-                data-active={query.range === i}
+                data-active={query.ranges?.includes(i) ?? false}
               >
                 {rangeLabel(r)}
               </Link>

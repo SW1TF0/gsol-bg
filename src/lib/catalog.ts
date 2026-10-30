@@ -64,7 +64,8 @@ export type CatalogQuery = {
   brands?: string[];
   /** Технически филтри: избор в една група = ИЛИ, между групите = И */
   facets?: Partial<Record<FacetKey, string[]>>;
-  range?: number;
+  /** Ценови ленти на категорията (индекси); няколко = ИЛИ */
+  ranges?: number[];
   promo?: boolean;
   q?: string;
   sort?: SortKey;
@@ -253,10 +254,12 @@ export async function queryProducts(query: CatalogQuery) {
 
   const perPage = query.perPage ?? 24;
   const category = query.category ? await getCategory(query.category) : undefined;
-  const range = category && query.range !== undefined ? category.priceRanges[query.range] : undefined;
+  const bands = category ? (query.ranges ?? []).map((i) => category.priceRanges[i]).filter(Boolean) : [];
   const shelf = await loadShelf(query.category, query.sub, Boolean(query.promo), query.q ? orSafe(query.q) : "");
 
-  const base = range ? shelf.filter((r) => r.price >= range[0] && (range[1] === null || r.price <= range[1])) : shelf;
+  const base = bands.length
+    ? shelf.filter((r) => bands.some(([min, max]) => r.price >= min && (max === null || r.price <= max)))
+    : shelf;
   const selected = Object.entries(query.facets ?? {}).filter(([, v]) => v?.length) as [FacetKey, string[]][];
   const facetsOk = (r: ShelfRow, except?: FacetKey) => selected.every(([k, v]) => k === except || v.includes(r.facets[k] ?? ""));
   const brandOk = (r: ShelfRow) => !query.brands?.length || query.brands.includes(r.brand);
@@ -282,6 +285,11 @@ export async function queryProducts(query: CatalogQuery) {
       .map((value) => ({ value, count: counts.get(value) ?? 0, active: chosen.includes(value) }));
     facets.push({ key: def.key, label: def.label, values });
   }
+
+  // Колко продукта има във всяка ценова лента при останалите филтри (за помощника „Избери решение“)
+  const rangeCounts = (category?.priceRanges ?? []).map(
+    ([min, max]) => shelf.filter((r) => r.price >= min && (max === null || r.price <= max) && brandOk(r) && facetsOk(r)).length,
+  );
 
   const matches = base.filter((r) => brandOk(r) && facetsOk(r));
   const stockRank = (s: string) => (s === "in_stock" ? 0 : s === "on_request" ? 1 : 2);
@@ -317,6 +325,7 @@ export async function queryProducts(query: CatalogQuery) {
     items,
     brands: [...brandCounts.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
     facets,
+    rangeCounts,
   };
 }
 
